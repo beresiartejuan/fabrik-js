@@ -1,0 +1,12 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Permitir scripts postinstall de dependencias nativas conocidas
+onlyBuiltDependencies:
+  - "@swc/core"
+  - "@tailwindcss/oxide"
+  - esbuild
+  - sharp
+  - unrs-resolver
+  - workerd

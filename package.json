@@ -1,0 +1,19 @@
+{
+  "name": "fabrik-js",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api start:dev"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8"
+  }
+}

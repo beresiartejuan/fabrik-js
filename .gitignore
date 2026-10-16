@@ -1,0 +1,20 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Builds
+.next
+dist
+out
+build
+.turbo
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Misc
+.DS_Store
+*.log
+coverage
