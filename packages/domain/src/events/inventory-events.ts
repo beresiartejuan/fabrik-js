@@ -1,14 +1,7 @@
 import type { BatchEventId, LocationId, MaterialId, StockMovementId } from '../value-objects/ids';
-import type { UnitOfMeasure } from '../value-objects/quantity';
+import type { StockDelta } from '../value-objects/stock-delta';
 
 import { createDomainEvent, type DomainEventBase } from './domain-event';
-
-// Delta de stock con signo: `amount` positivo = entrada, negativo = salida.
-// No se usa Quantity porque su invariante exige amount > 0 (mismatch con docs/02).
-export interface StockDelta {
-  readonly amount: number;
-  readonly unit: UnitOfMeasure;
-}
 
 export interface StockMovedPayload {
   readonly movementId: StockMovementId;

@@ -18,6 +18,11 @@ export function isUnitCompatibleWith(unit: UnitOfMeasure, physicalState: Physica
   return UNITS_BY_STATE[physicalState].includes(unit);
 }
 
+/** Unidades válidas para un estado físico (tabla de docs/02). */
+export function unitsForPhysicalState(physicalState: PhysicalState): readonly UnitOfMeasure[] {
+  return UNITS_BY_STATE[physicalState];
+}
+
 /**
  * Cantidad física inmutable. Invariante: `amount` finito y > 0.
  * En esta fase solo se opera entre cantidades de la misma unidad (sin conversión).
