@@ -80,6 +80,35 @@ describe('Material', () => {
     });
     expect(material.id).toBe(id);
   });
+
+  it('arranca activo y deactivate/activate devuelven instancias nuevas e idempotentes', () => {
+    const material = Material.create({
+      name: 'Harina',
+      kind: 'supply',
+      physicalState: 'solid',
+      unitOfMeasure: 'kg',
+    });
+    expect(material.active).toBe(true);
+
+    const inactive = material.deactivate();
+    expect(inactive.active).toBe(false);
+    expect(material.active).toBe(true); // inmutable
+    expect(inactive.deactivate()).toBe(inactive);
+    expect(inactive.activate().active).toBe(true);
+    expect(material.activate()).toBe(material);
+  });
+
+  it('fromPersistence conserva active', () => {
+    const material = Material.fromPersistence({
+      id: Material.create({ name: 'X', kind: 'supply', physicalState: 'solid', unitOfMeasure: 'kg' }).id,
+      name: 'Harina',
+      kind: 'supply',
+      physicalState: 'solid',
+      unitOfMeasure: 'kg',
+      active: false,
+    });
+    expect(material.active).toBe(false);
+  });
 });
 
 describe('Location', () => {

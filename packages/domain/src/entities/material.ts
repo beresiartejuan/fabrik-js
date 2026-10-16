@@ -16,6 +16,7 @@ export interface MaterialProps {
   readonly kind: MaterialKind;
   readonly physicalState: PhysicalState;
   readonly unitOfMeasure: UnitOfMeasure;
+  readonly active?: boolean;
 }
 
 export interface MaterialSnapshot extends MaterialProps {
@@ -26,6 +27,9 @@ export interface MaterialSnapshot extends MaterialProps {
  * Ítem físico del catálogo. Inmutable: `unitOfMeasure` debe ser coherente con
  * `physicalState` (docs/02, I6). Es la única regla que un Material puede
  * garantizar por sí mismo.
+ *
+ * `active` habilita la baja lógica (`DeactivateMaterial`, docs/04); por defecto
+ * `true` para no romper lecturas/creaciones existentes.
  */
 export class Material {
   readonly id: MaterialId;
@@ -34,6 +38,7 @@ export class Material {
   readonly kind: MaterialKind;
   readonly physicalState: PhysicalState;
   readonly unitOfMeasure: UnitOfMeasure;
+  readonly active: boolean;
 
   private constructor(snapshot: MaterialSnapshot) {
     this.id = snapshot.id;
@@ -42,6 +47,7 @@ export class Material {
     this.kind = snapshot.kind;
     this.physicalState = snapshot.physicalState;
     this.unitOfMeasure = snapshot.unitOfMeasure;
+    this.active = snapshot.active ?? true;
     Object.freeze(this);
   }
 
@@ -53,6 +59,28 @@ export class Material {
   /** Reconstituye un material ya persistido. */
   static fromPersistence(snapshot: MaterialSnapshot): Material {
     return Material.build(snapshot);
+  }
+
+  /** Reactiva un material (idempotente). */
+  activate(): Material {
+    return this.active ? this : new Material({ ...this.toSnapshot(), active: true });
+  }
+
+  /** Da de baja un material (idempotente). */
+  deactivate(): Material {
+    return this.active ? new Material({ ...this.toSnapshot(), active: false }) : this;
+  }
+
+  private toSnapshot(): MaterialSnapshot {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      kind: this.kind,
+      physicalState: this.physicalState,
+      unitOfMeasure: this.unitOfMeasure,
+      active: this.active,
+    };
   }
 
   private static build(snapshot: MaterialSnapshot): Material {
