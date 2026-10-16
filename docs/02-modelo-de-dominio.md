@@ -130,8 +130,8 @@ Movimiento de stock inmutable en un lugar de almacenamiento.
 ```
 StockMovement {
   id, locationId, materialId,
-  delta: Quantity,                    // positivo = entrada, negativo = salida
-  reason: 'produced' | 'consumed' | 'manual_adjustment' | 'transfer_in' | 'transfer_out',
+  delta: StockDelta,                  // VO con signo (value-objects): positivo = entrada, negativo = salida
+  reason: 'produced' | 'consumed' | 'supply_in' | 'manual_adjustment' | 'transfer_in' | 'transfer_out',
   batchEventId?,                      // evento de producción que lo originó
   timestamp
 }

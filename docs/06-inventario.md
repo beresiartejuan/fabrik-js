@@ -14,8 +14,8 @@ puede explicar por los movimientos que la trajeron.
 ```
 StockMovement {
   id, locationId, materialId,
-  delta: Quantity,
-  reason: 'produced' | 'consumed' | 'transfer_in' | 'transfer_out' | 'manual_adjustment',
+  delta: StockDelta,
+  reason: 'produced' | 'consumed' | 'supply_in' | 'transfer_in' | 'transfer_out' | 'manual_adjustment',
   batchEventId?,       // set cuando reason es produced/consumed
   timestamp
 }
@@ -25,6 +25,7 @@ StockMovement {
 |---|---|---|
 | `produced` | Output de un BatchEvent ingresa a almacenamiento | sí |
 | `consumed` | Input de un BatchEvent se consume | sí |
+| `supply_in` | Ingreso externo de suministros | no |
 | `transfer_in/out` | Movimiento entre lugares (par con signo opuesto) | no |
 | `manual_adjustment` | Corrección de conteo físico (solo admin) | no |
 

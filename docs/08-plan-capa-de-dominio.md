@@ -46,23 +46,35 @@ sin Drizzle, sin HTTP. Cada fase es mergeable y testeable de forma aislada.
       InvalidStateTransition, InvalidStockMovement.
 - [x] `StockDelta` movido a value-objects (compartido con events).
 
-## Fase 4 — Puertos
+## Fase 4 — Puertos ✅ (completada, +26 tests; total 165)
 
-- [ ] Interfaces de repositorio (docs/07) + `UnitOfWork`.
-- [ ] Fakes in-memory para tests (`packages/domain/src/testing/` o `__tests__/fakes`).
+- [x] 9 interfaces de repositorio en `src/ports/` (findById → `T | null`,
+      save = upsert; BatchEvent y StockMovement append-only).
+- [x] `UnitOfWork` con estilo `run(fn(repos))` + agregado `Repositories`.
+- [x] 9 fakes in-memory + `InMemoryUnitOfWork` + `inMemoryRepositories()`
+      en `src/testing/` (fuera del barrel público).
+- [x] Tests de contrato de los fakes (26).
 
-## Fase 5 — Use cases: catálogos
+## Fase 5 — Use cases: catálogos ✅ (completada, +83 tests; total 250)
 
-- [ ] ABM de Material, Location, Machine, Worker, Recipe con autorización
-      por rol (A; lectura A/Au).
-- [ ] Tests: happy path + `UnauthorizedRoleError` por rol indebido.
+- [x] Patrón: una clase por use case con deps inyectadas + `execute(actor, command)`;
+      `Actor { workerId, role }` + guard `requireRole` (escritura: admin;
+      lectura: admin+auditor; worker: nada en catálogos).
+- [x] ABM de Material (se agregó `active`), Location (Update = rename-only),
+      Machine (Create/Move validan I2 vía LocationRepository), Worker, Recipe (I7).
+- [x] Reads con `NotFoundError` tipado; eventos emitidos donde docs/05 los
+      define (material.created/updated, machine.created/moved).
+- [x] Tests: happy path + UnauthorizedRole por rol indebido + I2 + NotFound + I7.
 
-## Fase 6 — Use cases: asignaciones
+## Fase 6 — Use cases: asignaciones ✅ (completada, +24 tests; total 274)
 
-- [ ] `AssignWorkerToMachine` con **I1** (rechazo por solapamiento),
-      `UnassignWorker`, agendas.
-- [ ] Tests: solapamiento mismo worker (rechaza), distintos workers misma
-      máquina (acepta), horarios adyacentes sin solapar (acepta).
+- [x] `AssignWorkerToMachine` con **I1** (rechaza solapamiento, valida worker
+      activo con nuevo `InactiveWorkerError`), `UnassignWorker`, agendas
+      (`ListWorkerSchedule`, `ListMachineSchedule`; lectura A/Au).
+- [x] Se agregó `findById` al puerto `AssignmentRepository`.
+- [x] Tests: solapamiento mismo worker (otra y misma máquina, bordes de 1 min),
+      adyacentes OK, distintos días OK, N workers misma máquina OK, inactivo,
+      roles.
 
 ## Fase 7 — Use cases: producción e inventario
 
