@@ -11,11 +11,12 @@ import type { StockDelta } from '../value-objects/stock-delta';
 export type StockMovementReason =
   | 'produced'
   | 'consumed'
+  | 'supply_in'
   | 'transfer_in'
   | 'transfer_out'
   | 'manual_adjustment';
 
-// Los motivos de producción exigen batchEventId; los de transferencia/ajuste lo prohíben.
+// Los motivos de producción exigen batchEventId; transferencia/ajuste/suministro lo prohíben.
 const REASONS_REQUIRING_EVENT: readonly StockMovementReason[] = ['produced', 'consumed'];
 
 export interface StockMovementProps {
@@ -27,8 +28,9 @@ export interface StockMovementProps {
   readonly timestamp?: Date;
 }
 
-export interface StockMovementSnapshot extends StockMovementProps {
+export interface StockMovementSnapshot extends Omit<StockMovementProps, 'timestamp'> {
   readonly id: StockMovementId;
+  readonly timestamp: Date;
 }
 
 /**
@@ -52,13 +54,17 @@ export class StockMovement {
     this.delta = Object.freeze({ ...snapshot.delta });
     this.reason = snapshot.reason;
     this.batchEventId = snapshot.batchEventId;
-    this.timestamp = snapshot.timestamp ?? new Date();
+    this.timestamp = snapshot.timestamp;
     Object.freeze(this);
   }
 
   /** Registra un movimiento nuevo (id autogenerado, `timestamp` por defecto ahora). */
   static create(props: StockMovementProps): StockMovement {
-    return StockMovement.build({ ...props, id: StockMovementId.create() });
+    return StockMovement.build({
+      ...props,
+      id: StockMovementId.create(),
+      timestamp: props.timestamp ?? new Date(),
+    });
   }
 
   /** Reconstituye un movimiento ya persistido. */

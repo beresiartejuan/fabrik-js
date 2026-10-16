@@ -59,6 +59,27 @@ describe('StockMovement', () => {
     expect(produced.batchEventId).toBe(EVENT_ID);
   });
 
+  it('admite supply_in sin batchEventId y lo prohíbe con uno', () => {
+    const movement = StockMovement.create({
+      locationId: LOCATION_ID,
+      materialId: MATERIAL_ID,
+      delta: { amount: 20, unit: 'kg' },
+      reason: 'supply_in',
+    });
+    expect(movement.reason).toBe('supply_in');
+    expect(movement.batchEventId).toBeUndefined();
+
+    expect(() =>
+      StockMovement.create({
+        locationId: LOCATION_ID,
+        materialId: MATERIAL_ID,
+        delta: { amount: 20, unit: 'kg' },
+        reason: 'supply_in',
+        batchEventId: EVENT_ID,
+      }),
+    ).toThrow(InvalidStockMovementError);
+  });
+
   it('prohíbe batchEventId para transferencias y ajustes', () => {
     expect(() =>
       StockMovement.create({

@@ -34,8 +34,9 @@ export interface BatchEventProps {
   readonly timestamp?: Date;
 }
 
-export interface BatchEventSnapshot extends BatchEventProps {
+export interface BatchEventSnapshot extends Omit<BatchEventProps, 'timestamp'> {
   readonly id: BatchEventId;
+  readonly timestamp: Date;
 }
 
 // Trim de la observación: vacía → undefined; por encima del máximo → error.
@@ -81,13 +82,17 @@ export class BatchEvent {
     this.inputs = freezeQuantities(snapshot.inputs);
     this.outputs = freezeQuantities(snapshot.outputs);
     this.observation = normalizeObservation(snapshot.observation);
-    this.timestamp = snapshot.timestamp ?? new Date();
+    this.timestamp = snapshot.timestamp;
     Object.freeze(this);
   }
 
   /** Registra un evento nuevo (id autogenerado, `timestamp` por defecto ahora). */
   static create(props: BatchEventProps): BatchEvent {
-    return BatchEvent.build({ ...props, id: BatchEventId.create() });
+    return BatchEvent.build({
+      ...props,
+      id: BatchEventId.create(),
+      timestamp: props.timestamp ?? new Date(),
+    });
   }
 
   /** Reconstituye un evento ya persistido. */

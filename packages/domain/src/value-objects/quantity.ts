@@ -53,7 +53,12 @@ export class Quantity {
     return Quantity.create(this.amount + other.amount, this.unit);
   }
 
-  /** Resta dos cantidades de la misma unidad; el resultado debe seguir siendo > 0. */
+  /**
+   * Resta dos cantidades de la misma unidad. Rechaza resultados <= 0 (invariante
+   * de `Quantity`). Para verificar suficiencia de stock (I5) hay que comparar los
+   * montos crudos (`this.amount >= other.amount`), no usar `subtract`, que lanza
+   * cuando el resultado no es estrictamente positivo.
+   */
   subtract(other: Quantity): Quantity {
     this.assertSameUnit(other);
     return Quantity.create(this.amount - other.amount, this.unit);
