@@ -32,15 +32,19 @@ sin Drizzle, sin HTTP. Cada fase es mergeable y testeable de forma aislada.
 - [x] Helper de testing `collectingEventBus()` (no exportado públicamente).
 - [x] Tests: errors (22) + events (18).
 
-## Fase 3 — Entidades (sin persistencia)
+## Fase 3 — Entidades ✅ (completada, +48 tests; total 139)
 
-- [ ] `Material` (con `kind`, `physicalState`, validación de unidad).
-- [ ] `Location`, `Machine` (valida destino `production` al moverse — I2).
-- [ ] `Worker` (roles, `active`).
-- [ ] `Recipe` + `RecipeStep` (orden de pasos, I7).
-- [ ] `Batch`, `BatchEvent` (inmutables — factories, sin setters).
-- [ ] `Assignment`, `StockMovement` (inmutable, delta con signo).
-- [ ] Tests de factories y reglas de construcción.
+- [x] `Material` (valida unidad↔estado físico con `IncompatibleUnitError`).
+- [x] `Location`, `Machine` (`moveTo` valida destino `production` — I2; creación
+      validada en use cases, Fase 5).
+- [x] `Worker` (roles, activate/deactivate).
+- [x] `Recipe` + `RecipeStep` (posiciones consecutivas desde 1, I7).
+- [x] `Batch` con máquina de estados: in_progress ↔ stored → completed (final).
+- [x] `BatchEvent`, `StockMovement`, `Assignment`: inmutables por construcción.
+- [x] Patrón uniforme: entidades inmutables con transiciones copy-on-write.
+- [x] Errores nuevos: InvalidLocationKind, InvalidObservation (max 500),
+      InvalidStateTransition, InvalidStockMovement.
+- [x] `StockDelta` movido a value-objects (compartido con events).
 
 ## Fase 4 — Puertos
 
