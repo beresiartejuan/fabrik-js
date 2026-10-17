@@ -321,20 +321,55 @@ auditor.
 
 ---
 
-## Fase 0 — Base, capa HTTP, sesión, shell y login
+## Fase 0 — Base, capa HTTP, sesión, shell y login ✅ (completada)
 
-- [ ] Dependencias: `axios`; `shadcn init` en `apps/web` (Tailwind v4) + componentes base
+- [x] Dependencias: `axios`; `shadcn init` en `apps/web` (Tailwind v4) + componentes base
       (`button`, `input`, `label`, `card`, `dialog`, `table`, `sonner`/`toast`, `badge`,
       `skeleton`, `dropdown-menu`, `select`, `tabs`, `sheet`).
-- [ ] `.env.local`/`.env.example` con `NEXT_PUBLIC_API_URL`.
-- [ ] `lib/api/client.ts`: instancia axios + request interceptor (Bearer) + response
+- [x] `.env.local`/`.env.example` con `NEXT_PUBLIC_API_URL`.
+- [x] `lib/api/client.ts`: instancia axios + request interceptor (Bearer) + response
       interceptor con **refresh single-flight**, reintento y logout/redirect.
-- [ ] `lib/api/types.ts`, `lib/api/errors.ts` (+ `ApiError`, `errorToMessage`) y `modules/authApi.ts`.
-- [ ] `lib/session/session-store.ts`: `sessionStorage` (ambos tokens) + `SessionProvider`/`useSession`.
-- [ ] `lib/format/*` (unidades, días, fechas, cantidades) y `hooks/useApiQuery.ts`.
-- [ ] `/login` + `RequireAuth` + `RequireRole`, layout raíz `lang="es"`, layout `(app)` con
+- [x] `lib/api/types.ts`, `lib/api/errors.ts` (+ `ApiError`, `errorToMessage`) y `modules/authApi.ts`.
+- [x] `lib/session/session-store.ts`: `sessionStorage` (ambos tokens) + `SessionProvider`/`useSession`.
+- [x] `lib/format/*` (unidades, días, fechas, cantidades) y `hooks/useApiQuery.ts`.
+- [x] `/login` + `RequireAuth` + `RequireRole`, layout raíz `lang="es"`, layout `(app)` con
       **sidebar por rol** y topbar con "Cerrar sesión".
-- [ ] Dashboard `/` rol-aware (versión simple de la sección 2).
+- [x] Dashboard `/` rol-aware (versión simple de la sección 2).
+
+> Nota histórica: **Fase 0a** aterrizó las *librerías* de Fase 0 (deps/shadcn, env, capa HTTP
+> axios, DTOs de wire, `ApiError`/`errorToMessage`, `authApi`, store de sesión, formateadores
+> y `useApiQuery`) con tests unitarios; **Fase 0b** aterrizó las pantallas y guardas
+> (`/login`, `(app)`, dashboard rol-aware).
+
+**✅ Completada:** el shell client-rendered cierra Fase 0:
+
+- **Rutas:** raíz mínima en `src/app/layout.tsx` (`lang="es"`, fuentes, metadata,
+  `SessionProvider` + `Toaster`); `src/app/login/page.tsx` (público, campos nombre +
+  contraseña, `Field`/`FieldGroup`, 401 → "Nombre o contraseña incorrectos", error de red,
+  ya-logged-in → `/`); grupo `src/app/(app)/` con `layout.tsx` (guard + sidebar + topbar) y
+  `page.tsx` (dashboard rol-aware). Se retiró el scaffold `src/app/page.tsx`.
+- **Guardas** (`src/components/guards.tsx`): `RequireAuth` redirige a `/login` sin sesión y
+  muestra `PageLoading` durante la hidratación (además resuelve el `Actor` con `GET /auth/me`
+  si la sesión tiene tokens pero no worker); `RequireRole` redirige al dashboard (`/`) ante
+  un rol indebido (decisión documentada: la navegación ya filtra por rol y el RBAC real es
+  del dominio → 403).
+- **Sidebar por rol:** hand-rolled con primitivas de shadcn (`sheet` en mobile) y la matriz
+  de `src/lib/nav.ts` (misma que la tabla de *Pantallas*; un `admin` **no** ve "Registrar
+  transformación"). Topbar con nombre + rol y "Cerrar sesión" (`POST /auth/logout` → limpieza
+  local → `/login`).
+- **Dashboard `/`:** admin → contadores (`materials`/`machines`/`workers`), acciones rápidas
+  y accesos a catálogos; worker → "Mis máquinas de ahora" calculadas con
+  `GET /workers/:id/schedule` + `GET /machines` + `TimeSlot.contains(now)` del dominio;
+  auditor → últimos eventos (`GET /batch-events`, recorte en cliente) + accesos a
+  `/stock`/`/trazabilidad`. Skeletons y estados vacíos en español.
+- **Módulos de API nuevos** (mínimos para el dashboard): `materialsApi`, `machinesApi`,
+  `workersApi`, `batchEventsApi`, `assignmentsApi` (agendas). `session-store` gana un `name`
+  opcional (el login lo persiste) para el topbar, ya que `GET /auth/me` no expone el nombre y
+  `GET /workers/:id` es A/Au.
+
+Verificación: `pnpm --filter web test` (**70 tests**; neto +12: 14 nuevos —nav 7,
+guards 4, login 3— menos los 2 del smoke del scaffold retirado), `pnpm --filter web build`
+y `pnpm --filter web lint` (biome) verdes.
 
 **Criterio de salida:** login real contra la API (seed `admin`/`admin123`) navega al
 dashboard; el sidebar muestra secciones según rol; sin token, cualquier ruta privada

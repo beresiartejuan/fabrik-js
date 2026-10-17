@@ -1,0 +1,90 @@
+'use client';
+
+import Link from 'next/link';
+
+import { buttonVariants } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { machinesApi } from '@/lib/api/modules/machinesApi';
+import { materialsApi } from '@/lib/api/modules/materialsApi';
+import { workersApi } from '@/lib/api/modules/workersApi';
+import { useApiQuery } from '@/lib/hooks/useApiQuery';
+
+import { PageHeader, StatCard } from './dashboard-common';
+
+/**
+ * Dashboard del **admin** (docs/10-plan-de-web.md §2): contadores de catálogo
+ * (`materials`/`machines`/`workers` activos), acciones rápidas y accesos a los
+ * catálogos. Un admin **no** registra transformaciones (worker-only).
+ */
+
+const CATALOG_LINKS = [
+  { href: '/materiales', label: 'Materiales' },
+  { href: '/ubicaciones', label: 'Ubicaciones' },
+  { href: '/maquinas', label: 'Máquinas' },
+  { href: '/trabajadores', label: 'Trabajadores' },
+  { href: '/recetas', label: 'Recetas' },
+  { href: '/asignaciones', label: 'Asignaciones' },
+];
+
+export function AdminDashboard() {
+  const materials = useApiQuery(() => materialsApi.list());
+  const machines = useApiQuery(() => machinesApi.list());
+  const workers = useApiQuery(() => workersApi.list());
+
+  const activeMaterials = materials.data?.filter((material) => material.active).length;
+  const activeWorkers = workers.data?.filter((worker) => worker.active).length;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Panel" description="Resumen de la fábrica y accesos a los catálogos." />
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard
+          label="Materiales activos"
+          value={activeMaterials}
+          loading={materials.loading}
+          error={materials.error !== null}
+        />
+        <StatCard
+          label="Máquinas"
+          value={machines.data?.length}
+          loading={machines.loading}
+          error={machines.error !== null}
+        />
+        <StatCard
+          label="Trabajadores activos"
+          value={activeWorkers}
+          loading={workers.loading}
+          error={workers.error !== null}
+        />
+      </div>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="font-heading text-lg font-medium">Acciones rápidas</h2>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/produccion/nueva" className={buttonVariants()}>
+            Nueva producción
+          </Link>
+          <Link href="/suministros/arribo" className={buttonVariants({ variant: 'outline' })}>
+            Registrar arribo
+          </Link>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="font-heading text-lg font-medium">Catálogos</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {CATALOG_LINKS.map((catalog) => (
+            <Link key={catalog.href} href={catalog.href}>
+              <Card className="h-full transition-colors hover:bg-muted/50">
+                <CardHeader>
+                  <CardTitle className="text-base">{catalog.label}</CardTitle>
+                </CardHeader>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
