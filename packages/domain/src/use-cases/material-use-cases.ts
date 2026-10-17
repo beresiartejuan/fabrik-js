@@ -1,12 +1,12 @@
-import { NotFoundError } from '../errors';
-import { Material, type MaterialKind } from '../entities/material';
-import type { EventBus } from '../events/event-bus';
-import { materialCreated, materialUpdated } from '../events/material-events';
-import type { MaterialFilter, MaterialRepository } from '../ports/material-repository';
-import type { MaterialId } from '../value-objects/ids';
-import type { PhysicalState, UnitOfMeasure } from '../value-objects/quantity';
+import { NotFoundError } from '../errors/index.js';
+import { Material, type MaterialKind } from '../entities/material.js';
+import type { EventBus } from '../events/event-bus.js';
+import { materialCreated, materialUpdated } from '../events/material-events.js';
+import type { MaterialFilter, MaterialRepository } from '../ports/material-repository.js';
+import type { MaterialId } from '../value-objects/ids.js';
+import type { PhysicalState, UnitOfMeasure } from '../value-objects/quantity.js';
 
-import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor';
+import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor.js';
 
 // --- Dependencias ---
 

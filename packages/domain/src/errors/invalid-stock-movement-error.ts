@@ -1,4 +1,4 @@
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Reglas de construcción de un StockMovement (coherencia reason ↔ batchEventId, delta).
 export class InvalidStockMovementError extends DomainError {

@@ -1,8 +1,8 @@
-import type { Assignment } from '../entities';
-import type { AssignmentRepository } from '../ports';
-import type { AssignmentId, MachineId, WorkerId } from '../value-objects';
+import type { Assignment } from '../entities/index.js';
+import type { AssignmentRepository } from '../ports/index.js';
+import type { AssignmentId, MachineId, WorkerId } from '../value-objects/index.js';
 
-import { InMemoryStore } from './in-memory-store';
+import { InMemoryStore } from './in-memory-store.js';
 
 /** Fake en memoria de `AssignmentRepository` para tests (save = upsert). */
 export class InMemoryAssignmentRepository implements AssignmentRepository {

@@ -1,4 +1,4 @@
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Cantidad inválida: monto no finito/no positivo, o unidades incompatibles.
 export class InvalidQuantityError extends DomainError {

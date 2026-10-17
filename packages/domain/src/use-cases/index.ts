@@ -2,12 +2,12 @@
 // producción + stock; Fase 8: trazabilidad). Patrón uniforme: cada caso de uso es
 // una clase con dependencias inyectadas (puertos + EventBus) y un único
 // `execute(actor, command)`. La autorización por rol se aplica con `requireRole`.
-export * from './actor';
-export * from './assignment-use-cases';
-export * from './location-use-cases';
-export * from './machine-use-cases';
-export * from './material-use-cases';
-export * from './production-use-cases';
-export * from './recipe-use-cases';
-export * from './traceability-use-cases';
-export * from './worker-use-cases';
+export * from './actor.js';
+export * from './assignment-use-cases.js';
+export * from './location-use-cases.js';
+export * from './machine-use-cases.js';
+export * from './material-use-cases.js';
+export * from './production-use-cases.js';
+export * from './recipe-use-cases.js';
+export * from './traceability-use-cases.js';
+export * from './worker-use-cases.js';

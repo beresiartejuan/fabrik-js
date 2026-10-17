@@ -4,23 +4,23 @@
 // catálogo de docs/04 (A = admin, Au = auditor, W = worker):
 //  - `TraceBatch` / `TraceForward` / `GetStockMovements` / `ListBatchEvents`: A, Au.
 //  - `GetStockByLocation`: A, Au, W.
-import { NotFoundError } from '../errors';
-import type { Batch } from '../entities/batch';
-import type { BatchEvent } from '../entities/batch-event';
-import type { StockMovement } from '../entities/stock-movement';
-import type { WorkerRole } from '../entities/worker';
+import { NotFoundError } from '../errors/index.js';
+import type { Batch } from '../entities/batch.js';
+import type { BatchEvent } from '../entities/batch-event.js';
+import type { StockMovement } from '../entities/stock-movement.js';
+import type { WorkerRole } from '../entities/worker.js';
 import type {
   BatchEventFilter,
   BatchEventRepository,
-} from '../ports/batch-event-repository';
-import type { BatchRepository } from '../ports/batch-repository';
-import type { LocationRepository } from '../ports/location-repository';
-import type { MaterialRepository } from '../ports/material-repository';
-import type { StockMovementRepository } from '../ports/stock-movement-repository';
-import type { BatchId, LocationId, MaterialId } from '../value-objects/ids';
-import type { UnitOfMeasure } from '../value-objects/quantity';
+} from '../ports/batch-event-repository.js';
+import type { BatchRepository } from '../ports/batch-repository.js';
+import type { LocationRepository } from '../ports/location-repository.js';
+import type { MaterialRepository } from '../ports/material-repository.js';
+import type { StockMovementRepository } from '../ports/stock-movement-repository.js';
+import type { BatchId, LocationId, MaterialId } from '../value-objects/ids.js';
+import type { UnitOfMeasure } from '../value-objects/quantity.js';
 
-import { ALL_ROLES, requireRole, type Actor } from './actor';
+import { ALL_ROLES, requireRole, type Actor } from './actor.js';
 
 // --- Roles (docs/04) ---
 

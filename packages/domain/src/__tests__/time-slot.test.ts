@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { InvalidTimeSlotError, TimeSlot, type DayOfWeek } from '../index';
+import { InvalidTimeSlotError, TimeSlot, type DayOfWeek } from '../index.js';
 
 const MONDAY: DayOfWeek = 1;
 const TUESDAY: DayOfWeek = 2;

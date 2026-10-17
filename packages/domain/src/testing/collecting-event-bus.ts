@@ -1,4 +1,4 @@
-import type { DomainEvent, EventBus } from '../events';
+import type { DomainEvent, EventBus } from '../events/index.js';
 
 /**
  * Bus de eventos en memoria para tests: acumula los eventos publicados en orden.

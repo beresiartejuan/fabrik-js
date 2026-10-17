@@ -1,4 +1,4 @@
-import type { DomainEvent } from './domain-event';
+import type { DomainEvent } from './domain-event.js';
 
 /**
  * Bus de eventos de dominio. Interfaz mínima: cada app decide la implementación

@@ -34,8 +34,16 @@ src/
 import { Quantity, Material, type EventBus } from '@fabrik/domain';
 ```
 
-El paquete expone directamente el código fuente (`./src/index.ts`); no hay paso
-de build para consumirlo. En el monorepo se enlaza con `workspace:*`.
+El paquete **se consume compilado**: el `exports` map apunta a `dist/`
+(`types` → `./dist/index.d.ts`, `default` → `./dist/index.js`), y los *imports*
+relativos del fuente llevan extensión `.js` explícita para que el ESM emitido
+resuelva en Node. En el monorepo se enlaza con `workspace:*`; `build` debe
+ejecutarse antes que los consumidores (`turbo` lo encadena vía `dependsOn`).
+
+> **Fase 0 (empaquetado consumible).** Antes el paquete exponía el fuente
+> (`./src/index.ts`) con *imports* sin extensión, lo que provocaba **TS2834**
+> bajo `moduleResolution: nodenext` (el caso de `apps/api`). Ya no aplica: el
+> consumidor resuelve `dist/index.d.ts` / `dist/index.js` y no toca el fuente.
 
 ## `testing/` no es API público
 
@@ -43,6 +51,11 @@ Los fakes in-memory y `collectingEventBus()` viven en `src/testing/` y **no**
 se re-exportan desde el barrel raíz. Son herramientas para los tests del propio
 dominio (y de la API que implemente los puertos), no parte del contrato
 público. Pueden cambiar sin aviso.
+
+El *build* emite `dist/testing/`, pero el `exports` map **no** publica el
+subpath `./testing`: consumirlo desde otro paquete (`@fabrik/domain/testing`)
+**no está soportado** en esta fase. Queda fuera de alcance a propósito; si la
+API necesita reutilizar los fakes, se añadirá un subpath explícito más adelante.
 
 ## Comandos
 
@@ -54,6 +67,9 @@ pnpm --filter @fabrik/domain build      # tsc → dist/
 
 ## Documentación
 
-Diseño completo en `docs/`: modelo y glosario (`01`, `02`), flujo de producción
-(`03`), casos de uso (`04`), eventos (`05`), inventario (`06`), arquitectura
-(`07`) y el plan de implementación (`08`).
+- **API del paquete**: [docs/index.md](docs/index.md) — explicación (por qué está
+  diseñado así, invariantes, decisiones y limitaciones) y referencia (value objects,
+  entidades, errores y eventos, puertos y casos de uso). Solo cubre los exports públicos.
+- **Diseño completo (fuente de verdad de las reglas)** en el `docs/` raíz: modelo y
+  glosario (`01`, `02`), flujo de producción (`03`), casos de uso (`04`), eventos
+  (`05`), inventario (`06`), arquitectura (`07`) y el plan de implementación (`08`).

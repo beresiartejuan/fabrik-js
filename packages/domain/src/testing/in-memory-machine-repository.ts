@@ -1,8 +1,8 @@
-import type { Machine } from '../entities';
-import type { MachineFilter, MachineRepository } from '../ports';
-import type { MachineId } from '../value-objects';
+import type { Machine } from '../entities/index.js';
+import type { MachineFilter, MachineRepository } from '../ports/index.js';
+import type { MachineId } from '../value-objects/index.js';
 
-import { InMemoryStore } from './in-memory-store';
+import { InMemoryStore } from './in-memory-store.js';
 
 function matches(machine: Machine, filter?: MachineFilter): boolean {
   if (filter?.locationId !== undefined && machine.locationId !== filter.locationId) {

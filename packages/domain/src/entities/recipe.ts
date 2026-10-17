@@ -1,8 +1,8 @@
-import { RecipeIntegrityError } from '../errors';
-import { RecipeId, RecipeStepId, type MaterialId } from '../value-objects/ids';
-import type { Quantity } from '../value-objects/quantity';
+import { RecipeIntegrityError } from '../errors/index.js';
+import { RecipeId, RecipeStepId, type MaterialId } from '../value-objects/ids.js';
+import type { Quantity } from '../value-objects/quantity.js';
 
-import type { MachineType } from './machine';
+import type { MachineType } from './machine.js';
 
 // Material + cantidad requerida/producida por un paso de receta.
 export interface MaterialQuantity {

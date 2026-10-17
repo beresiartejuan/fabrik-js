@@ -1,11 +1,11 @@
-import { InvalidStockMovementError } from '../errors';
+import { InvalidStockMovementError } from '../errors/index.js';
 import {
   StockMovementId,
   type BatchEventId,
   type LocationId,
   type MaterialId,
-} from '../value-objects/ids';
-import type { StockDelta } from '../value-objects/stock-delta';
+} from '../value-objects/ids.js';
+import type { StockDelta } from '../value-objects/stock-delta.js';
 
 // Motivo de un movimiento de stock (docs/02).
 export type StockMovementReason =

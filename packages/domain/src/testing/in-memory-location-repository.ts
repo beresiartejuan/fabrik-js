@@ -1,8 +1,8 @@
-import type { Location } from '../entities';
-import type { LocationFilter, LocationRepository } from '../ports';
-import type { LocationId } from '../value-objects';
+import type { Location } from '../entities/index.js';
+import type { LocationFilter, LocationRepository } from '../ports/index.js';
+import type { LocationId } from '../value-objects/index.js';
 
-import { InMemoryStore } from './in-memory-store';
+import { InMemoryStore } from './in-memory-store.js';
 
 function matches(location: Location, filter?: LocationFilter): boolean {
   if (filter?.kind !== undefined && location.kind !== filter.kind) {

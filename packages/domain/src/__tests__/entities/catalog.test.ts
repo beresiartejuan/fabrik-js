@@ -10,7 +10,7 @@ import {
   Machine,
   Material,
   Worker,
-} from '../../index';
+} from '../../index.js';
 
 describe('Factory', () => {
   it('create genera id y conserva el nombre', () => {

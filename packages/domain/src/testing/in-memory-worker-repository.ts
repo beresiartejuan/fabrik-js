@@ -1,8 +1,8 @@
-import type { Worker } from '../entities';
-import type { WorkerFilter, WorkerRepository } from '../ports';
-import type { WorkerId } from '../value-objects';
+import type { Worker } from '../entities/index.js';
+import type { WorkerFilter, WorkerRepository } from '../ports/index.js';
+import type { WorkerId } from '../value-objects/index.js';
 
-import { InMemoryStore } from './in-memory-store';
+import { InMemoryStore } from './in-memory-store.js';
 
 function matches(worker: Worker, filter?: WorkerFilter): boolean {
   if (filter?.role !== undefined && worker.role !== filter.role) {

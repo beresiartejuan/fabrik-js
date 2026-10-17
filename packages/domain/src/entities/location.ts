@@ -1,4 +1,4 @@
-import { LocationId } from '../value-objects/ids';
+import { LocationId } from '../value-objects/ids.js';
 
 // Un lugar de producción aloja máquinas; un lugar de almacenamiento guarda stock (docs/02).
 export type LocationKind = 'production' | 'storage';

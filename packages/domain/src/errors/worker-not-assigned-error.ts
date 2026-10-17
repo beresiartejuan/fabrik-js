@@ -1,6 +1,6 @@
-import type { MachineId, WorkerId } from '../value-objects/ids';
+import type { MachineId, WorkerId } from '../value-objects/ids.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Invariante I3: solo registra un BatchEvent el worker con asignación vigente a la máquina.
 export class WorkerNotAssignedError extends DomainError {

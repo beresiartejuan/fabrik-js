@@ -1,5 +1,5 @@
-import type { Recipe } from '../entities/recipe';
-import type { MaterialId, RecipeId } from '../value-objects/ids';
+import type { Recipe } from '../entities/recipe.js';
+import type { MaterialId, RecipeId } from '../value-objects/ids.js';
 
 // Filtro explícito y pequeño para `list`.
 export interface RecipeFilter {

@@ -1,5 +1,5 @@
-import type { Batch, BatchStatus } from '../entities/batch';
-import type { BatchEventId, BatchId, MaterialId, RecipeId } from '../value-objects/ids';
+import type { Batch, BatchStatus } from '../entities/batch.js';
+import type { BatchEventId, BatchId, MaterialId, RecipeId } from '../value-objects/ids.js';
 
 // Filtro explícito y pequeño para `list`.
 export interface BatchFilter {

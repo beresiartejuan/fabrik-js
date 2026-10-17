@@ -1,7 +1,7 @@
-import type { MaterialId } from '../value-objects/ids';
-import type { PhysicalState, UnitOfMeasure } from '../value-objects/quantity';
+import type { MaterialId } from '../value-objects/ids.js';
+import type { PhysicalState, UnitOfMeasure } from '../value-objects/quantity.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Invariante I6: las cantidades deben ser coherentes con la unidad del material.
 // También cubre la coherencia unidad ↔ estado físico (docs/02) cuando se provee

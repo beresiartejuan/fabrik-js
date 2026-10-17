@@ -6,7 +6,7 @@ import {
   MachineId,
   TimeSlot,
   WorkerId,
-} from '../../index';
+} from '../../index.js';
 
 const WORKER_ID = WorkerId.from('worker-1');
 const OTHER_WORKER_ID = WorkerId.from('worker-2');

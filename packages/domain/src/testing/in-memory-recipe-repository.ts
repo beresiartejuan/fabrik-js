@@ -1,8 +1,8 @@
-import type { Recipe } from '../entities';
-import type { RecipeFilter, RecipeRepository } from '../ports';
-import type { RecipeId } from '../value-objects';
+import type { Recipe } from '../entities/index.js';
+import type { RecipeFilter, RecipeRepository } from '../ports/index.js';
+import type { RecipeId } from '../value-objects/index.js';
 
-import { InMemoryStore } from './in-memory-store';
+import { InMemoryStore } from './in-memory-store.js';
 
 function matches(recipe: Recipe, filter?: RecipeFilter): boolean {
   if (filter?.outputProductId !== undefined && recipe.outputProductId !== filter.outputProductId) {

@@ -8,7 +8,7 @@ import {
   RecipeIntegrityError,
   RecipeStep,
   RecipeStepId,
-} from '../../index';
+} from '../../index.js';
 
 const SUPPLY_ID = MaterialId.from('supply-1');
 const INTERMEDIATE_ID = MaterialId.from('intermediate-1');

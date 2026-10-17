@@ -1,4 +1,4 @@
-import { InvalidQuantityError } from '../errors';
+import { InvalidQuantityError } from '../errors/index.js';
 
 // Estado físico de un material (docs/02).
 export type PhysicalState = 'solid' | 'liquid' | 'gas';

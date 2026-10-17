@@ -1,6 +1,6 @@
-import type { MaterialId } from '../value-objects/ids';
+import type { MaterialId } from '../value-objects/ids.js';
 
-import { createDomainEvent, type DomainEventBase } from './domain-event';
+import { createDomainEvent, type DomainEventBase } from './domain-event.js';
 
 // Payload compartido por los eventos del catálogo de materiales (docs/05).
 export interface MaterialEventPayload {

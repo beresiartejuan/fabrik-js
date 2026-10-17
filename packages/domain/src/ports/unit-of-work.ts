@@ -1,12 +1,12 @@
-import type { AssignmentRepository } from './assignment-repository';
-import type { BatchEventRepository } from './batch-event-repository';
-import type { BatchRepository } from './batch-repository';
-import type { LocationRepository } from './location-repository';
-import type { MachineRepository } from './machine-repository';
-import type { MaterialRepository } from './material-repository';
-import type { RecipeRepository } from './recipe-repository';
-import type { StockMovementRepository } from './stock-movement-repository';
-import type { WorkerRepository } from './worker-repository';
+import type { AssignmentRepository } from './assignment-repository.js';
+import type { BatchEventRepository } from './batch-event-repository.js';
+import type { BatchRepository } from './batch-repository.js';
+import type { LocationRepository } from './location-repository.js';
+import type { MachineRepository } from './machine-repository.js';
+import type { MaterialRepository } from './material-repository.js';
+import type { RecipeRepository } from './recipe-repository.js';
+import type { StockMovementRepository } from './stock-movement-repository.js';
+import type { WorkerRepository } from './worker-repository.js';
 
 /**
  * Agregado de repositorios que participan de una misma unidad de trabajo.

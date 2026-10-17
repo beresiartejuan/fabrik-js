@@ -1,7 +1,7 @@
-import { InvalidLocationKindError, InvalidStateTransitionError } from '../errors';
-import { LocationId, MachineId } from '../value-objects/ids';
+import { InvalidLocationKindError, InvalidStateTransitionError } from '../errors/index.js';
+import { LocationId, MachineId } from '../value-objects/ids.js';
 
-import type { LocationKind } from './location';
+import type { LocationKind } from './location.js';
 
 // Catálogo de tipos de máquina abierto (docs/02): el tipo habilita pasos de receta.
 export type MachineType = string;

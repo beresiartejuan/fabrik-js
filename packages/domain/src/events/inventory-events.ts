@@ -1,7 +1,7 @@
-import type { BatchEventId, LocationId, MaterialId, StockMovementId } from '../value-objects/ids';
-import type { StockDelta } from '../value-objects/stock-delta';
+import type { BatchEventId, LocationId, MaterialId, StockMovementId } from '../value-objects/ids.js';
+import type { StockDelta } from '../value-objects/stock-delta.js';
 
-import { createDomainEvent, type DomainEventBase } from './domain-event';
+import { createDomainEvent, type DomainEventBase } from './domain-event.js';
 
 export interface StockMovedPayload {
   readonly movementId: StockMovementId;

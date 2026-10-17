@@ -1,7 +1,7 @@
-import type { AssignmentId, MachineId, WorkerId } from '../value-objects/ids';
-import type { TimeSlot } from '../value-objects/time-slot';
+import type { AssignmentId, MachineId, WorkerId } from '../value-objects/ids.js';
+import type { TimeSlot } from '../value-objects/time-slot.js';
 
-import { createDomainEvent, type DomainEventBase } from './domain-event';
+import { createDomainEvent, type DomainEventBase } from './domain-event.js';
 
 export interface WorkerAssignedPayload {
   readonly assignmentId: AssignmentId;

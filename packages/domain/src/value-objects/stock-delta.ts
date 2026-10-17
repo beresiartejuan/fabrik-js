@@ -1,4 +1,4 @@
-import type { UnitOfMeasure } from './quantity';
+import type { UnitOfMeasure } from './quantity.js';
 
 // Delta de stock con signo: `amount` positivo = entrada, negativo = salida.
 // No se usa Quantity porque su invariante exige amount > 0 (mismatch con docs/02).

@@ -22,7 +22,7 @@ import {
   UnauthorizedRoleError,
   WorkerId,
   WorkerNotAssignedError,
-} from '../index';
+} from '../index.js';
 
 const WORKER_ID = WorkerId.from('worker-1');
 const MACHINE_ID = MachineId.from('machine-1');

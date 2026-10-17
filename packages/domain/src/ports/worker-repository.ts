@@ -1,5 +1,5 @@
-import type { Worker, WorkerRole } from '../entities/worker';
-import type { WorkerId } from '../value-objects/ids';
+import type { Worker, WorkerRole } from '../entities/worker.js';
+import type { WorkerId } from '../value-objects/ids.js';
 
 // Filtro explícito y pequeño para `list`.
 export interface WorkerFilter {

@@ -1,4 +1,4 @@
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Autorización por rol: el rol del worker no puede ejecutar el caso de uso.
 export class UnauthorizedRoleError extends DomainError {

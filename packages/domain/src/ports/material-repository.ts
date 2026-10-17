@@ -1,6 +1,6 @@
-import type { Material, MaterialKind } from '../entities/material';
-import type { PhysicalState } from '../value-objects/quantity';
-import type { MaterialId } from '../value-objects/ids';
+import type { Material, MaterialKind } from '../entities/material.js';
+import type { PhysicalState } from '../value-objects/quantity.js';
+import type { MaterialId } from '../value-objects/ids.js';
 
 // Filtro explícito y pequeño para `list` (todos los campos son opcionales:
 // ausente = sin restricción).

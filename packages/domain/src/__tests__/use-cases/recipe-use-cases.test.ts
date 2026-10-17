@@ -15,8 +15,8 @@ import {
   type Actor,
   type CreateRecipeCommand,
   type RecipeStepProps,
-} from '../../index';
-import { inMemoryRepositories } from '../../testing';
+} from '../../index.js';
+import { inMemoryRepositories } from '../../testing/index.js';
 
 const ADMIN: Actor = { workerId: WorkerId.from('admin-1'), role: 'admin' };
 const WORKER: Actor = { workerId: WorkerId.from('worker-1'), role: 'worker' };

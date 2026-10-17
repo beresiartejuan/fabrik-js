@@ -1,4 +1,4 @@
-import type { Repositories, UnitOfWork } from '../ports';
+import type { Repositories, UnitOfWork } from '../ports/index.js';
 
 /**
  * `UnitOfWork` de test: ejecuta `fn` como una pasada directa sobre los

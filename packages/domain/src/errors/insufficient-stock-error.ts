@@ -1,7 +1,7 @@
-import type { MaterialId } from '../value-objects/ids';
-import type { Quantity } from '../value-objects/quantity';
+import type { MaterialId } from '../value-objects/ids.js';
+import type { Quantity } from '../value-objects/quantity.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Invariante I5: una salida requiere stock suficiente; el stock no puede quedar negativo.
 export class InsufficientStockError extends DomainError {

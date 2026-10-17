@@ -1,6 +1,6 @@
-import type { LocationId } from '../value-objects/ids';
+import type { LocationId } from '../value-objects/ids.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Invariante I2: una máquina solo puede ubicarse en un Location de kind 'production'.
 // El parámetro opcional `expected` generaliza el error para otros casos de uso que

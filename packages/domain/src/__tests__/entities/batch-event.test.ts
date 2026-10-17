@@ -12,7 +12,7 @@ import {
   Quantity,
   RecipeStepId,
   WorkerId,
-} from '../../index';
+} from '../../index.js';
 
 const MACHINE_ID = MachineId.from('machine-1');
 const WORKER_ID = WorkerId.from('worker-1');

@@ -1,4 +1,4 @@
-import { InvalidObservationError, MAX_OBSERVATION_LENGTH } from '../errors';
+import { InvalidObservationError, MAX_OBSERVATION_LENGTH } from '../errors/index.js';
 import {
   BatchEventId,
   type BatchId,
@@ -7,8 +7,8 @@ import {
   type MaterialId,
   type RecipeStepId,
   type WorkerId,
-} from '../value-objects/ids';
-import type { Quantity } from '../value-objects/quantity';
+} from '../value-objects/ids.js';
+import type { Quantity } from '../value-objects/quantity.js';
 
 /**
  * Cantidad asociada a un lote dentro de un BatchEvent.

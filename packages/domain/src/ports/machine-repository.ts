@@ -1,5 +1,5 @@
-import type { Machine, MachineStatus, MachineType } from '../entities/machine';
-import type { LocationId, MachineId } from '../value-objects/ids';
+import type { Machine, MachineStatus, MachineType } from '../entities/machine.js';
+import type { LocationId, MachineId } from '../value-objects/ids.js';
 
 // Filtro explícito y pequeño para `list`.
 export interface MachineFilter {

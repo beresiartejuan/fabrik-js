@@ -1,4 +1,4 @@
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Longitud máxima de la observación de un BatchEvent (docs/02).
 export const MAX_OBSERVATION_LENGTH = 500;

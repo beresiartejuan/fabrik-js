@@ -1,5 +1,5 @@
-import type { Location, LocationKind } from '../entities/location';
-import type { LocationId } from '../value-objects/ids';
+import type { Location, LocationKind } from '../entities/location.js';
+import type { LocationId } from '../value-objects/ids.js';
 
 // Filtro explícito y pequeño para `list`.
 export interface LocationFilter {

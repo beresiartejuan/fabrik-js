@@ -1,9 +1,9 @@
-import type { StockMovement } from '../entities';
-import type { StockMovementRepository } from '../ports';
-import type { LocationId, MaterialId, StockMovementId } from '../value-objects';
-import type { StockDelta } from '../value-objects/stock-delta';
+import type { StockMovement } from '../entities/index.js';
+import type { StockMovementRepository } from '../ports/index.js';
+import type { LocationId, MaterialId, StockMovementId } from '../value-objects/index.js';
+import type { StockDelta } from '../value-objects/stock-delta.js';
 
-import { InMemoryStore } from './in-memory-store';
+import { InMemoryStore } from './in-memory-store.js';
 
 /** Fake en memoria append-only de `StockMovementRepository` para tests. */
 export class InMemoryStockMovementRepository implements StockMovementRepository {

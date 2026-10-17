@@ -1,6 +1,6 @@
-import type { WorkerRole } from '../entities/worker';
-import { UnauthorizedRoleError } from '../errors';
-import type { WorkerId } from '../value-objects/ids';
+import type { WorkerRole } from '../entities/worker.js';
+import { UnauthorizedRoleError } from '../errors/index.js';
+import type { WorkerId } from '../value-objects/ids.js';
 
 /**
  * Contexto mínimo de ejecución de un caso de uso: quién lo ejecuta y con qué

@@ -1,5 +1,5 @@
-import type { Assignment } from '../entities/assignment';
-import type { AssignmentId, MachineId, WorkerId } from '../value-objects/ids';
+import type { Assignment } from '../entities/assignment.js';
+import type { AssignmentId, MachineId, WorkerId } from '../value-objects/ids.js';
 
 /**
  * Persistencia de asignaciones horarias (docs/04, asignaciones). Las consultas

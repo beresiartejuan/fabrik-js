@@ -1,6 +1,6 @@
-import type { AssignmentId, WorkerId } from '../value-objects/ids';
+import type { AssignmentId, WorkerId } from '../value-objects/ids.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Invariante I1: un worker no puede tener dos asignaciones con franjas solapadas.
 export class OverlappingScheduleError extends DomainError {

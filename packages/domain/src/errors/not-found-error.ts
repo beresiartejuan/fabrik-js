@@ -1,4 +1,4 @@
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Convención de lecturas por id (Fase 5): cuando la entidad no existe se lanza
 // este error en lugar de devolver `null`, para no propagar valores vacíos al

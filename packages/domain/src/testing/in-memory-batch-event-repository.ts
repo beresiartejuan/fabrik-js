@@ -1,8 +1,8 @@
-import type { BatchEvent, BatchQuantity } from '../entities';
-import type { BatchEventFilter, BatchEventRepository } from '../ports';
-import type { BatchEventId, BatchId } from '../value-objects';
+import type { BatchEvent, BatchQuantity } from '../entities/index.js';
+import type { BatchEventFilter, BatchEventRepository } from '../ports/index.js';
+import type { BatchEventId, BatchId } from '../value-objects/index.js';
 
-import { InMemoryStore } from './in-memory-store';
+import { InMemoryStore } from './in-memory-store.js';
 
 function hasMaterial(items: readonly BatchQuantity[], materialId: string): boolean {
   return items.some((item) => item.materialId === materialId);

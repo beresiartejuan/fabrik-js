@@ -1,14 +1,14 @@
-import type { WorkerAssigned, WorkerUnassigned } from './assignment-events';
-import type { StockMoved } from './inventory-events';
-import type { MachineCreated, MachineMoved } from './machine-events';
-import type { MaterialCreated, MaterialUpdated } from './material-events';
+import type { WorkerAssigned, WorkerUnassigned } from './assignment-events.js';
+import type { StockMoved } from './inventory-events.js';
+import type { MachineCreated, MachineMoved } from './machine-events.js';
+import type { MaterialCreated, MaterialUpdated } from './material-events.js';
 import type {
   BatchCreated,
   BatchStored,
   BatchTransformed,
   ProductionCompleted,
   SupplyArrived,
-} from './production-events';
+} from './production-events.js';
 
 /**
  * Contrato base de todo evento de dominio (docs/05). Cada evento concreto fija

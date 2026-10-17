@@ -1,6 +1,6 @@
-import type { BatchId } from '../value-objects/ids';
+import type { BatchId } from '../value-objects/ids.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // `CompleteProduction` exige que el lote pertenezca a una receta (el evento
 // `production.completed` requiere `recipeId`). Completar un suministro o un lote

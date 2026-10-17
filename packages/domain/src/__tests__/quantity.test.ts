@@ -6,7 +6,7 @@ import {
   isUnitCompatibleWith,
   type PhysicalState,
   type UnitOfMeasure,
-} from '../index';
+} from '../index.js';
 
 describe('Quantity', () => {
   it('crea una cantidad válida', () => {

@@ -1,8 +1,8 @@
-import type { Batch } from '../entities';
-import type { BatchFilter, BatchRepository } from '../ports';
-import type { BatchId, MaterialId } from '../value-objects';
+import type { Batch } from '../entities/index.js';
+import type { BatchFilter, BatchRepository } from '../ports/index.js';
+import type { BatchId, MaterialId } from '../value-objects/index.js';
 
-import { InMemoryStore } from './in-memory-store';
+import { InMemoryStore } from './in-memory-store.js';
 
 function matches(batch: Batch, filter?: BatchFilter): boolean {
   if (filter?.materialId !== undefined && batch.materialId !== filter.materialId) {

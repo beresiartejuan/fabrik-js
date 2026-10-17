@@ -1,6 +1,6 @@
-import { InvalidStateTransitionError } from '../errors';
-import { BatchId, type BatchEventId, type MaterialId, type RecipeId } from '../value-objects/ids';
-import type { Quantity } from '../value-objects/quantity';
+import { InvalidStateTransitionError } from '../errors/index.js';
+import { BatchId, type BatchEventId, type MaterialId, type RecipeId } from '../value-objects/ids.js';
+import type { Quantity } from '../value-objects/quantity.js';
 
 // Ciclo de vida de un lote (docs/02).
 export type BatchStatus = 'in_progress' | 'completed' | 'stored';

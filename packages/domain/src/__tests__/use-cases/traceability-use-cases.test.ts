@@ -19,8 +19,8 @@ import {
   TraceForward,
   WorkerId,
   type Actor,
-} from '../../index';
-import { inMemoryRepositories } from '../../testing';
+} from '../../index.js';
+import { inMemoryRepositories } from '../../testing/index.js';
 
 const ADMIN: Actor = { workerId: WorkerId.from('admin-1'), role: 'admin' };
 const AUDITOR: Actor = { workerId: WorkerId.from('auditor-1'), role: 'auditor' };

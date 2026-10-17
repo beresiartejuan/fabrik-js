@@ -1,6 +1,6 @@
-import type { MachineId } from '../value-objects/ids';
+import type { MachineId } from '../value-objects/ids.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // La máquina no está en estado operativo para ejecutar una transformación.
 export class InactiveMachineError extends DomainError {

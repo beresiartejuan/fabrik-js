@@ -1,8 +1,8 @@
-import type { Material } from '../entities';
-import type { MaterialFilter, MaterialRepository } from '../ports';
-import type { MaterialId } from '../value-objects';
+import type { Material } from '../entities/index.js';
+import type { MaterialFilter, MaterialRepository } from '../ports/index.js';
+import type { MaterialId } from '../value-objects/index.js';
 
-import { InMemoryStore } from './in-memory-store';
+import { InMemoryStore } from './in-memory-store.js';
 
 function matches(material: Material, filter?: MaterialFilter): boolean {
   if (filter?.kind !== undefined && material.kind !== filter.kind) {

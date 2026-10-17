@@ -6,10 +6,10 @@ import type {
   MaterialId,
   RecipeId,
   WorkerId,
-} from '../value-objects/ids';
-import type { Quantity } from '../value-objects/quantity';
+} from '../value-objects/ids.js';
+import type { Quantity } from '../value-objects/quantity.js';
 
-import { createDomainEvent, type DomainEventBase } from './domain-event';
+import { createDomainEvent, type DomainEventBase } from './domain-event.js';
 
 export interface SupplyArrivedPayload {
   readonly batchId: BatchId;

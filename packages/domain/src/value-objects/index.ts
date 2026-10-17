@@ -1,5 +1,5 @@
 // Barrel de value objects de la capa de dominio.
-export * from './ids';
-export * from './quantity';
-export * from './stock-delta';
-export * from './time-slot';
+export * from './ids.js';
+export * from './quantity.js';
+export * from './stock-delta.js';
+export * from './time-slot.js';

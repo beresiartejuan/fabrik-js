@@ -31,7 +31,7 @@ import {
   type StockMovementRepository,
   type UnitOfWork,
   type WorkerRepository,
-} from '../index';
+} from '../index.js';
 import {
   InMemoryAssignmentRepository,
   InMemoryBatchEventRepository,
@@ -44,7 +44,7 @@ import {
   InMemoryUnitOfWork,
   InMemoryWorkerRepository,
   inMemoryRepositories,
-} from '../testing';
+} from '../testing/index.js';
 
 const SUPPLY_ID = MaterialId.from('material-supply');
 const PRODUCT_ID = MaterialId.from('material-product');

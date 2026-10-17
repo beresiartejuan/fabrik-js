@@ -1,4 +1,4 @@
-import { WorkerId } from '../value-objects/ids';
+import { WorkerId } from '../value-objects/ids.js';
 
 // Rol de identidad del trabajador; la autorización ocurre en los use cases (docs/02).
 export type WorkerRole = 'admin' | 'worker' | 'auditor';

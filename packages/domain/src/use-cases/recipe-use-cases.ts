@@ -1,10 +1,10 @@
-import { NotFoundError } from '../errors';
-import { Recipe, RecipeStep, type RecipeStepProps } from '../entities/recipe';
-import type { RecipeFilter, RecipeRepository } from '../ports/recipe-repository';
-import type { MaterialId, RecipeId } from '../value-objects/ids';
-import type { Quantity } from '../value-objects/quantity';
+import { NotFoundError } from '../errors/index.js';
+import { Recipe, RecipeStep, type RecipeStepProps } from '../entities/recipe.js';
+import type { RecipeFilter, RecipeRepository } from '../ports/recipe-repository.js';
+import type { MaterialId, RecipeId } from '../value-objects/ids.js';
+import type { Quantity } from '../value-objects/quantity.js';
 
-import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor';
+import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor.js';
 
 // --- Dependencias ---
 

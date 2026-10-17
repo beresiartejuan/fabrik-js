@@ -39,8 +39,8 @@ import {
   type BatchTransformed,
   type ProductionCompleted,
   type SupplyArrived,
-} from '../../index';
-import { collectingEventBus, inMemoryRepositories, InMemoryUnitOfWork } from '../../testing';
+} from '../../index.js';
+import { collectingEventBus, inMemoryRepositories, InMemoryUnitOfWork } from '../../testing/index.js';
 
 // 2026-01-05 es lunes (getDay() === 1).
 const monday = (hour: number, minute = 0): Date => new Date(2026, 0, 5, hour, minute, 0, 0);

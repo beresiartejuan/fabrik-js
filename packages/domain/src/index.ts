@@ -2,9 +2,9 @@
 // orden de dependencia: value objects → errores → eventos → entidades → puertos
 // → casos de uso. Las utilidades de test (`src/testing/`) NO forman parte del
 // API público y por eso no se re-exportan aquí.
-export * from './value-objects';
-export * from './errors';
-export * from './events';
-export * from './entities';
-export * from './ports';
-export * from './use-cases';
+export * from './value-objects/index.js';
+export * from './errors/index.js';
+export * from './events/index.js';
+export * from './entities/index.js';
+export * from './ports/index.js';
+export * from './use-cases/index.js';

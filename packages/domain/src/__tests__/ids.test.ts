@@ -13,7 +13,7 @@ import {
   StockMovementId,
   WorkerId,
   type IdFactory,
-} from '../index';
+} from '../index.js';
 
 const FACTORIES: ReadonlyArray<IdFactory<string>> = [
   FactoryId,

@@ -1,9 +1,9 @@
-import { NotFoundError } from '../errors';
-import { Location, type LocationKind } from '../entities/location';
-import type { LocationFilter, LocationRepository } from '../ports/location-repository';
-import type { LocationId } from '../value-objects/ids';
+import { NotFoundError } from '../errors/index.js';
+import { Location, type LocationKind } from '../entities/location.js';
+import type { LocationFilter, LocationRepository } from '../ports/location-repository.js';
+import type { LocationId } from '../value-objects/ids.js';
 
-import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor';
+import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor.js';
 
 // --- Dependencias ---
 

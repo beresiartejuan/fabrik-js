@@ -8,7 +8,7 @@ import {
   MaterialId,
   Quantity,
   RecipeId,
-} from '../../index';
+} from '../../index.js';
 
 const MATERIAL_ID = MaterialId.from('material-1');
 

@@ -1,14 +1,14 @@
-import type { Repositories } from '../ports';
+import type { Repositories } from '../ports/index.js';
 
-import { InMemoryAssignmentRepository } from './in-memory-assignment-repository';
-import { InMemoryBatchEventRepository } from './in-memory-batch-event-repository';
-import { InMemoryBatchRepository } from './in-memory-batch-repository';
-import { InMemoryLocationRepository } from './in-memory-location-repository';
-import { InMemoryMachineRepository } from './in-memory-machine-repository';
-import { InMemoryMaterialRepository } from './in-memory-material-repository';
-import { InMemoryRecipeRepository } from './in-memory-recipe-repository';
-import { InMemoryStockMovementRepository } from './in-memory-stock-movement-repository';
-import { InMemoryWorkerRepository } from './in-memory-worker-repository';
+import { InMemoryAssignmentRepository } from './in-memory-assignment-repository.js';
+import { InMemoryBatchEventRepository } from './in-memory-batch-event-repository.js';
+import { InMemoryBatchRepository } from './in-memory-batch-repository.js';
+import { InMemoryLocationRepository } from './in-memory-location-repository.js';
+import { InMemoryMachineRepository } from './in-memory-machine-repository.js';
+import { InMemoryMaterialRepository } from './in-memory-material-repository.js';
+import { InMemoryRecipeRepository } from './in-memory-recipe-repository.js';
+import { InMemoryStockMovementRepository } from './in-memory-stock-movement-repository.js';
+import { InMemoryWorkerRepository } from './in-memory-worker-repository.js';
 
 /**
  * Agregado de fakes con tipos concretos: además de satisfacer `Repositories`,

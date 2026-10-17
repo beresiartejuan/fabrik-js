@@ -1,7 +1,7 @@
-import type { MaterialKind } from '../entities/material';
-import type { MaterialId } from '../value-objects/ids';
+import type { MaterialKind } from '../entities/material.js';
+import type { MaterialId } from '../value-objects/ids.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // El material referenciado no es del tipo (kind) que exige el caso de uso: p. ej.
 // `RegisterSupplyArrival` solo acepta materiales `supply` (docs/04).

@@ -1,4 +1,4 @@
-import { InvalidTimeSlotError } from '../errors';
+import { InvalidTimeSlotError } from '../errors/index.js';
 
 // Día de la semana: 0 = domingo ... 6 = sábado (igual que Date.getDay()).
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;

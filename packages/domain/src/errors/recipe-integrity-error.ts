@@ -1,6 +1,6 @@
-import type { RecipeId } from '../value-objects/ids';
+import type { RecipeId } from '../value-objects/ids.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Invariante I7: el output de la receta debe coincidir con el output de su último paso.
 export class RecipeIntegrityError extends DomainError {

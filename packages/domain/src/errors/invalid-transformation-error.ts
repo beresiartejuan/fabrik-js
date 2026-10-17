@@ -1,6 +1,6 @@
-import type { BatchId } from '../value-objects/ids';
+import type { BatchId } from '../value-objects/ids.js';
 
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Motivos por los que `RecordTransformation` rechaza un comando antes de tocar
 // el dominio: transformación vacía (ni inputs ni outputs) o lote de input

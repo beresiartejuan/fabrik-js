@@ -20,22 +20,22 @@ import {
   NotFoundError,
   UnauthorizedRoleError,
   WorkerNotAssignedError,
-} from '../errors';
-import { Batch } from '../entities/batch';
-import { BatchEvent } from '../entities/batch-event';
-import { StockMovement } from '../entities/stock-movement';
-import type { WorkerRole } from '../entities/worker';
-import type { EventBus } from '../events/event-bus';
+} from '../errors/index.js';
+import { Batch } from '../entities/batch.js';
+import { BatchEvent } from '../entities/batch-event.js';
+import { StockMovement } from '../entities/stock-movement.js';
+import type { WorkerRole } from '../entities/worker.js';
+import type { EventBus } from '../events/event-bus.js';
 import {
   batchCreated,
   batchStored,
   batchTransformed,
   productionCompleted,
   supplyArrived,
-} from '../events/production-events';
-import type { BatchRepository } from '../ports/batch-repository';
-import type { RecipeRepository } from '../ports/recipe-repository';
-import type { UnitOfWork } from '../ports/unit-of-work';
+} from '../events/production-events.js';
+import type { BatchRepository } from '../ports/batch-repository.js';
+import type { RecipeRepository } from '../ports/recipe-repository.js';
+import type { UnitOfWork } from '../ports/unit-of-work.js';
 import type {
   BatchId,
   LocationId,
@@ -44,10 +44,10 @@ import type {
   RecipeId,
   RecipeStepId,
   WorkerId,
-} from '../value-objects/ids';
-import type { Quantity } from '../value-objects/quantity';
+} from '../value-objects/ids.js';
+import type { Quantity } from '../value-objects/quantity.js';
 
-import { requireRole, type Actor } from './actor';
+import { requireRole, type Actor } from './actor.js';
 
 // --- Roles (docs/04) ---
 

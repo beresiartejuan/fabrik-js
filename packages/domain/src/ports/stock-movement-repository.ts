@@ -1,6 +1,6 @@
-import type { StockMovement } from '../entities/stock-movement';
-import type { LocationId, MaterialId } from '../value-objects/ids';
-import type { StockDelta } from '../value-objects/stock-delta';
+import type { StockMovement } from '../entities/stock-movement.js';
+import type { LocationId, MaterialId } from '../value-objects/ids.js';
+import type { StockDelta } from '../value-objects/stock-delta.js';
 
 /**
  * Persistencia append-only de movimientos de stock (I4): solo se agregan. El

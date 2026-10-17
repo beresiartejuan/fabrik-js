@@ -1,4 +1,4 @@
-import { FactoryId } from '../value-objects/ids';
+import { FactoryId } from '../value-objects/ids.js';
 
 export interface FactoryProps {
   readonly name: string;

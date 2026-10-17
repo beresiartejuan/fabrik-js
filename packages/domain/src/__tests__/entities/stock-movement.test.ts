@@ -7,7 +7,7 @@ import {
   MaterialId,
   StockMovement,
   StockMovementId,
-} from '../../index';
+} from '../../index.js';
 
 const LOCATION_ID = LocationId.from('location-1');
 const MATERIAL_ID = MaterialId.from('material-1');

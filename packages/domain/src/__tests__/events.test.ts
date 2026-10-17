@@ -26,8 +26,8 @@ import {
   workerUnassigned,
   type DomainEvent,
   type EventBus,
-} from '../index';
-import { collectingEventBus } from '../testing';
+} from '../index.js';
+import { collectingEventBus } from '../testing/index.js';
 
 const MATERIAL_ID = MaterialId.from('material-1');
 const MACHINE_ID = MachineId.from('machine-1');

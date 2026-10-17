@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import * as domain from '../index';
+import * as domain from '../index.js';
 
 describe('@fabrik/domain', () => {
   it('exporta el barrel de la capa de dominio', () => {

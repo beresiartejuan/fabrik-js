@@ -1,5 +1,5 @@
-import { AssignmentId, MachineId, WorkerId } from '../value-objects/ids';
-import type { TimeSlot } from '../value-objects/time-slot';
+import { AssignmentId, MachineId, WorkerId } from '../value-objects/ids.js';
+import type { TimeSlot } from '../value-objects/time-slot.js';
 
 export interface AssignmentProps {
   readonly workerId: WorkerId;

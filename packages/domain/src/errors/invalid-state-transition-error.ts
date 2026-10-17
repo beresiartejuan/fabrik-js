@@ -1,4 +1,4 @@
-import { DomainError } from './domain-error';
+import { DomainError } from './domain-error.js';
 
 // Transición de estado no permitida por la máquina de estados de una entidad
 // con ciclo de vida mutable (Machine, Batch).
