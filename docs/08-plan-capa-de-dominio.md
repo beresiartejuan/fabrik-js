@@ -76,29 +76,38 @@ sin Drizzle, sin HTTP. Cada fase es mergeable y testeable de forma aislada.
       adyacentes OK, distintos días OK, N workers misma máquina OK, inactivo,
       roles.
 
-## Fase 7 — Use cases: producción e inventario
+## Fase 7 — Use cases: producción e inventario ✅ (completada, +39 tests; total 313)
 
-- [ ] `RegisterSupplyArrival`, `StartProduction`, `RecordTransformation`
-      (transaccional vía UnitOfWork: evento + movimientos + batches),
-      `StoreBatch`, `CompleteProduction`.
-- [ ] Validaciones: I3 (asignación vigente), I5 (stock suficiente), I6
-      (coherencia de unidades).
-- [ ] Stock actual: query `getStock(locationId)` = suma de movimientos.
-- [ ] Tests: flujo completo suministro → 2 pasos → producto final; intento de
-      registrar sin asignación; stock negativo rechazado; eventos emitidos.
+- [x] `RegisterSupplyArrival` (A/W; batch 'stored' + `supply_in`),
+      `StartProduction` (A; batch raíz con cantidad planificada),
+      `RecordTransformation` (W; transaccional vía UnitOfWork: evento +
+      movimientos 'consumed' + batches de output), `StoreBatch` (→ 'produced' si
+      hay evento origen, si no 'transfer_in'), `CompleteProduction` (A/W).
+- [x] Validaciones: I3 (asignación vigente + `slot.contains(timestamp)`), I6,
+      máquina en mantenimiento, actor = workerId.
+- [x] **I5 diferido conscientemente** (documentado): los 'consumed' debitan la
+      ubicación de la máquina mientras 'produced' acredita storage; chequear
+      no-negatividad ahí sería incoherente. Se reevalúa con el flujo completo.
+- [x] Tests: flujo completo de docs con merma y 7 eventos en orden + rechazos.
 
-## Fase 8 — Trazabilidad
+## Fase 8 — Trazabilidad ✅ (completada, +29 tests; total 342)
 
-- [ ] `TraceBatch` (árbol hacia atrás) y `TraceForward` (hacia adelante).
-- [ ] `ListBatchEvents` con filtros.
-- [ ] Tests: genealogía de 3 niveles; recall (lote de suministro → N productos).
+- [x] `TraceBatch` (árbol `BatchTraceNode` hacia atrás, guarda anti-ciclos),
+      `TraceForward` (árbol `BatchForwardNode` de recall usando
+      `listByInputBatchId` + filtro `originBatchEventId` agregado a BatchFilter).
+- [x] `ListBatchEvents` con filtros + orden por timestamp.
+- [x] `GetStockByLocation` (A/Au/W con `ALL_ROLES`; unidad desde el Material)
+      y `GetStockMovements` (A/Au).
+- [x] Fixes de la revisión aplicados: RecordTransformation rechaza transformación
+      vacía y batchId duplicado (`InvalidTransformationError`), CompleteProduction
+      valida receta primero (`NotAProductionOrderError`).
 
-## Fase 9 — Publicación interna
+## Fase 9 — Publicación interna ✅ (completada)
 
-- [ ] Barrel `index.ts` completo y ordenado.
-- [ ] Agregar `@fabrik/domain: workspace:*` como dependencia en `apps/api` y
+- [x] Barrel `index.ts` completo y ordenado.
+- [x] Agregar `@fabrik/domain: workspace:*` como dependencia en `apps/api` y
       `apps/web` (solo wiring del paquete, sin usarlo aún).
-- [ ] Documentar en `packages/domain/README.md` cómo importarlo.
+- [x] Documentar en `packages/domain/README.md` cómo importarlo.
 
 ## Orden y criterio de corte
 
