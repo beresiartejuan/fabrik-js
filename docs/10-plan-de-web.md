@@ -426,16 +426,56 @@ redirige a `/login`. Vitest verde para el interceptor (single-flight, reintento,
   de la tabla de trabajadores auditor/admin), `pnpm --filter web build` y
   `pnpm --filter web lint` (biome) verdes.
 
-## Fase 2 — Recetas y builder de pasos
+## Fase 2 — Recetas y builder de pasos ✅ (completada)
 
-- [ ] `/recetas` (lista) + `/recetas/nueva` + `/recetas/[id]` (edición).
-- [ ] `RecipeBuilder`: pasos ordenables, inputs/outputs repetibles, recálculo de `position`.
-- [ ] Validación pre-flight (≥1 paso, posiciones 1..N, I7) + mapeo de `RecipeIntegrityError`.
-- [ ] `recipesApi` (`POST`/`PATCH` con `steps` que reemplaza la lista completa).
+- [x] `/recetas` (lista) + `/recetas/nueva` + `/recetas/[id]` (edición).
+- [x] `RecipeBuilder`: pasos ordenables, inputs/outputs repetibles, recálculo de `position`.
+- [x] Validación pre-flight (≥1 paso, posiciones 1..N, I7) + mapeo de `RecipeIntegrityError`.
+- [x] `recipesApi` (`POST`/`PATCH` con `steps` que reemplaza la lista completa).
 
 **Criterio de salida:** se crea una receta de dos pasos y se edita reemplazando pasos;
 una receta con I7 violada muestra error inline y el 422 mapeado. Tests del builder
 (reordenar pasos recalcula posiciones; validación I7).
+
+**✅ Completada:** recetas operativas de punta a punta:
+
+- **`recipesApi`** contra el contrato real de `apps/api/src/recipes/*.ts`:
+  `GET /recipes` (`?outputProductId=`), `GET /recipes/:id`, `POST /recipes`,
+  `PATCH /recipes/:id`. El body de escritura verificado es
+  `{ name, outputProductId, outputQuantity: { amount, unit }, steps: [{ position,
+  machineType, inputs: [{ materialId, quantity: { amount, unit } }], outputProductId,
+  outputQuantity: { amount, unit } }] }`; `PATCH` con `steps` reemplaza la lista
+  completa (no hay merge por posición).
+- **Lista `/recetas`:** nombre, producto de salida resuelto con `GET /materials`,
+  cantidad, nº de pasos y acción por fila. Admin crea/edita; auditor abre la receta
+  en solo lectura (`Ver receta`). `RequireRole(['admin','auditor'])` + `CatalogGate`.
+- **Builder compartido** (`components/recipes/recipe-builder.tsx`): cabecera
+  (nombre, producto de salida de tipo producto, cantidad y unidad derivada del
+  material), pasos ordenables con subir/bajar/eliminar y **posición recalculada
+  1..N**, tipo de máquina libre con `datalist` de los tipos existentes
+  (`GET /machines`) y salida por paso con producto + cantidad/unidad. Los insumos
+  son filas repetibles con cualquier material, cantidad y unidad corregida al
+  elegir el material.
+- **Estado puro** (`recipe-builder-state.ts`): `addStep`/`removeStep`/`moveStep`/
+  `recalcPositions`/`addInput`/`removeInput`, selección de materiales que deriva la
+  unidad, `validateRecipe` y `toRecipePayload`. La lógica crítica se testea sin
+  montar React.
+- **Validación pre-flight en español:** ≥1 paso, posiciones consecutivas, nombre y
+  filas completas, cantidades > 0, material existente, unidad coherente con el
+  estado físico (`isUnitCompatibleWith`) y **I7** (el output del último paso debe
+  coincidir con el producto de salida de la receta). Resumen con lista de errores +
+  mensajes inline por campo. Los errores del servidor se mapean con
+  `errorToMessage` y, cuando existen, se muestran los `context` del
+  `DomainExceptionFilter` (p. ej. `reason` de `RecipeIntegrityError` → 422).
+- **Edición:** `/recetas/[id]` precarga la receta y avisa que al guardar se
+  reemplazan todos los pasos. `params` es una promesa en Next 16: se resuelve con
+  `use()` dentro de `Suspense` (cache components).
+- **Navegación:** `/recetas` pasa a `enabled: true`; el dashboard admin ya muestra
+  la tarjeta de Recetas por `isNavHrefEnabled`. Tests de nav/dashboard ajustados.
+- **Verificación:** `pnpm --filter web test` (**130 tests**; +25: 18 del state puro,
+  3 del builder y 4 del contrato de API), `pnpm --filter web build` (rutas
+  `/recetas`, `/recetas/nueva`, `/recetas/[id]` prerenderizadas/parciales) y
+  `pnpm --filter web lint` (biome) verdes.
 
 ## Fase 3 — Asignaciones
 

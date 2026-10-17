@@ -43,6 +43,7 @@ export function SelectField({
     <Field className={className}>
       <FieldLabel>{label}</FieldLabel>
       <Select
+        items={options}
         value={value}
         onValueChange={(next) => {
           if (next !== null) {

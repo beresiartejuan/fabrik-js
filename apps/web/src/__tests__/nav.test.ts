@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { isActiveHref, isNavHrefEnabled, NAV_ITEMS, navItemsForRole, ROLE_LABELS } from '@/lib/nav';
 
 const FUTURE_HREFS = [
-  '/recetas',
   '/asignaciones',
   '/produccion',
   '/produccion/nueva',
@@ -15,9 +14,16 @@ const FUTURE_HREFS = [
 ];
 
 describe('navItemsForRole', () => {
-  it('el admin solo ve las secciones con pantalla existente', () => {
+  it('el admin ve los catálogos existentes y recetas', () => {
     const hrefs = navItemsForRole('admin').map((item) => item.href);
-    expect(hrefs).toEqual(['/', '/materiales', '/ubicaciones', '/maquinas', '/trabajadores']);
+    expect(hrefs).toEqual([
+      '/',
+      '/materiales',
+      '/ubicaciones',
+      '/maquinas',
+      '/trabajadores',
+      '/recetas',
+    ]);
   });
 
   it('el worker solo ve Inicio mientras las fases futuras no aterricen', () => {
@@ -25,9 +31,16 @@ describe('navItemsForRole', () => {
     expect(hrefs).toEqual(['/']);
   });
 
-  it('el auditor ve los catálogos existentes e Inicio', () => {
+  it('el auditor ve los catálogos existentes, recetas e Inicio', () => {
     const hrefs = navItemsForRole('auditor').map((item) => item.href);
-    expect(hrefs).toEqual(['/', '/materiales', '/ubicaciones', '/maquinas', '/trabajadores']);
+    expect(hrefs).toEqual([
+      '/',
+      '/materiales',
+      '/ubicaciones',
+      '/maquinas',
+      '/trabajadores',
+      '/recetas',
+    ]);
   });
 
   it('oculta las rutas de fases futuras para todos los roles', () => {
@@ -43,11 +56,19 @@ describe('navItemsForRole', () => {
 describe('NAV_ITEMS enabled', () => {
   it('marca habilitadas solo las rutas que existen hoy', () => {
     const enabled = NAV_ITEMS.filter((item) => item.enabled === true).map((item) => item.href);
-    expect(enabled).toEqual(['/', '/materiales', '/ubicaciones', '/maquinas', '/trabajadores']);
+    expect(enabled).toEqual([
+      '/',
+      '/materiales',
+      '/ubicaciones',
+      '/maquinas',
+      '/trabajadores',
+      '/recetas',
+    ]);
   });
 
   it('isNavHrefEnabled respeta el flag y las rutas desconocidas quedan ocultas', () => {
     expect(isNavHrefEnabled('/materiales')).toBe(true);
+    expect(isNavHrefEnabled('/recetas')).toBe(true);
     expect(isNavHrefEnabled('/stock')).toBe(false);
     expect(isNavHrefEnabled('/ruta-inexistente')).toBe(false);
   });
