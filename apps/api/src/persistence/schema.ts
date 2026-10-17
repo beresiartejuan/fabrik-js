@@ -93,7 +93,10 @@ export const workers = sqliteTable(
     role: text('role', { enum: WORKER_ROLES }).notNull(),
     active: integer('active', { mode: 'boolean' }).notNull().default(true),
   },
-  (table) => [index('workers_role_idx').on(table.role), index('workers_active_idx').on(table.active)],
+  (table) => [
+    index('workers_role_idx').on(table.role),
+    index('workers_active_idx').on(table.active),
+  ],
 );
 
 export const recipes = sqliteTable(

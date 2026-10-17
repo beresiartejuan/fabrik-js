@@ -1,25 +1,28 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type Actor,
   Assignment,
   Batch,
+  type BatchCreated,
   BatchId,
+  type BatchStored,
+  type BatchTransformed,
   CompleteProduction,
   InactiveMachineError,
   InactiveWorkerError,
   IncompatibleUnitError,
   InvalidLocationKindError,
   InvalidStateTransitionError,
-  InvalidTransformationError,
   Location,
   LocationId,
   Machine,
   MachineId,
   Material,
   MaterialId,
-  MaterialKindMismatchError,
   NotAProductionOrderError,
   NotFoundError,
+  type ProductionCompleted,
   Quantity,
   Recipe,
   RecipeId,
@@ -28,19 +31,17 @@ import {
   RegisterSupplyArrival,
   StartProduction,
   StoreBatch,
+  type SupplyArrived,
   TimeSlot,
-  UnauthorizedRoleError,
   Worker,
   WorkerId,
   WorkerNotAssignedError,
-  type Actor,
-  type BatchCreated,
-  type BatchStored,
-  type BatchTransformed,
-  type ProductionCompleted,
-  type SupplyArrived,
 } from '../../index.js';
-import { collectingEventBus, inMemoryRepositories, InMemoryUnitOfWork } from '../../testing/index.js';
+import {
+  collectingEventBus,
+  InMemoryUnitOfWork,
+  inMemoryRepositories,
+} from '../../testing/index.js';
 
 // 2026-01-05 es lunes (getDay() === 1).
 const monday = (hour: number, minute = 0): Date => new Date(2026, 0, 5, hour, minute, 0, 0);
@@ -153,7 +154,11 @@ async function seedFixture() {
     step1,
     step2,
     registerSupply: new RegisterSupplyArrival(transactionalDeps),
-    startProduction: new StartProduction({ recipes: repos.recipes, batches: repos.batches, events }),
+    startProduction: new StartProduction({
+      recipes: repos.recipes,
+      batches: repos.batches,
+      events,
+    }),
     recordTransformation: new RecordTransformation(transactionalDeps),
     storeBatch: new StoreBatch(transactionalDeps),
     completeProduction: new CompleteProduction({ batches: repos.batches, events }),
@@ -311,7 +316,9 @@ describe('flujo completo de producción (docs/03)', () => {
 
     // Repositorios actualizados.
     await expect(fixture.repos.batchEvents.listBy()).resolves.toHaveLength(2);
-    await expect(fixture.repos.stockMovements.listByLocation(fixture.storage.id)).resolves.toHaveLength(3);
+    await expect(
+      fixture.repos.stockMovements.listByLocation(fixture.storage.id),
+    ).resolves.toHaveLength(3);
     await expect(fixture.repos.batches.list()).resolves.toHaveLength(5);
   });
 });
@@ -746,13 +753,19 @@ describe('StoreBatch', () => {
     const fixture = await seedFixture();
 
     await expect(
-      fixture.storeBatch.execute(ADMIN, { batchId: BatchId.create(), locationId: fixture.storage.id }),
+      fixture.storeBatch.execute(ADMIN, {
+        batchId: BatchId.create(),
+        locationId: fixture.storage.id,
+      }),
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it('lanza NotFoundError si el lugar no existe', async () => {
     const fixture = await seedFixture();
-    const loose = Batch.create({ materialId: fixture.aceite.id, quantity: Quantity.create(3, 'l') });
+    const loose = Batch.create({
+      materialId: fixture.aceite.id,
+      quantity: Quantity.create(3, 'l'),
+    });
     await fixture.repos.batches.save(loose);
 
     await expect(
@@ -762,7 +775,10 @@ describe('StoreBatch', () => {
 
   it('rechaza almacenar en un lugar de producción', async () => {
     const fixture = await seedFixture();
-    const loose = Batch.create({ materialId: fixture.aceite.id, quantity: Quantity.create(3, 'l') });
+    const loose = Batch.create({
+      materialId: fixture.aceite.id,
+      quantity: Quantity.create(3, 'l'),
+    });
     await fixture.repos.batches.save(loose);
 
     await expect(
@@ -772,7 +788,10 @@ describe('StoreBatch', () => {
 
   it('rechaza un lote que ya no está en proceso', async () => {
     const fixture = await seedFixture();
-    const loose = Batch.create({ materialId: fixture.aceite.id, quantity: Quantity.create(3, 'l') });
+    const loose = Batch.create({
+      materialId: fixture.aceite.id,
+      quantity: Quantity.create(3, 'l'),
+    });
     await fixture.repos.batches.save(loose);
     await fixture.storeBatch.execute(ADMIN, { batchId: loose.id, locationId: fixture.storage.id });
 
@@ -785,7 +804,10 @@ describe('StoreBatch', () => {
     const fixture = await seedFixture();
 
     await expect(
-      fixture.storeBatch.execute(AUDITOR, { batchId: BatchId.create(), locationId: fixture.storage.id }),
+      fixture.storeBatch.execute(AUDITOR, {
+        batchId: BatchId.create(),
+        locationId: fixture.storage.id,
+      }),
     ).rejects.toMatchObject({ name: 'UnauthorizedRoleError', useCase: 'StoreBatch' });
   });
 });
@@ -839,7 +861,10 @@ describe('CompleteProduction', () => {
 
     await expect(
       fixture.completeProduction.execute(ADMIN, { batchId: supply.id }),
-    ).rejects.toMatchObject({ name: 'NotAProductionOrderError', batchId: supply.id });
+    ).rejects.toMatchObject({
+      name: 'NotAProductionOrderError',
+      batchId: supply.id,
+    });
   });
 
   it('valida que es orden de producción antes de transicionar el estado', async () => {
@@ -866,6 +891,9 @@ describe('CompleteProduction', () => {
 
     await expect(
       fixture.completeProduction.execute(AUDITOR, { batchId: BatchId.create() }),
-    ).rejects.toMatchObject({ name: 'UnauthorizedRoleError', useCase: 'CompleteProduction' });
+    ).rejects.toMatchObject({
+      name: 'UnauthorizedRoleError',
+      useCase: 'CompleteProduction',
+    });
   });
 });

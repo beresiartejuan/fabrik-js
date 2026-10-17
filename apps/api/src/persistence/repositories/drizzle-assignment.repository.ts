@@ -1,5 +1,3 @@
-import { eq } from 'drizzle-orm';
-
 import type {
   Assignment,
   AssignmentId,
@@ -7,6 +5,7 @@ import type {
   MachineId,
   WorkerId,
 } from '@fabrik/domain';
+import { eq } from 'drizzle-orm';
 
 import type { Executor } from '../executor.js';
 import { assignmentToRow, rowToAssignment } from '../mappers.js';
@@ -22,10 +21,7 @@ export class DrizzleAssignmentRepository implements AssignmentRepository {
   }
 
   async findByWorker(workerId: WorkerId): Promise<readonly Assignment[]> {
-    const rows = await this.db
-      .select()
-      .from(assignments)
-      .where(eq(assignments.workerId, workerId));
+    const rows = await this.db.select().from(assignments).where(eq(assignments.workerId, workerId));
     return rows.map(rowToAssignment);
   }
 

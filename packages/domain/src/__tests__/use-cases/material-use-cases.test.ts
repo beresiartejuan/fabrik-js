@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type Actor,
   CreateMaterial,
+  type CreateMaterialCommand,
   DeactivateMaterial,
   GetMaterial,
   IncompatibleUnitError,
@@ -11,8 +13,6 @@ import {
   UnauthorizedRoleError,
   UpdateMaterial,
   WorkerId,
-  type Actor,
-  type CreateMaterialCommand,
 } from '../../index.js';
 import { collectingEventBus, inMemoryRepositories } from '../../testing/index.js';
 

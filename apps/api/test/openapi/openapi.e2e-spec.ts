@@ -1,10 +1,7 @@
-import { SwaggerModule, type OpenAPIObject } from '@nestjs/swagger';
+import { type OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import request from 'supertest';
 
-import {
-  buildOpenApiDocument,
-  OPENAPI_ROUTES,
-} from '../../src/openapi/openapi.js';
+import { buildOpenApiDocument, OPENAPI_ROUTES } from '../../src/openapi/openapi.js';
 import { createE2EApp, type E2EContext } from '../support/e2e-app.js';
 
 /**
@@ -22,11 +19,7 @@ describe('OpenAPI (e2e)', () => {
   beforeAll(async () => {
     ctx = await createE2EApp({
       beforeInit: (app) =>
-        SwaggerModule.setup(
-          'docs',
-          app,
-          buildOpenApiDocument() as unknown as OpenAPIObject,
-        ),
+        SwaggerModule.setup('docs', app, buildOpenApiDocument() as unknown as OpenAPIObject),
     });
   });
 
@@ -35,9 +28,7 @@ describe('OpenAPI (e2e)', () => {
   });
 
   it('sirve el documento en /docs-json', async () => {
-    const response = await request(ctx.app.getHttpServer())
-      .get('/docs-json')
-      .expect(200);
+    const response = await request(ctx.app.getHttpServer()).get('/docs-json').expect(200);
     expect(response.body).toMatchObject({
       openapi: '3.0.0',
       info: { title: 'fabrik-api' },
@@ -52,18 +43,14 @@ describe('OpenAPI (e2e)', () => {
   });
 
   it('sirve la UI en /docs', async () => {
-    const response = await request(ctx.app.getHttpServer())
-      .get('/docs')
-      .redirects(1);
+    const response = await request(ctx.app.getHttpServer()).get('/docs').redirects(1);
     expect(response.status).toBe(200);
     expect(response.headers['content-type']).toMatch(/text\/html/);
   });
 
   it('la tabla OPENAPI_ROUTES cubre todas las rutas montadas por Nest (anti-drift)', () => {
     const mounted = collectMountedRoutes(ctx);
-    const documented = OPENAPI_ROUTES.map(
-      (route) => `${route.method.toUpperCase()} ${route.path}`,
-    );
+    const documented = OPENAPI_ROUTES.map((route) => `${route.method.toUpperCase()} ${route.path}`);
 
     expect(new Set(documented)).toEqual(new Set(mounted));
   });

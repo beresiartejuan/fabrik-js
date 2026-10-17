@@ -1,13 +1,4 @@
 import {
-  Catch,
-  HttpException,
-  HttpStatus,
-  Logger,
-  type ArgumentsHost,
-  type ExceptionFilter,
-} from '@nestjs/common';
-import type { Response } from 'express';
-import {
   DomainError,
   InactiveMachineError,
   InactiveWorkerError,
@@ -28,6 +19,15 @@ import {
   UnauthorizedRoleError,
   WorkerNotAssignedError,
 } from '@fabrik/domain';
+import {
+  type ArgumentsHost,
+  Catch,
+  type ExceptionFilter,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
+import type { Response } from 'express';
 
 /** Cuerpo de error estable que ve el cliente. */
 export interface DomainErrorResponse {

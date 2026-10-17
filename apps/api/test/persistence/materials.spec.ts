@@ -16,9 +16,7 @@ describe('DrizzleMaterialRepository', () => {
 
   it('findById devuelve null cuando no existe', async () => {
     const material = aMaterial();
-    await expect(
-      ctx.repositories.materials.findById(material.id),
-    ).resolves.toBeNull();
+    await expect(ctx.repositories.materials.findById(material.id)).resolves.toBeNull();
   });
 
   it('save + findById hacen round-trip del material', async () => {
@@ -63,9 +61,7 @@ describe('DrizzleMaterialRepository', () => {
     expect(await ctx.repositories.materials.list()).toHaveLength(3);
 
     const supplies = await ctx.repositories.materials.list({ kind: 'supply' });
-    expect(supplies.map((m) => m.id).sort()).toEqual(
-      [supply.id, liquid.id].sort(),
-    );
+    expect(supplies.map((m) => m.id).sort()).toEqual([supply.id, liquid.id].sort());
 
     const products = await ctx.repositories.materials.list({ kind: 'product' });
     expect(products.map((m) => m.id)).toEqual([product.id]);
@@ -85,11 +81,7 @@ describe('DrizzleMaterialRepository', () => {
   it('existsByName detecta nombres existentes', async () => {
     await ctx.repositories.materials.save(aMaterial({ name: 'Azúcar' }));
 
-    await expect(
-      ctx.repositories.materials.existsByName!('Azúcar'),
-    ).resolves.toBe(true);
-    await expect(ctx.repositories.materials.existsByName!('Sal')).resolves.toBe(
-      false,
-    );
+    await expect(ctx.repositories.materials.existsByName!('Azúcar')).resolves.toBe(true);
+    await expect(ctx.repositories.materials.existsByName!('Sal')).resolves.toBe(false);
   });
 });

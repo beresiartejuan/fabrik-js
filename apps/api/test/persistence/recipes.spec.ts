@@ -106,8 +106,8 @@ describe('DrizzleRecipeRepository', () => {
     await ctx.repositories.recipes.save(recipeBizcocho);
 
     expect(await ctx.repositories.recipes.list()).toHaveLength(2);
-    expect((await ctx.repositories.recipes.list({ outputProductId: pan.id })).map((r) => r.id)).toEqual([
-      recipePan.id,
-    ]);
+    expect(
+      (await ctx.repositories.recipes.list({ outputProductId: pan.id })).map((r) => r.id),
+    ).toEqual([recipePan.id]);
   });
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type Actor,
   Batch,
   BatchEvent,
   BatchEventId,
@@ -18,7 +19,6 @@ import {
   TraceBatch,
   TraceForward,
   WorkerId,
-  type Actor,
 } from '../../index.js';
 import { inMemoryRepositories } from '../../testing/index.js';
 
@@ -139,20 +139,25 @@ async function seedGenealogy(fixture: Fixture) {
   });
   await fixture.repos.batches.save(batchJabon);
 
-  return { aceite, sosa, mezcla, jabon, batchAceite, batchSosa, batchMezcla, batchJabon, mezclaEvent, cocinadoEvent };
+  return {
+    aceite,
+    sosa,
+    mezcla,
+    jabon,
+    batchAceite,
+    batchSosa,
+    batchMezcla,
+    batchJabon,
+    mezclaEvent,
+    cocinadoEvent,
+  };
 }
 
 describe('TraceBatch (genealogía hacia atrás)', () => {
   it('reconstruye el árbol de 3 niveles de docs/03', async () => {
     const fixture = traceFixture();
-    const {
-      batchAceite,
-      batchSosa,
-      batchMezcla,
-      batchJabon,
-      mezclaEvent,
-      cocinadoEvent,
-    } = await seedGenealogy(fixture);
+    const { batchAceite, batchSosa, batchMezcla, batchJabon, mezclaEvent, cocinadoEvent } =
+      await seedGenealogy(fixture);
 
     const tree = await fixture.traceBatch.execute(AUDITOR, { batchId: batchJabon.id });
 
@@ -190,10 +195,15 @@ describe('TraceBatch (genealogía hacia atrás)', () => {
 
     await expect(
       fixture.traceBatch.execute(ADMIN, { batchId: batchJabon.id }),
-    ).resolves.toMatchObject({ batch: { id: batchJabon.id } });
+    ).resolves.toMatchObject({
+      batch: { id: batchJabon.id },
+    });
     await expect(
       fixture.traceBatch.execute(WORKER, { batchId: batchJabon.id }),
-    ).rejects.toMatchObject({ name: 'UnauthorizedRoleError', useCase: 'TraceBatch' });
+    ).rejects.toMatchObject({
+      name: 'UnauthorizedRoleError',
+      useCase: 'TraceBatch',
+    });
   });
 
   it('lanza NotFoundError si el lote raíz no existe', async () => {
@@ -340,9 +350,10 @@ describe('TraceForward (recall hacia adelante)', () => {
     const lote = Batch.create({ materialId: material.id, quantity: Quantity.create(1, 'l') });
     await fixture.repos.batches.save(lote);
 
-    await expect(
-      fixture.traceForward.execute(WORKER, { batchId: lote.id }),
-    ).rejects.toMatchObject({ name: 'UnauthorizedRoleError', useCase: 'TraceForward' });
+    await expect(fixture.traceForward.execute(WORKER, { batchId: lote.id })).rejects.toMatchObject({
+      name: 'UnauthorizedRoleError',
+      useCase: 'TraceForward',
+    });
   });
 
   it('corta las ramas cíclicas hacia adelante', async () => {
@@ -577,7 +588,10 @@ describe('GetStockMovements (historial)', () => {
     ).rejects.toBeInstanceOf(NotFoundError);
     await expect(
       fixture.getStockMovements.execute(WORKER, { locationId: storage.id }),
-    ).rejects.toMatchObject({ name: 'UnauthorizedRoleError', useCase: 'GetStockMovements' });
+    ).rejects.toMatchObject({
+      name: 'UnauthorizedRoleError',
+      useCase: 'GetStockMovements',
+    });
   });
 });
 
@@ -593,7 +607,9 @@ describe('ListBatchEvents (búsqueda)', () => {
       machineId: machineA,
       workerId: JUAN,
       locationId: PLANT,
-      inputs: [{ batchId: BatchId.create(), materialId: supplyMat.id, quantity: Quantity.create(1, 'l') }],
+      inputs: [
+        { batchId: BatchId.create(), materialId: supplyMat.id, quantity: Quantity.create(1, 'l') },
+      ],
       outputs: [{ materialId: productMat.id, quantity: Quantity.create(1, 'l') }],
       timestamp: T1,
     });
@@ -609,7 +625,9 @@ describe('ListBatchEvents (búsqueda)', () => {
       machineId: machineA,
       workerId: ANA,
       locationId: PLANT,
-      inputs: [{ batchId: BatchId.create(), materialId: otherMat.id, quantity: Quantity.create(1, 'kg') }],
+      inputs: [
+        { batchId: BatchId.create(), materialId: otherMat.id, quantity: Quantity.create(1, 'kg') },
+      ],
       outputs: [],
       timestamp: T3,
     });

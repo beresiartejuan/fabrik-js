@@ -1,28 +1,28 @@
 import {
   Assignment,
+  type AssignmentProps,
   Batch,
   BatchEvent,
+  type BatchEventProps,
+  type BatchProps,
   Location,
+  type LocationId,
+  type LocationProps,
   Machine,
+  type MachineId,
+  type MachineProps,
   Material,
+  type MaterialId,
+  type MaterialProps,
   Quantity,
   Recipe,
   RecipeStep,
-  StockMovement,
-  TimeSlot,
-  Worker,
-  type AssignmentProps,
-  type BatchEventProps,
-  type BatchProps,
-  type LocationId,
-  type LocationProps,
-  type MachineId,
-  type MachineProps,
-  type MaterialId,
-  type MaterialProps,
   type RecipeStepProps,
+  StockMovement,
   type StockMovementProps,
+  TimeSlot,
   type UnitOfMeasure,
+  Worker,
   type WorkerId,
   type WorkerProps,
 } from '@fabrik/domain';
@@ -53,7 +53,10 @@ export function aWorker(overrides: Partial<WorkerProps> = {}): Worker {
   return Worker.create({ name: 'Ana', role: 'worker', ...overrides });
 }
 
-export function aRecipeStep(outputProductId: MaterialId, overrides: Partial<RecipeStepProps> = {}): RecipeStep {
+export function aRecipeStep(
+  outputProductId: MaterialId,
+  overrides: Partial<RecipeStepProps> = {},
+): RecipeStep {
   return RecipeStep.create({
     position: 1,
     machineType: 'oven',

@@ -49,34 +49,25 @@ export interface ProductionCompletedPayload {
   readonly recipeId: RecipeId;
 }
 
-export interface SupplyArrived
-  extends DomainEventBase<'supply.arrived', SupplyArrivedPayload> {}
+export interface SupplyArrived extends DomainEventBase<'supply.arrived', SupplyArrivedPayload> {}
 
-export interface BatchCreated
-  extends DomainEventBase<'batch.created', BatchCreatedPayload> {}
+export interface BatchCreated extends DomainEventBase<'batch.created', BatchCreatedPayload> {}
 
 export interface BatchTransformed
   extends DomainEventBase<'batch.transformed', BatchTransformedPayload> {}
 
-export interface BatchStored
-  extends DomainEventBase<'batch.stored', BatchStoredPayload> {}
+export interface BatchStored extends DomainEventBase<'batch.stored', BatchStoredPayload> {}
 
 export interface ProductionCompleted
   extends DomainEventBase<'production.completed', ProductionCompletedPayload> {}
 
 /** Se emite tras registrar el ingreso de un suministro (docs/05). */
-export function supplyArrived(
-  payload: SupplyArrivedPayload,
-  occurredAt?: Date,
-): SupplyArrived {
+export function supplyArrived(payload: SupplyArrivedPayload, occurredAt?: Date): SupplyArrived {
   return createDomainEvent('supply.arrived', payload, occurredAt);
 }
 
 /** Se emite al iniciar la producción de un lote raíz (docs/05). */
-export function batchCreated(
-  payload: BatchCreatedPayload,
-  occurredAt?: Date,
-): BatchCreated {
+export function batchCreated(payload: BatchCreatedPayload, occurredAt?: Date): BatchCreated {
   return createDomainEvent('batch.created', payload, occurredAt);
 }
 
@@ -89,10 +80,7 @@ export function batchTransformed(
 }
 
 /** Se emite al mover un lote a almacenamiento (docs/05). */
-export function batchStored(
-  payload: BatchStoredPayload,
-  occurredAt?: Date,
-): BatchStored {
+export function batchStored(payload: BatchStoredPayload, occurredAt?: Date): BatchStored {
   return createDomainEvent('batch.stored', payload, occurredAt);
 }
 

@@ -14,17 +14,13 @@ export interface WorkerUnassignedPayload {
   readonly assignmentId: AssignmentId;
 }
 
-export interface WorkerAssigned
-  extends DomainEventBase<'worker.assigned', WorkerAssignedPayload> {}
+export interface WorkerAssigned extends DomainEventBase<'worker.assigned', WorkerAssignedPayload> {}
 
 export interface WorkerUnassigned
   extends DomainEventBase<'worker.unassigned', WorkerUnassignedPayload> {}
 
 /** Se emite tras asignar un worker a una máquina en una franja horaria (docs/05). */
-export function workerAssigned(
-  payload: WorkerAssignedPayload,
-  occurredAt?: Date,
-): WorkerAssigned {
+export function workerAssigned(payload: WorkerAssignedPayload, occurredAt?: Date): WorkerAssigned {
   return createDomainEvent('worker.assigned', payload, occurredAt);
 }
 

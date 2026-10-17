@@ -1,4 +1,4 @@
-import { BadRequestException, type ArgumentMetadata } from '@nestjs/common';
+import { type ArgumentMetadata, BadRequestException } from '@nestjs/common';
 import { z } from 'zod';
 
 import { ZodValidationPipe } from './zod-validation.pipe.js';

@@ -1,9 +1,16 @@
-import { Inject, Injectable, Module, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Module,
+  type OnModuleDestroy,
+  type OnModuleInit,
+} from '@nestjs/common';
 
 import {
   applyMigrations,
   closeDb,
   createDb,
+  type Db,
   DrizzleAssignmentRepository,
   DrizzleBatchEventRepository,
   DrizzleBatchRepository,
@@ -15,7 +22,6 @@ import {
   DrizzleUnitOfWork,
   DrizzleWorkerRepository,
   resolveDbFile,
-  type Db,
 } from '../persistence/index.js';
 
 import {

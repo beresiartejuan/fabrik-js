@@ -1,12 +1,10 @@
 import { randomUUID } from 'node:crypto';
-
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import type { Actor, Worker, WorkerRepository } from '@fabrik/domain';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { WORKER_REPOSITORY } from '../domain/tokens.js';
-
-import { AUTH_CONFIG, CREDENTIAL_REPOSITORY, REFRESH_TOKEN_REPOSITORY } from './auth.tokens.js';
 import type { AuthConfig } from './auth.config.js';
+import { AUTH_CONFIG, CREDENTIAL_REPOSITORY, REFRESH_TOKEN_REPOSITORY } from './auth.tokens.js';
 import type { CredentialRepository } from './credentials.repository.js';
 import { hashToken, secureEqual, signJwt, verifyJwt } from './jwt.js';
 import { hashPassword, verifyPassword } from './password.js';
@@ -98,7 +96,7 @@ export class AuthService {
     }
 
     const worker = await this.workers.findById(record.workerId);
-    if (!worker || !worker.active) {
+    if (!worker?.active) {
       throw new UnauthorizedException('El worker está inactivo');
     }
 

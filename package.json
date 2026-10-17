@@ -9,11 +9,15 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "check": "biome check .",
+    "format": "biome format --write .",
+    "check:fix": "biome check --write .",
     "test": "turbo run test",
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api start:dev"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.15",
     "turbo": "^2.5.8"
   }
 }

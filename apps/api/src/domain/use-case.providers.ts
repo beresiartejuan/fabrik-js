@@ -1,6 +1,8 @@
-import type { FactoryProvider } from '@nestjs/common';
 import {
+  type AssignmentRepository,
   AssignWorkerToMachine,
+  type BatchEventRepository,
+  type BatchRepository,
   CompleteProduction,
   CreateLocation,
   CreateMachine,
@@ -9,6 +11,7 @@ import {
   CreateWorker,
   DeactivateMaterial,
   DeactivateWorker,
+  type EventBus,
   GetLocation,
   GetMachine,
   GetMaterial,
@@ -24,31 +27,28 @@ import {
   ListRecipes,
   ListWorkerSchedule,
   ListWorkers,
+  type LocationRepository,
+  type MachineRepository,
+  type MaterialRepository,
   MoveMachine,
+  type RecipeRepository,
   RecordTransformation,
   RegisterSupplyArrival,
   StartProduction,
+  type StockMovementRepository,
   StoreBatch,
   TraceBatch,
   TraceForward,
   UnassignWorker,
+  type UnitOfWork,
   UpdateLocation,
   UpdateMachine,
   UpdateMaterial,
   UpdateRecipe,
   UpdateWorker,
-  type AssignmentRepository,
-  type BatchEventRepository,
-  type BatchRepository,
-  type EventBus,
-  type LocationRepository,
-  type MachineRepository,
-  type MaterialRepository,
-  type RecipeRepository,
-  type StockMovementRepository,
-  type UnitOfWork,
   type WorkerRepository,
 } from '@fabrik/domain';
+import type { FactoryProvider } from '@nestjs/common';
 
 import {
   ASSIGNMENT_REPOSITORY,
@@ -289,7 +289,8 @@ export const productionUseCaseProviders: FactoryProvider[] = [
   },
   {
     provide: StoreBatch,
-    useFactory: (unitOfWork: UnitOfWork, events: EventBus) => new StoreBatch({ unitOfWork, events }),
+    useFactory: (unitOfWork: UnitOfWork, events: EventBus) =>
+      new StoreBatch({ unitOfWork, events }),
     inject: [UNIT_OF_WORK, EVENT_BUS],
   },
   {

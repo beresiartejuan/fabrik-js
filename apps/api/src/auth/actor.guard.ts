@@ -1,18 +1,17 @@
+import { type Actor, WorkerId, type WorkerRepository } from '@fabrik/domain';
 import {
+  type CanActivate,
+  type ExecutionContext,
   Inject,
   Injectable,
   UnauthorizedException,
-  type CanActivate,
-  type ExecutionContext,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
-import { WorkerId, type Actor, type WorkerRepository } from '@fabrik/domain';
 
 import { WORKER_REPOSITORY } from '../domain/tokens.js';
-
-import { AUTH_CONFIG } from './auth.tokens.js';
 import type { AuthConfig } from './auth.config.js';
+import { AUTH_CONFIG } from './auth.tokens.js';
 import { verifyJwt } from './jwt.js';
 import { IS_PUBLIC_KEY } from './public.decorator.js';
 
@@ -82,7 +81,7 @@ export class ActorGuard implements CanActivate {
     }
 
     const worker = await this.workers.findById(WorkerId.from(subject));
-    if (!worker || !worker.active) {
+    if (!worker?.active) {
       throw new UnauthorizedException('Worker inexistente o inactivo');
     }
 

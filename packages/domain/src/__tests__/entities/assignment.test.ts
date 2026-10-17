@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  Assignment,
-  AssignmentId,
-  MachineId,
-  TimeSlot,
-  WorkerId,
-} from '../../index.js';
+import { Assignment, AssignmentId, MachineId, TimeSlot, WorkerId } from '../../index.js';
 
 const WORKER_ID = WorkerId.from('worker-1');
 const OTHER_WORKER_ID = WorkerId.from('worker-2');

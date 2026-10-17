@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type Actor,
   AssignmentId,
+  AssignWorkerToMachine,
   InactiveWorkerError,
   ListMachineSchedule,
   ListWorkerSchedule,
@@ -11,13 +13,11 @@ import {
   NotFoundError,
   OverlappingScheduleError,
   TimeSlot,
-  UnauthorizedRoleError,
   UnassignWorker,
+  UnauthorizedRoleError,
   Worker,
-  WorkerId,
-  AssignWorkerToMachine,
-  type Actor,
   type WorkerAssigned,
+  WorkerId,
   type WorkerUnassigned,
 } from '../../index.js';
 import { collectingEventBus, inMemoryRepositories } from '../../testing/index.js';
@@ -52,7 +52,10 @@ function setup() {
 
 type Repos = ReturnType<typeof setup>['repos'];
 
-async function seedWorker(repos: Repos, options?: { readonly inactive?: boolean }): Promise<Worker> {
+async function seedWorker(
+  repos: Repos,
+  options?: { readonly inactive?: boolean },
+): Promise<Worker> {
   const worker = Worker.create({ name: 'Beto', role: 'worker' });
   await repos.workers.save(options?.inactive ? worker.deactivate() : worker);
   return worker;
@@ -96,7 +99,11 @@ describe('AssignWorkerToMachine', () => {
     const machine = await seedMachine(repos);
 
     await expect(
-      assign.execute(ADMIN, { workerId: WorkerId.create(), machineId: machine.id, slot: MONDAY_MORNING() }),
+      assign.execute(ADMIN, {
+        workerId: WorkerId.create(),
+        machineId: machine.id,
+        slot: MONDAY_MORNING(),
+      }),
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
@@ -115,7 +122,11 @@ describe('AssignWorkerToMachine', () => {
     const worker = await seedWorker(repos);
 
     await expect(
-      assign.execute(ADMIN, { workerId: worker.id, machineId: MachineId.create(), slot: MONDAY_MORNING() }),
+      assign.execute(ADMIN, {
+        workerId: worker.id,
+        machineId: MachineId.create(),
+        slot: MONDAY_MORNING(),
+      }),
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
@@ -125,7 +136,11 @@ describe('AssignWorkerToMachine', () => {
     const machine = await seedMachine(repos);
 
     await expect(
-      assign.execute(WORKER, { workerId: worker.id, machineId: machine.id, slot: MONDAY_MORNING() }),
+      assign.execute(WORKER, {
+        workerId: worker.id,
+        machineId: machine.id,
+        slot: MONDAY_MORNING(),
+      }),
     ).rejects.toMatchObject({ name: 'UnauthorizedRoleError', useCase: 'AssignWorkerToMachine' });
   });
 
@@ -135,7 +150,11 @@ describe('AssignWorkerToMachine', () => {
     const machine = await seedMachine(repos);
 
     await expect(
-      assign.execute(AUDITOR, { workerId: worker.id, machineId: machine.id, slot: MONDAY_MORNING() }),
+      assign.execute(AUDITOR, {
+        workerId: worker.id,
+        machineId: machine.id,
+        slot: MONDAY_MORNING(),
+      }),
     ).rejects.toBeInstanceOf(UnauthorizedRoleError);
   });
 });
@@ -353,8 +372,12 @@ describe('ListWorkerSchedule', () => {
       slot: TimeSlot.create([1], '08:00', '12:00'),
     });
 
-    await expect(listWorkerSchedule.execute(ADMIN, { workerId: workerA.id })).resolves.toHaveLength(2);
-    await expect(listWorkerSchedule.execute(AUDITOR, { workerId: workerB.id })).resolves.toHaveLength(1);
+    await expect(listWorkerSchedule.execute(ADMIN, { workerId: workerA.id })).resolves.toHaveLength(
+      2,
+    );
+    await expect(
+      listWorkerSchedule.execute(AUDITOR, { workerId: workerB.id }),
+    ).resolves.toHaveLength(1);
   });
 
   it('lanza NotFoundError si el worker no existe', async () => {
@@ -397,8 +420,12 @@ describe('ListMachineSchedule', () => {
       slot: TimeSlot.create([2], '08:00', '12:00'),
     });
 
-    await expect(listMachineSchedule.execute(ADMIN, { machineId: machineA.id })).resolves.toHaveLength(2);
-    await expect(listMachineSchedule.execute(AUDITOR, { machineId: machineB.id })).resolves.toHaveLength(1);
+    await expect(
+      listMachineSchedule.execute(ADMIN, { machineId: machineA.id }),
+    ).resolves.toHaveLength(2);
+    await expect(
+      listMachineSchedule.execute(AUDITOR, { machineId: machineB.id }),
+    ).resolves.toHaveLength(1);
   });
 
   it('lanza NotFoundError si la máquina no existe', async () => {

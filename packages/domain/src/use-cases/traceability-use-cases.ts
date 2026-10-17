@@ -4,15 +4,13 @@
 // catálogo de docs/04 (A = admin, Au = auditor, W = worker):
 //  - `TraceBatch` / `TraceForward` / `GetStockMovements` / `ListBatchEvents`: A, Au.
 //  - `GetStockByLocation`: A, Au, W.
-import { NotFoundError } from '../errors/index.js';
+
 import type { Batch } from '../entities/batch.js';
 import type { BatchEvent } from '../entities/batch-event.js';
 import type { StockMovement } from '../entities/stock-movement.js';
 import type { WorkerRole } from '../entities/worker.js';
-import type {
-  BatchEventFilter,
-  BatchEventRepository,
-} from '../ports/batch-event-repository.js';
+import { NotFoundError } from '../errors/index.js';
+import type { BatchEventFilter, BatchEventRepository } from '../ports/batch-event-repository.js';
 import type { BatchRepository } from '../ports/batch-repository.js';
 import type { LocationRepository } from '../ports/location-repository.js';
 import type { MaterialRepository } from '../ports/material-repository.js';
@@ -20,7 +18,7 @@ import type { StockMovementRepository } from '../ports/stock-movement-repository
 import type { BatchId, LocationId, MaterialId } from '../value-objects/ids.js';
 import type { UnitOfMeasure } from '../value-objects/quantity.js';
 
-import { ALL_ROLES, requireRole, type Actor } from './actor.js';
+import { type Actor, ALL_ROLES, requireRole } from './actor.js';
 
 // --- Roles (docs/04) ---
 
@@ -279,7 +277,10 @@ export class GetStockByLocation {
 export class GetStockMovements {
   constructor(private readonly deps: StockMovementsDeps) {}
 
-  async execute(actor: Actor, command: GetStockMovementsCommand): Promise<readonly StockMovement[]> {
+  async execute(
+    actor: Actor,
+    command: GetStockMovementsCommand,
+  ): Promise<readonly StockMovement[]> {
     requireRole(actor, TRACEABILITY_READ_ROLES, 'GetStockMovements');
 
     const location = await this.deps.locations.findById(command.locationId);

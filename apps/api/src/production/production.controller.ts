@@ -1,13 +1,7 @@
 import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Inject,
-  Post,
-} from '@nestjs/common';
-import {
+  type Actor,
   BatchId,
+  type BatchRepository,
   CompleteProduction,
   LocationId,
   MachineId,
@@ -18,28 +12,27 @@ import {
   RecordTransformation,
   StartProduction,
   StoreBatch,
-  type Actor,
-  type BatchRepository,
 } from '@fabrik/domain';
+import { Body, Controller, HttpCode, HttpStatus, Inject, Post } from '@nestjs/common';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 import {
+  type BatchResponse,
   serializeBatch,
   serializeBatchEvent,
-  type BatchResponse,
 } from '../common/entity-serializers.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { BATCH_REPOSITORY } from '../domain/tokens.js';
 
 import {
-  CompleteProductionSchema,
-  RecordTransformationSchema,
-  StartProductionSchema,
-  StoreBatchSchema,
   type CompleteProductionDto,
+  CompleteProductionSchema,
   type RecordTransformationDto,
+  RecordTransformationSchema,
   type StartProductionDto,
+  StartProductionSchema,
   type StoreBatchDto,
+  StoreBatchSchema,
   type TransformationResponse,
 } from './production.dto.js';
 

@@ -1,10 +1,9 @@
-import { Inject, Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common';
 import { Worker, type WorkerRepository } from '@fabrik/domain';
+import { Inject, Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common';
 
 import { WORKER_REPOSITORY } from '../domain/tokens.js';
-
-import { AUTH_CONFIG, CREDENTIAL_REPOSITORY } from './auth.tokens.js';
 import type { AuthConfig } from './auth.config.js';
+import { AUTH_CONFIG, CREDENTIAL_REPOSITORY } from './auth.tokens.js';
 import type { CredentialRepository } from './credentials.repository.js';
 import { hashPassword } from './password.js';
 

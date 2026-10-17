@@ -29,11 +29,7 @@ export const ALL_ROLES: readonly WorkerRole[] = ['admin', 'worker', 'auditor'];
  * actor no está en `allowed`. Se ejecuta antes de cualquier validación o efecto
  * para que un rol indebido nunca llegue a tocar el dominio.
  */
-export function requireRole(
-  actor: Actor,
-  allowed: readonly WorkerRole[],
-  useCase: string,
-): void {
+export function requireRole(actor: Actor, allowed: readonly WorkerRole[], useCase: string): void {
   if (!allowed.includes(actor.role)) {
     throw new UnauthorizedRoleError(actor.role, useCase);
   }

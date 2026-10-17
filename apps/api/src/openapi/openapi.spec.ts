@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { OPENAPI_ROUTES, buildOpenApiDocument } from './openapi.js';
+import { buildOpenApiDocument, OPENAPI_ROUTES } from './openapi.js';
 
 /**
  * El documento OpenAPI se genera desde los schemas zod. Este test fija la forma
@@ -47,18 +47,14 @@ describe('buildOpenApiDocument', () => {
       const operation = paths[route.path]?.[route.method];
       expect(operation, `${route.method} ${route.path}`).toBeDefined();
       expect(operation?.summary, `${route.method} ${route.path}`).toBeTruthy();
-      expect(operation?.tags, `${route.method} ${route.path}`).toEqual(
-        route.tags,
-      );
+      expect(operation?.tags, `${route.method} ${route.path}`).toEqual(route.tags);
       expect(Object.keys(operation?.responses ?? {}).length).toBeGreaterThan(0);
     }
   });
 
   it('marca como públicas (sin seguridad) las rutas @Public()', () => {
     for (const path of ['/health', '/auth/login', '/auth/refresh']) {
-      expect(
-        paths[path]?.get?.summary ?? paths[path]?.post?.summary,
-      ).toBeTruthy();
+      expect(paths[path]?.get?.summary ?? paths[path]?.post?.summary).toBeTruthy();
       expect(paths[path]?.get ?? paths[path]?.post).toMatchObject({
         security: [],
       });
@@ -67,15 +63,12 @@ describe('buildOpenApiDocument', () => {
 
   it('documenta los cuerpos desde los schemas zod (sin duplicar la forma)', () => {
     const materialBody =
-      paths['/materials']?.post?.requestBody?.content?.['application/json']
-        ?.schema;
+      paths['/materials']?.post?.requestBody?.content?.['application/json']?.schema;
     expect(materialBody).toMatchObject({ type: 'object' });
     expect(materialBody).toHaveProperty('properties.kind.enum');
 
     const transformBody =
-      paths['/production/transform']?.post?.requestBody?.content?.[
-        'application/json'
-      ]?.schema;
+      paths['/production/transform']?.post?.requestBody?.content?.['application/json']?.schema;
     expect(transformBody).toHaveProperty('properties.machineId');
     // El `workerId` sale del Actor, nunca del cuerpo (endurecimiento de Fase 5).
     expect(transformBody).not.toHaveProperty('properties.workerId');

@@ -1,4 +1,15 @@
 import {
+  type Actor,
+  CreateRecipe,
+  GetRecipe,
+  ListRecipes,
+  MaterialId,
+  Quantity,
+  RecipeId,
+  type RecipeStepProps,
+  UpdateRecipe,
+} from '@fabrik/domain';
+import {
   Body,
   Controller,
   Get,
@@ -9,31 +20,20 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  CreateRecipe,
-  GetRecipe,
-  ListRecipes,
-  MaterialId,
-  Quantity,
-  RecipeId,
-  UpdateRecipe,
-  type Actor,
-  type RecipeStepProps,
-} from '@fabrik/domain';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
 import {
-  CreateRecipeSchema,
-  ListRecipesQuerySchema,
-  UpdateRecipeSchema,
-  serializeRecipe,
   type CreateRecipeDto,
+  CreateRecipeSchema,
   type ListRecipesQuery,
+  ListRecipesQuerySchema,
   type RecipeResponse,
   type RecipeStepDto,
+  serializeRecipe,
   type UpdateRecipeDto,
+  UpdateRecipeSchema,
 } from './recipes.dto.js';
 
 /**
@@ -74,9 +74,7 @@ export class RecipesController {
   ): Promise<RecipeResponse[]> {
     const recipes = await this.listRecipes.execute(actor, {
       filter: {
-        outputProductId: query.outputProductId
-          ? MaterialId.from(query.outputProductId)
-          : undefined,
+        outputProductId: query.outputProductId ? MaterialId.from(query.outputProductId) : undefined,
       },
     });
     return recipes.map(serializeRecipe);

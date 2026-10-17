@@ -1,5 +1,3 @@
-import { and, eq, gte, inArray, lte } from 'drizzle-orm';
-
 import type {
   BatchEvent,
   BatchEventFilter,
@@ -7,6 +5,7 @@ import type {
   BatchEventRepository,
   BatchId,
 } from '@fabrik/domain';
+import { and, eq, gte, inArray, lte } from 'drizzle-orm';
 
 import type { Executor } from '../executor.js';
 import {
@@ -15,7 +14,7 @@ import {
   batchEventToRow,
   rowToBatchEvent,
 } from '../mappers.js';
-import { batchEventInputs, batchEventOutputs, batchEvents, type BatchEventRow } from '../schema.js';
+import { type BatchEventRow, batchEventInputs, batchEventOutputs, batchEvents } from '../schema.js';
 
 /**
  * Adaptador Drizzle **append-only** de `BatchEventRepository`: solo `add`/`findBy`/`list`

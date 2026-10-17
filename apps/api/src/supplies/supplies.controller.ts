@@ -1,14 +1,17 @@
+import {
+  type Actor,
+  LocationId,
+  MaterialId,
+  Quantity,
+  RegisterSupplyArrival,
+} from '@fabrik/domain';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { LocationId, MaterialId, Quantity, RegisterSupplyArrival, type Actor } from '@fabrik/domain';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
-import { serializeBatch, type BatchResponse } from '../common/entity-serializers.js';
+import { type BatchResponse, serializeBatch } from '../common/entity-serializers.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
-import {
-  RegisterSupplyArrivalSchema,
-  type RegisterSupplyArrivalDto,
-} from './supplies.dto.js';
+import { type RegisterSupplyArrivalDto, RegisterSupplyArrivalSchema } from './supplies.dto.js';
 
 /**
  * Ingreso de suministros (Fase 5, docs/09). RBAC en el dominio: `admin` y

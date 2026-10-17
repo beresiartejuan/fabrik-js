@@ -1,6 +1,5 @@
-import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
-
 import type { Actor as ActorContext } from '@fabrik/domain';
+import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
 
 import type { AuthenticatedRequest } from './actor.guard.js';
 

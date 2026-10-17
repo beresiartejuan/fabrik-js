@@ -1,6 +1,5 @@
-import { and, eq } from 'drizzle-orm';
-
 import type { Batch, BatchFilter, BatchId, BatchRepository, MaterialId } from '@fabrik/domain';
+import { and, eq } from 'drizzle-orm';
 
 import type { Executor } from '../executor.js';
 import { batchToRow, rowToBatch } from '../mappers.js';
@@ -43,9 +42,6 @@ export class DrizzleBatchRepository implements BatchRepository {
 
   async save(batch: Batch): Promise<void> {
     const row = batchToRow(batch);
-    await this.db
-      .insert(batches)
-      .values(row)
-      .onConflictDoUpdate({ target: batches.id, set: row });
+    await this.db.insert(batches).values(row).onConflictDoUpdate({ target: batches.id, set: row });
   }
 }

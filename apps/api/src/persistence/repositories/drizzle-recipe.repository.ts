@@ -1,15 +1,15 @@
+import type { Recipe, RecipeFilter, RecipeId, RecipeRepository } from '@fabrik/domain';
 import { eq, inArray } from 'drizzle-orm';
 
-import type { Recipe, RecipeFilter, RecipeId, RecipeRepository } from '@fabrik/domain';
-
 import type { Executor } from '../executor.js';
+import { recipeStepInputsToRows, recipeStepToRow, recipeToRow, rowToRecipe } from '../mappers.js';
 import {
-  recipeStepInputsToRows,
-  recipeStepToRow,
-  recipeToRow,
-  rowToRecipe,
-} from '../mappers.js';
-import { recipeStepInputs, recipeSteps, recipes, type RecipeRow, type RecipeStepRow } from '../schema.js';
+  type RecipeRow,
+  type RecipeStepRow,
+  recipeStepInputs,
+  recipeSteps,
+  recipes,
+} from '../schema.js';
 
 /** Adaptador Drizzle de `RecipeRepository` (`save` = upsert del agregado). */
 export class DrizzleRecipeRepository implements RecipeRepository {
@@ -28,16 +28,17 @@ export class DrizzleRecipeRepository implements RecipeRepository {
     const rows = await this.db
       .select()
       .from(recipes)
-      .where(filter?.outputProductId !== undefined ? eq(recipes.outputProductId, filter.outputProductId) : undefined);
+      .where(
+        filter?.outputProductId !== undefined
+          ? eq(recipes.outputProductId, filter.outputProductId)
+          : undefined,
+      );
     return this.hydrate(rows);
   }
 
   async save(recipe: Recipe): Promise<void> {
     const row = recipeToRow(recipe);
-    await this.db
-      .insert(recipes)
-      .values(row)
-      .onConflictDoUpdate({ target: recipes.id, set: row });
+    await this.db.insert(recipes).values(row).onConflictDoUpdate({ target: recipes.id, set: row });
 
     // Reemplazo del grafo de hijos: se borran pasos + inputs y se reinsertan.
     const existingSteps = await this.db
@@ -76,7 +77,10 @@ export class DrizzleRecipeRepository implements RecipeRepository {
     const stepIds = stepRows.map((step) => step.id);
     const inputRows =
       stepIds.length > 0
-        ? await this.db.select().from(recipeStepInputs).where(inArray(recipeStepInputs.recipeStepId, stepIds))
+        ? await this.db
+            .select()
+            .from(recipeStepInputs)
+            .where(inArray(recipeStepInputs.recipeStepId, stepIds))
         : [];
 
     const inputsByStep = groupBy(inputRows, (input) => input.recipeStepId);

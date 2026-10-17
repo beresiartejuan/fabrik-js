@@ -3,33 +3,33 @@ import { describe, expect, it } from 'vitest';
 import {
   Assignment,
   AssignmentId,
+  type AssignmentRepository,
   Batch,
   BatchEvent,
   BatchEventId,
+  type BatchEventRepository,
   BatchId,
+  type BatchRepository,
   Location,
   LocationId,
+  type LocationRepository,
   Machine,
   MachineId,
+  type MachineRepository,
   Material,
   MaterialId,
+  type MaterialRepository,
   Quantity,
   Recipe,
+  type RecipeRepository,
   RecipeStep,
+  type Repositories,
   StockMovement,
+  type StockMovementRepository,
   TimeSlot,
+  type UnitOfWork,
   Worker,
   WorkerId,
-  type AssignmentRepository,
-  type BatchEventRepository,
-  type BatchRepository,
-  type LocationRepository,
-  type MachineRepository,
-  type MaterialRepository,
-  type RecipeRepository,
-  type Repositories,
-  type StockMovementRepository,
-  type UnitOfWork,
   type WorkerRepository,
 } from '../index.js';
 import {
@@ -142,10 +142,20 @@ describe('InMemoryMaterialRepository', () => {
     const repo = new InMemoryMaterialRepository();
     await repo.save(supplyMaterial());
     await repo.save(
-      Material.create({ name: 'Agua', kind: 'supply', physicalState: 'liquid', unitOfMeasure: 'l' }),
+      Material.create({
+        name: 'Agua',
+        kind: 'supply',
+        physicalState: 'liquid',
+        unitOfMeasure: 'l',
+      }),
     );
     await repo.save(
-      Material.create({ name: 'Caja', kind: 'product', physicalState: 'solid', unitOfMeasure: 'unit' }),
+      Material.create({
+        name: 'Caja',
+        kind: 'product',
+        physicalState: 'solid',
+        unitOfMeasure: 'unit',
+      }),
     );
 
     expect(await repo.list()).toHaveLength(3);
@@ -167,7 +177,9 @@ describe('InMemoryMachineRepository', () => {
     const repo: MachineRepository = new InMemoryMachineRepository();
     const machine = Machine.create({ name: 'Mezcladora', type: 'mixer', locationId: LOCATION_ID });
     await repo.save(machine);
-    await repo.save(Machine.create({ name: 'Horno', type: 'oven', locationId: LocationId.from('l2') }));
+    await repo.save(
+      Machine.create({ name: 'Horno', type: 'oven', locationId: LocationId.from('l2') }),
+    );
 
     await expect(repo.findById(machine.id)).resolves.toBe(machine);
     expect(await repo.list()).toHaveLength(2);
@@ -287,7 +299,9 @@ describe('InMemoryBatchEventRepository (append-only)', () => {
       machineId: MACHINE_ID,
       workerId: WORKER_ID,
       locationId: LOCATION_ID,
-      inputs: [{ batchId: BatchId.create(), materialId: SUPPLY_ID, quantity: Quantity.create(1, 'kg') }],
+      inputs: [
+        { batchId: BatchId.create(), materialId: SUPPLY_ID, quantity: Quantity.create(1, 'kg') },
+      ],
       outputs: [{ materialId: PRODUCT_ID, quantity: Quantity.create(1, 'kg') }],
       timestamp,
     });

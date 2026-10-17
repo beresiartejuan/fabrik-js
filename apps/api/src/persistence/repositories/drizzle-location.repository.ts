@@ -1,6 +1,5 @@
-import { eq } from 'drizzle-orm';
-
 import type { Location, LocationFilter, LocationId, LocationRepository } from '@fabrik/domain';
+import { eq } from 'drizzle-orm';
 
 import type { Executor } from '../executor.js';
 import { locationToRow, rowToLocation } from '../mappers.js';

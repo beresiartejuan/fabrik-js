@@ -104,7 +104,11 @@ function isPayload(value: unknown): value is JwtPayload {
  * Verifica firma, forma y vigencia de un JWT. Lanza `JwtError` con `reason`
  * (`malformed` | `signature` | `expired`) en caso de fallo.
  */
-export function verifyJwt(token: string, secret: string, options: VerifyJwtOptions = {}): JwtPayload {
+export function verifyJwt(
+  token: string,
+  secret: string,
+  options: VerifyJwtOptions = {},
+): JwtPayload {
   const segments = token.split('.');
   if (segments.length !== 3) {
     throw new JwtError('malformed', 'El token no tiene el formato JWT compacto');

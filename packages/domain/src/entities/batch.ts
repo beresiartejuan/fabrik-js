@@ -1,5 +1,10 @@
 import { InvalidStateTransitionError } from '../errors/index.js';
-import { BatchId, type BatchEventId, type MaterialId, type RecipeId } from '../value-objects/ids.js';
+import {
+  type BatchEventId,
+  BatchId,
+  type MaterialId,
+  type RecipeId,
+} from '../value-objects/ids.js';
 import type { Quantity } from '../value-objects/quantity.js';
 
 // Ciclo de vida de un lote (docs/02).

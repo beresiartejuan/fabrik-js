@@ -1,8 +1,7 @@
 import { rmSync } from 'node:fs';
-
+import { Worker, type WorkerRepository } from '@fabrik/domain';
 import type { INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
-import { Worker, type WorkerRepository } from '@fabrik/domain';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 
@@ -11,10 +10,7 @@ import { CREDENTIAL_REPOSITORY } from '../../src/auth/auth.tokens.js';
 import type { CredentialRepository } from '../../src/auth/credentials.repository.js';
 import { hashPassword } from '../../src/auth/password.js';
 import { DB, WORKER_REPOSITORY } from '../../src/domain/tokens.js';
-import {
-  createTestDatabase,
-  type TestDatabase,
-} from '../persistence/test-db.js';
+import { createTestDatabase, type TestDatabase } from '../persistence/test-db.js';
 
 /**
  * Bootstrap compartido de los e2e de la Fase 4.
@@ -68,9 +64,7 @@ export interface E2EOptions {
   beforeInit?(app: INestApplication<App>): void;
 }
 
-export async function createE2EApp(
-  options: E2EOptions = {},
-): Promise<E2EContext> {
+export async function createE2EApp(options: E2EOptions = {}): Promise<E2EContext> {
   process.env.JWT_ACCESS_SECRET = 'e2e-access-secret';
   process.env.JWT_REFRESH_SECRET = 'e2e-refresh-secret';
   process.env.BOOTSTRAP_ADMIN_NAME = ADMIN.name;

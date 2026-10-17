@@ -85,7 +85,11 @@ describe('Stock (e2e)', () => {
       const response = await request(server)
         .post('/supplies/arrivals')
         .set('Authorization', ctx.auth('worker'))
-        .send({ materialId: flourId, quantity: { amount, unit: 'kg' }, locationId: storageLocationId })
+        .send({
+          materialId: flourId,
+          quantity: { amount, unit: 'kg' },
+          locationId: storageLocationId,
+        })
         .expect(201);
       return (response.body as { id: string }).id;
     };

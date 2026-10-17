@@ -1,4 +1,4 @@
-import { randomBytes, scrypt, timingSafeEqual, type ScryptOptions } from 'node:crypto';
+import { randomBytes, type ScryptOptions, scrypt, timingSafeEqual } from 'node:crypto';
 
 /**
  * Hash de contraseñas con **scrypt** de `node:crypto` (Fase 3, docs/09).
@@ -118,7 +118,12 @@ export async function verifyPassword(password: string, encoded: string): Promise
   if (!parsed) {
     return false;
   }
-  const derived = await scryptAsync(password, parsed.salt, parsed.hash.length, toOptions(parsed.params));
+  const derived = await scryptAsync(
+    password,
+    parsed.salt,
+    parsed.hash.length,
+    toOptions(parsed.params),
+  );
   if (derived.length !== parsed.hash.length) {
     return false;
   }

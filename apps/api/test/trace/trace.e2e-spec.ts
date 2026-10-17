@@ -59,18 +59,12 @@ const T2 = new Date(2026, 4, 13, 10, 30, 0);
 
 /** Recolecta recursivamente los ids de lote del árbol hacia adelante. */
 function collectForwardBatchIds(node: ForwardNodeBody): string[] {
-  return [
-    ...(node.batch ? [node.batch.id] : []),
-    ...node.children.flatMap(collectForwardBatchIds),
-  ];
+  return [...(node.batch ? [node.batch.id] : []), ...node.children.flatMap(collectForwardBatchIds)];
 }
 
 /** Recolecta recursivamente los ids de evento del árbol hacia adelante. */
 function collectForwardEventIds(node: ForwardNodeBody): string[] {
-  return [
-    ...(node.event ? [node.event.id] : []),
-    ...node.children.flatMap(collectForwardEventIds),
-  ];
+  return [...(node.event ? [node.event.id] : []), ...node.children.flatMap(collectForwardEventIds)];
 }
 
 const iso = (date: Date): string => encodeURIComponent(date.toISOString());

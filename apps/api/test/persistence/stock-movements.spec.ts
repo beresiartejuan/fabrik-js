@@ -43,11 +43,13 @@ describe('DrizzleStockMovementRepository (append-only)', () => {
     await ctx.repositories.stockMovements.add(inMaterial);
     await ctx.repositories.stockMovements.add(outMaterial);
 
-    expect((await ctx.repositories.stockMovements.listByLocation(locationId)).map((m) => m.id).sort()).toEqual(
-      [inMaterial.id, outMaterial.id].sort(),
-    );
     expect(
-      (await ctx.repositories.stockMovements.listByLocation(locationId, material.id)).map((m) => m.id),
+      (await ctx.repositories.stockMovements.listByLocation(locationId)).map((m) => m.id).sort(),
+    ).toEqual([inMaterial.id, outMaterial.id].sort());
+    expect(
+      (await ctx.repositories.stockMovements.listByLocation(locationId, material.id)).map(
+        (m) => m.id,
+      ),
     ).toEqual([inMaterial.id]);
   });
 
@@ -77,7 +79,10 @@ describe('DrizzleStockMovementRepository (append-only)', () => {
       }),
     );
 
-    const total = await ctx.repositories.stockMovements.sumByLocationAndMaterial(locationId, material.id);
+    const total = await ctx.repositories.stockMovements.sumByLocationAndMaterial(
+      locationId,
+      material.id,
+    );
     expect(total).toMatchObject({ amount: 6, unit: 'kg' });
   });
 
@@ -110,7 +115,10 @@ describe('DrizzleStockMovementRepository (append-only)', () => {
       }),
     );
 
-    const total = await ctx.repositories.stockMovements.sumByLocationAndMaterial(locationId, material.id);
+    const total = await ctx.repositories.stockMovements.sumByLocationAndMaterial(
+      locationId,
+      material.id,
+    );
     expect(total).toMatchObject({ amount: 10, unit: 'kg' });
   });
 
@@ -135,7 +143,10 @@ describe('DrizzleStockMovementRepository (append-only)', () => {
     );
 
     expect(await ctx.repositories.stockMovements.listByLocation(locationId)).toHaveLength(1);
-    const total = await ctx.repositories.stockMovements.sumByLocationAndMaterial(locationId, material.id);
+    const total = await ctx.repositories.stockMovements.sumByLocationAndMaterial(
+      locationId,
+      material.id,
+    );
     expect(total).toMatchObject({ amount: 2, unit: 'kg' });
   });
 });

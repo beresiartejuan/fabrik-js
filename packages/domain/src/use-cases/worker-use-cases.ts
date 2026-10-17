@@ -1,9 +1,9 @@
-import { NotFoundError } from '../errors/index.js';
 import { Worker, type WorkerRole } from '../entities/worker.js';
+import { NotFoundError } from '../errors/index.js';
 import type { WorkerFilter, WorkerRepository } from '../ports/worker-repository.js';
 import type { WorkerId } from '../value-objects/ids.js';
 
-import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor.js';
+import { type Actor, CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole } from './actor.js';
 
 // --- Dependencias ---
 

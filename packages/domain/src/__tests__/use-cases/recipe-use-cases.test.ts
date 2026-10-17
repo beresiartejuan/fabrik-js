@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type Actor,
   CreateRecipe,
+  type CreateRecipeCommand,
   GetRecipe,
   ListRecipes,
   MaterialId,
@@ -9,12 +11,10 @@ import {
   Quantity,
   RecipeId,
   RecipeIntegrityError,
+  type RecipeStepProps,
   UnauthorizedRoleError,
   UpdateRecipe,
   WorkerId,
-  type Actor,
-  type CreateRecipeCommand,
-  type RecipeStepProps,
 } from '../../index.js';
 import { inMemoryRepositories } from '../../testing/index.js';
 
@@ -184,7 +184,9 @@ describe('GetRecipe / ListRecipes (roles A, Au)', () => {
     await create.execute(ADMIN, VALID_RECIPE);
 
     await expect(list.execute(ADMIN, {})).resolves.toHaveLength(1);
-    await expect(list.execute(AUDITOR, { filter: { outputProductId: PRODUCT_ID } })).resolves.toHaveLength(1);
+    await expect(
+      list.execute(AUDITOR, { filter: { outputProductId: PRODUCT_ID } }),
+    ).resolves.toHaveLength(1);
     await expect(
       list.execute(AUDITOR, { filter: { outputProductId: SUPPLY_ID } }),
     ).resolves.toHaveLength(0);

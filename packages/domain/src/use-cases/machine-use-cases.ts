@@ -1,12 +1,12 @@
-import { InvalidLocationKindError, NotFoundError } from '../errors/index.js';
 import { Machine, type MachineType } from '../entities/machine.js';
+import { InvalidLocationKindError, NotFoundError } from '../errors/index.js';
 import type { EventBus } from '../events/event-bus.js';
 import { machineCreated, machineMoved } from '../events/machine-events.js';
-import type { MachineFilter, MachineRepository } from '../ports/machine-repository.js';
 import type { LocationRepository } from '../ports/location-repository.js';
+import type { MachineFilter, MachineRepository } from '../ports/machine-repository.js';
 import type { LocationId, MachineId } from '../value-objects/ids.js';
 
-import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor.js';
+import { type Actor, CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole } from './actor.js';
 
 // --- Dependencias ---
 

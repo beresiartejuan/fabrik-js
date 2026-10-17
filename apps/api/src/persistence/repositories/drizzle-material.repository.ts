@@ -1,6 +1,5 @@
-import { and, eq } from 'drizzle-orm';
-
 import type { Material, MaterialFilter, MaterialId, MaterialRepository } from '@fabrik/domain';
+import { and, eq } from 'drizzle-orm';
 
 import type { Executor } from '../executor.js';
 import { materialToRow, rowToMaterial } from '../mappers.js';

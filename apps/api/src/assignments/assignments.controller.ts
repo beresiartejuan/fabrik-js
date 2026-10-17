@@ -1,22 +1,22 @@
-import { Body, Controller, Delete, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import {
-  AssignWorkerToMachine,
+  type Actor,
   AssignmentId,
+  AssignWorkerToMachine,
   MachineId,
   TimeSlot,
   UnassignWorker,
   WorkerId,
-  type Actor,
 } from '@fabrik/domain';
+import { Body, Controller, Delete, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
 import {
-  CreateAssignmentSchema,
-  serializeAssignment,
   type AssignmentResponse,
   type CreateAssignmentDto,
+  CreateAssignmentSchema,
+  serializeAssignment,
 } from './assignments.dto.js';
 
 /**

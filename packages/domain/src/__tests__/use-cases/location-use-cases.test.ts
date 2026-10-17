@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type Actor,
   CreateLocation,
   GetLocation,
   ListLocations,
@@ -9,7 +10,6 @@ import {
   UnauthorizedRoleError,
   UpdateLocation,
   WorkerId,
-  type Actor,
 } from '../../index.js';
 import { inMemoryRepositories } from '../../testing/index.js';
 

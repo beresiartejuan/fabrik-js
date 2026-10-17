@@ -5,6 +5,8 @@ import {
   BatchEvent,
   BatchEventId,
   BatchId,
+  type BatchQuantity,
+  type DayOfWeek,
   Factory,
   FactoryId,
   Location,
@@ -13,21 +15,19 @@ import {
   MachineId,
   Material,
   MaterialId,
+  type MaterialQuantity,
   Quantity,
   Recipe,
   RecipeId,
   RecipeStep,
   RecipeStepId,
+  type StockDelta,
   StockMovement,
   StockMovementId,
   TimeSlot,
+  type UnitOfMeasure,
   Worker,
   WorkerId,
-  type BatchQuantity,
-  type DayOfWeek,
-  type MaterialQuantity,
-  type StockDelta,
-  type UnitOfMeasure,
 } from '@fabrik/domain';
 
 import type {
@@ -196,7 +196,10 @@ export function rowToRecipeStepInput(row: RecipeStepInputRow): MaterialQuantity 
   };
 }
 
-export function rowToRecipeStep(row: RecipeStepRow, inputs: readonly RecipeStepInputRow[]): RecipeStep {
+export function rowToRecipeStep(
+  row: RecipeStepRow,
+  inputs: readonly RecipeStepInputRow[],
+): RecipeStep {
   return RecipeStep.fromPersistence({
     id: RecipeStepId.from(row.id),
     position: row.position,

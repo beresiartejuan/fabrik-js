@@ -1,4 +1,13 @@
 import {
+  type Actor,
+  CreateMaterial,
+  DeactivateMaterial,
+  GetMaterial,
+  ListMaterials,
+  MaterialId,
+  UpdateMaterial,
+} from '@fabrik/domain';
+import {
   Body,
   Controller,
   Get,
@@ -9,28 +18,19 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  CreateMaterial,
-  DeactivateMaterial,
-  GetMaterial,
-  ListMaterials,
-  MaterialId,
-  UpdateMaterial,
-  type Actor,
-} from '@fabrik/domain';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
 import {
-  CreateMaterialSchema,
-  ListMaterialsQuerySchema,
-  UpdateMaterialSchema,
-  serializeMaterial,
   type CreateMaterialDto,
+  CreateMaterialSchema,
   type ListMaterialsQuery,
+  ListMaterialsQuerySchema,
   type MaterialResponse,
+  serializeMaterial,
   type UpdateMaterialDto,
+  UpdateMaterialSchema,
 } from './materials.dto.js';
 
 /**
@@ -93,10 +93,7 @@ export class MaterialsController {
 
   @Post(':id/deactivate')
   @HttpCode(HttpStatus.OK)
-  async deactivate(
-    @ActorParam() actor: Actor,
-    @Param('id') id: string,
-  ): Promise<MaterialResponse> {
+  async deactivate(@ActorParam() actor: Actor, @Param('id') id: string): Promise<MaterialResponse> {
     const material = await this.deactivateMaterial.execute(actor, { id: MaterialId.from(id) });
     return serializeMaterial(material);
   }

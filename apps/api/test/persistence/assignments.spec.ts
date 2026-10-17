@@ -48,12 +48,12 @@ describe('DrizzleAssignmentRepository', () => {
     await ctx.repositories.assignments.save(a2);
     await ctx.repositories.assignments.save(a3);
 
-    expect((await ctx.repositories.assignments.findByWorker(workerA)).map((a) => a.id).sort()).toEqual(
-      [a1.id, a2.id].sort(),
-    );
-    expect((await ctx.repositories.assignments.findByMachine(machineA)).map((a) => a.id).sort()).toEqual(
-      [a1.id, a3.id].sort(),
-    );
+    expect(
+      (await ctx.repositories.assignments.findByWorker(workerA)).map((a) => a.id).sort(),
+    ).toEqual([a1.id, a2.id].sort());
+    expect(
+      (await ctx.repositories.assignments.findByMachine(machineA)).map((a) => a.id).sort(),
+    ).toEqual([a1.id, a3.id].sort());
     expect(await ctx.repositories.assignments.findByWorker(WorkerId.create())).toEqual([]);
   });
 

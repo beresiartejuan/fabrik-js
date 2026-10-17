@@ -1,7 +1,7 @@
-import { z } from 'zod';
 import type { Machine } from '@fabrik/domain';
+import { z } from 'zod';
 
-import { MACHINE_STATUSES, idSchema } from '../common/catalog-schemas.js';
+import { idSchema, MACHINE_STATUSES } from '../common/catalog-schemas.js';
 
 /** DTOs del recurso `machines` (Fase 4). */
 

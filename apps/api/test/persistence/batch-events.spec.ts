@@ -1,12 +1,12 @@
 import {
   BatchEvent,
   BatchEventId,
+  type BatchEventProps,
   BatchId,
   LocationId,
   MachineId,
   RecipeStepId,
   WorkerId,
-  type BatchEventProps,
 } from '@fabrik/domain';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -34,9 +34,7 @@ describe('DrizzleBatchEventRepository (append-only)', () => {
       workerId: workerA,
       locationId,
       inputs: [{ batchId: inputBatch, materialId: materialA.id, quantity: quantity(1, 'kg') }],
-      outputs: [
-        { batchId: outputBatch, materialId: materialB.id, quantity: quantity(2, 'unit') },
-      ],
+      outputs: [{ batchId: outputBatch, materialId: materialB.id, quantity: quantity(2, 'unit') }],
       timestamp: ts0,
       ...overrides,
     });
@@ -55,7 +53,10 @@ describe('DrizzleBatchEventRepository (append-only)', () => {
   });
 
   it('add + findById hacen round-trip (inputs, outputs, observación normalizada)', async () => {
-    const created = event({ observation: '  listo el lote  ', recipeStepId: RecipeStepId.create() });
+    const created = event({
+      observation: '  listo el lote  ',
+      recipeStepId: RecipeStepId.create(),
+    });
     await ctx.repositories.batchEvents.add(created);
 
     const found = await ctx.repositories.batchEvents.findById(created.id);
@@ -92,12 +93,12 @@ describe('DrizzleBatchEventRepository (append-only)', () => {
     await ctx.repositories.batchEvents.add(e1);
     await ctx.repositories.batchEvents.add(e2);
 
-    expect((await ctx.repositories.batchEvents.listBy({ machineId: machineA })).map((e) => e.id)).toEqual(
-      [e1.id],
-    );
-    expect((await ctx.repositories.batchEvents.listBy({ workerId: workerB })).map((e) => e.id)).toEqual([
-      e2.id,
-    ]);
+    expect(
+      (await ctx.repositories.batchEvents.listBy({ machineId: machineA })).map((e) => e.id),
+    ).toEqual([e1.id]);
+    expect(
+      (await ctx.repositories.batchEvents.listBy({ workerId: workerB })).map((e) => e.id),
+    ).toEqual([e2.id]);
   });
 
   it('listBy materialId matchea tanto inputs como outputs', async () => {
@@ -119,7 +120,9 @@ describe('DrizzleBatchEventRepository (append-only)', () => {
     await ctx.repositories.batchEvents.add(e0);
     await ctx.repositories.batchEvents.add(e1);
 
-    const onlyZero = await ctx.repositories.batchEvents.listBy({ dateRange: { from: ts0, to: ts0 } });
+    const onlyZero = await ctx.repositories.batchEvents.listBy({
+      dateRange: { from: ts0, to: ts0 },
+    });
     expect(onlyZero.map((e) => e.id)).toEqual([e0.id]);
 
     const both = await ctx.repositories.batchEvents.listBy({ dateRange: { from: ts0, to: ts1 } });

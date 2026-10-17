@@ -9,6 +9,11 @@
 //    sería incoherente hasta cerrar el flujo de almacenamiento.
 //  - No se emite el evento genérico `stock.moved` (docs/05) en esta fase: los
 //    eventos publicados son los enumerados por caso de uso en docs/04.
+
+import { Batch } from '../entities/batch.js';
+import { BatchEvent } from '../entities/batch-event.js';
+import { StockMovement } from '../entities/stock-movement.js';
+import type { WorkerRole } from '../entities/worker.js';
 import {
   InactiveMachineError,
   InactiveWorkerError,
@@ -21,10 +26,6 @@ import {
   UnauthorizedRoleError,
   WorkerNotAssignedError,
 } from '../errors/index.js';
-import { Batch } from '../entities/batch.js';
-import { BatchEvent } from '../entities/batch-event.js';
-import { StockMovement } from '../entities/stock-movement.js';
-import type { WorkerRole } from '../entities/worker.js';
 import type { EventBus } from '../events/event-bus.js';
 import {
   batchCreated,
@@ -47,7 +48,7 @@ import type {
 } from '../value-objects/ids.js';
 import type { Quantity } from '../value-objects/quantity.js';
 
-import { requireRole, type Actor } from './actor.js';
+import { type Actor, requireRole } from './actor.js';
 
 // --- Roles (docs/04) ---
 
@@ -314,8 +315,7 @@ export class RecordTransformation {
       // I3: asignación vigente del worker a esta máquina en el instante dado.
       const assignments = await repos.assignments.findByWorker(worker.id);
       const assigned = assignments.some(
-        (assignment) =>
-          assignment.machineId === machine.id && assignment.slot.contains(timestamp),
+        (assignment) => assignment.machineId === machine.id && assignment.slot.contains(timestamp),
       );
       if (!assigned) {
         throw new WorkerNotAssignedError(worker.id, machine.id, timestamp);
@@ -338,7 +338,11 @@ export class RecordTransformation {
           throw new NotFoundError('Material', output.materialId);
         }
         if (output.quantity.unit !== material.unitOfMeasure) {
-          throw new IncompatibleUnitError(material.unitOfMeasure, output.quantity.unit, material.id);
+          throw new IncompatibleUnitError(
+            material.unitOfMeasure,
+            output.quantity.unit,
+            material.id,
+          );
         }
       }
 
@@ -504,9 +508,7 @@ export class CompleteProduction {
 
     const completed = batch.complete();
     await this.deps.batches.save(completed);
-    await this.deps.events.publish(
-      productionCompleted({ batchId: completed.id, recipeId }),
-    );
+    await this.deps.events.publish(productionCompleted({ batchId: completed.id, recipeId }));
     return completed;
   }
 }

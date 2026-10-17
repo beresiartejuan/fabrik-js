@@ -1,20 +1,25 @@
 import { describe, expect, it } from 'vitest';
 
-import { JwtError, hashToken, secureEqual, signJwt, verifyJwt } from './jwt.js';
+import { hashToken, JwtError, secureEqual, signJwt, verifyJwt } from './jwt.js';
 
 const SECRET = 'secreto-de-prueba';
 
 describe('jwt (HMAC-SHA256 manual)', () => {
   it('firma y verifica un token conservando los claims', () => {
-    const token = signJwt(
-      { sub: 'worker-1', role: 'admin', typ: 'access' },
-      SECRET,
-      { expiresInSeconds: 900, now: 1_000 },
-    );
+    const token = signJwt({ sub: 'worker-1', role: 'admin', typ: 'access' }, SECRET, {
+      expiresInSeconds: 900,
+      now: 1_000,
+    });
     expect(token.split('.')).toHaveLength(3);
 
     const payload = verifyJwt(token, SECRET, { now: 1_500 });
-    expect(payload).toMatchObject({ sub: 'worker-1', role: 'admin', typ: 'access', iat: 1_000, exp: 1_900 });
+    expect(payload).toMatchObject({
+      sub: 'worker-1',
+      role: 'admin',
+      typ: 'access',
+      iat: 1_000,
+      exp: 1_900,
+    });
   });
 
   it('rechaza la firma con otro secreto', () => {

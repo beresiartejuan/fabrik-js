@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { InvalidTimeSlotError, TimeSlot, type DayOfWeek } from '../index.js';
+import { type DayOfWeek, InvalidTimeSlotError, TimeSlot } from '../index.js';
 
 const MONDAY: DayOfWeek = 1;
 const TUESDAY: DayOfWeek = 2;
@@ -99,10 +99,14 @@ describe('TimeSlot.equals', () => {
       ),
     ).toBe(true);
     expect(
-      TimeSlot.create([MONDAY], '08:00', '12:00').equals(TimeSlot.create([MONDAY], '09:00', '12:00')),
+      TimeSlot.create([MONDAY], '08:00', '12:00').equals(
+        TimeSlot.create([MONDAY], '09:00', '12:00'),
+      ),
     ).toBe(false);
     expect(
-      TimeSlot.create([MONDAY], '08:00', '12:00').equals(TimeSlot.create([TUESDAY], '08:00', '12:00')),
+      TimeSlot.create([MONDAY], '08:00', '12:00').equals(
+        TimeSlot.create([TUESDAY], '08:00', '12:00'),
+      ),
     ).toBe(false);
   });
 });

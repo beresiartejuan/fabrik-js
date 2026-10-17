@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
   InvalidQuantityError,
-  Quantity,
   isUnitCompatibleWith,
   type PhysicalState,
+  Quantity,
   type UnitOfMeasure,
 } from '../index.js';
 
@@ -38,7 +38,9 @@ describe('Quantity', () => {
   });
 
   it('lanza al sumar cantidades de distinta unidad', () => {
-    expect(() => Quantity.create(1, 'g').add(Quantity.create(1, 'kg'))).toThrow(InvalidQuantityError);
+    expect(() => Quantity.create(1, 'g').add(Quantity.create(1, 'kg'))).toThrow(
+      InvalidQuantityError,
+    );
   });
 
   it('resta cantidades de la misma unidad', () => {

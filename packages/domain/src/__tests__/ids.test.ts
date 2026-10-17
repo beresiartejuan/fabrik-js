@@ -5,6 +5,7 @@ import {
   BatchEventId,
   BatchId,
   FactoryId,
+  type IdFactory,
   LocationId,
   MachineId,
   MaterialId,
@@ -12,7 +13,6 @@ import {
   RecipeStepId,
   StockMovementId,
   WorkerId,
-  type IdFactory,
 } from '../index.js';
 
 const FACTORIES: ReadonlyArray<IdFactory<string>> = [

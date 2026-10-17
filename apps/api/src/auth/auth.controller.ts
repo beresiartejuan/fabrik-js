@@ -1,11 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import type { Actor } from '@fabrik/domain';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
 import { Actor as ActorParam } from './actor.decorator.js';
 import { AuthService, type AuthTokens } from './auth.service.js';
-import { LoginSchema, RefreshSchema, type LoginDto, type RefreshDto } from './dto.js';
+import { type LoginDto, LoginSchema, type RefreshDto, RefreshSchema } from './dto.js';
 import { Public } from './public.decorator.js';
 
 /**

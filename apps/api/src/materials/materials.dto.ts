@@ -1,11 +1,7 @@
-import { z } from 'zod';
 import type { Material } from '@fabrik/domain';
+import { z } from 'zod';
 
-import {
-  MATERIAL_KINDS,
-  PHYSICAL_STATES,
-  UNITS_OF_MEASURE,
-} from '../common/catalog-schemas.js';
+import { MATERIAL_KINDS, PHYSICAL_STATES, UNITS_OF_MEASURE } from '../common/catalog-schemas.js';
 
 /**
  * DTOs del recurso `materials` (Fase 4). Patrón de la Fase 2: el schema zod es la

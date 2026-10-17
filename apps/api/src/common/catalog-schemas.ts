@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import type { DayOfWeek } from '@fabrik/domain';
+import { z } from 'zod';
 
 /**
  * Piezas de validación compartidas por los DTOs de catálogo (Fase 4, docs/09).

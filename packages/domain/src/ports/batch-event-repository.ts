@@ -1,5 +1,11 @@
 import type { BatchEvent } from '../entities/batch-event.js';
-import type { BatchEventId, BatchId, MachineId, MaterialId, WorkerId } from '../value-objects/ids.js';
+import type {
+  BatchEventId,
+  BatchId,
+  MachineId,
+  MaterialId,
+  WorkerId,
+} from '../value-objects/ids.js';
 
 // Rango temporal inclusivo [from, to] (ambos extremos opcionales).
 export interface DateRange {

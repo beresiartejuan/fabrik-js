@@ -1,10 +1,7 @@
 import { z } from 'zod';
 
 import { idSchema, quantitySchema } from '../common/catalog-schemas.js';
-import type {
-  BatchEventResponse,
-  BatchResponse,
-} from '../common/entity-serializers.js';
+import type { BatchEventResponse, BatchResponse } from '../common/entity-serializers.js';
 
 /**
  * DTOs del recurso `production` (Fase 5).
@@ -51,8 +48,8 @@ export const RecordTransformationSchema = z.object({
   inputs: z.array(TransformationInputSchema),
   outputs: z.array(TransformationOutputSchema),
   observation: z.string().optional(),
-  timestamp: z
-    .iso.datetime({ offset: true })
+  timestamp: z.iso
+    .datetime({ offset: true })
     .transform((value) => new Date(value))
     .optional(),
 });

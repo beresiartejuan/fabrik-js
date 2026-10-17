@@ -1,15 +1,15 @@
-import { Controller, Get, Param } from '@nestjs/common';
 import {
+  type Actor,
   ListMachineSchedule,
   ListWorkerSchedule,
   MachineId,
   WorkerId,
-  type Actor,
 } from '@fabrik/domain';
+import { Controller, Get, Param } from '@nestjs/common';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 
-import { serializeAssignment, type AssignmentResponse } from './assignments.dto.js';
+import { type AssignmentResponse, serializeAssignment } from './assignments.dto.js';
 
 /**
  * Agendas (Fase 4, docs/09): endpoints anidados bajo el recurso al que pertenecen

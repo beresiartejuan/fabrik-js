@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import type { Location } from '@fabrik/domain';
+import { z } from 'zod';
 
 import { LOCATION_KINDS } from '../common/catalog-schemas.js';
 

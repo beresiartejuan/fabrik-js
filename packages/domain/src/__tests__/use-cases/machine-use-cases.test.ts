@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type Actor,
   CreateMachine,
   GetMachine,
   InvalidLocationKindError,
@@ -8,12 +9,11 @@ import {
   Location,
   LocationId,
   MachineId,
+  MoveMachine,
   NotFoundError,
   UnauthorizedRoleError,
   UpdateMachine,
   WorkerId,
-  MoveMachine,
-  type Actor,
 } from '../../index.js';
 import { collectingEventBus, inMemoryRepositories } from '../../testing/index.js';
 
@@ -82,7 +82,10 @@ describe('CreateMachine', () => {
 
     await expect(
       create.execute(WORKER, { name: 'M', type: 'mixer', locationId: location.id }),
-    ).rejects.toMatchObject({ name: 'UnauthorizedRoleError', useCase: 'CreateMachine' });
+    ).rejects.toMatchObject({
+      name: 'UnauthorizedRoleError',
+      useCase: 'CreateMachine',
+    });
   });
 
   it('rechaza al rol auditor', async () => {
@@ -106,7 +109,11 @@ describe('UpdateMachine', () => {
     });
     events.clear();
 
-    const updated = await update.execute(ADMIN, { id: machine.id, name: 'Mezcladora 2', type: 'blender' });
+    const updated = await update.execute(ADMIN, {
+      id: machine.id,
+      name: 'Mezcladora 2',
+      type: 'blender',
+    });
 
     expect(updated.name).toBe('Mezcladora 2');
     expect(updated.type).toBe('blender');
@@ -217,7 +224,10 @@ describe('MoveMachine', () => {
 
     await expect(
       move.execute(WORKER, { id: machine.id, locationId: origin.id }),
-    ).rejects.toMatchObject({ name: 'UnauthorizedRoleError', useCase: 'MoveMachine' });
+    ).rejects.toMatchObject({
+      name: 'UnauthorizedRoleError',
+      useCase: 'MoveMachine',
+    });
   });
 
   it('rechaza al rol auditor', async () => {

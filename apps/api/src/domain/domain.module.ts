@@ -25,7 +25,10 @@ import { useCaseProviders, useCaseTokens } from './use-case.providers.js';
  */
 @Module({
   imports: [PersistenceModule],
-  providers: [{ provide: EVENT_BUS, useFactory: () => new InMemoryEventBus() }, ...useCaseProviders],
+  providers: [
+    { provide: EVENT_BUS, useFactory: () => new InMemoryEventBus() },
+    ...useCaseProviders,
+  ],
   exports: [PersistenceModule, EVENT_BUS, ...useCaseTokens],
 })
 export class DomainModule {}

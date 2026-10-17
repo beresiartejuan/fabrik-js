@@ -1,15 +1,14 @@
 import { rmSync } from 'node:fs';
-
+import { Worker, type WorkerRepository } from '@fabrik/domain';
 import type { INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
-import { Worker, type WorkerRepository } from '@fabrik/domain';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { AppModule } from '../../src/app.module.js';
-import { AUTH_CONFIG, CREDENTIAL_REPOSITORY } from '../../src/auth/auth.tokens.js';
 import type { AuthConfig } from '../../src/auth/auth.config.js';
+import { AUTH_CONFIG, CREDENTIAL_REPOSITORY } from '../../src/auth/auth.tokens.js';
 import type { CredentialRepository } from '../../src/auth/credentials.repository.js';
 import { signJwt } from '../../src/auth/jwt.js';
 import { hashPassword } from '../../src/auth/password.js';
@@ -109,10 +108,7 @@ describe('Auth (e2e)', () => {
   });
 
   it('POST /auth/login sin password → 400 (zod)', async () => {
-    await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ name: ADMIN.name })
-      .expect(400);
+    await request(app.getHttpServer()).post('/auth/login').send({ name: ADMIN.name }).expect(400);
   });
 
   it('GET /auth/me sin token → 401', async () => {
@@ -196,10 +192,7 @@ describe('Auth (e2e)', () => {
       .post('/auth/logout')
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(204);
-    await request(app.getHttpServer())
-      .post('/auth/refresh')
-      .send({ refreshToken })
-      .expect(401);
+    await request(app.getHttpServer()).post('/auth/refresh').send({ refreshToken }).expect(401);
   });
 
   it('POST /auth/logout sin token → 401', async () => {

@@ -26,8 +26,8 @@ import { hashPassword } from '../auth/password.js';
 
 import { closeDb, createDb, type Db } from './client.js';
 import { resolveDbFile } from './config.js';
-import { applyMigrations } from './migrations.js';
 import { factoryToRow } from './mappers.js';
+import { applyMigrations } from './migrations.js';
 import { createRepositories } from './repositories/index.js';
 import { factories } from './schema.js';
 
@@ -116,7 +116,10 @@ export async function seed(db: Db): Promise<SeedSummary> {
   const credentials: CredentialRepository = new DrizzleCredentialRepository(db);
 
   // --- Fábrica (sin puerto en el dominio: inserción directa) ---
-  const factory = Factory.fromPersistence({ id: FactoryId.from(IDS.factory), name: 'Fábrica Demo' });
+  const factory = Factory.fromPersistence({
+    id: FactoryId.from(IDS.factory),
+    name: 'Fábrica Demo',
+  });
   const factoryRow = factoryToRow(factory);
   await db.insert(factories).values(factoryRow).onConflictDoUpdate({
     target: factories.id,
@@ -282,10 +285,16 @@ async function main(): Promise<void> {
     await applyMigrations(db);
     const summary = await seed(db);
     console.log(`[db:seed] contexto de demo sembrado sobre ${dbFile}`);
-    console.log(`[db:seed]   lugares:      almacén ${summary.locations.storage} / planta ${summary.locations.production}`);
-    console.log(`[db:seed]   materiales:   harina ${summary.materials.harina}, agua ${summary.materials.agua}, masa ${summary.materials.masa}, pan ${summary.materials.pan}`);
+    console.log(
+      `[db:seed]   lugares:      almacén ${summary.locations.storage} / planta ${summary.locations.production}`,
+    );
+    console.log(
+      `[db:seed]   materiales:   harina ${summary.materials.harina}, agua ${summary.materials.agua}, masa ${summary.materials.masa}, pan ${summary.materials.pan}`,
+    );
     console.log(`[db:seed]   máquina:      ${summary.machineId} · receta ${summary.recipeId}`);
-    console.log(`[db:seed]   usuarios:     ${DEMO_USERS.map((user) => `${user.name} (${user.role})`).join(', ')}`);
+    console.log(
+      `[db:seed]   usuarios:     ${DEMO_USERS.map((user) => `${user.name} (${user.role})`).join(', ')}`,
+    );
   } finally {
     await closeDb(db);
   }

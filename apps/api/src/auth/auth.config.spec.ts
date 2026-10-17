@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_ACCESS_TTL_SECONDS,
   DEFAULT_REFRESH_TTL_SECONDS,
-  TEST_ACCESS_SECRET,
-  TEST_REFRESH_SECRET,
   isTestEnvironment,
   resolveAuthConfig,
+  TEST_ACCESS_SECRET,
+  TEST_REFRESH_SECRET,
 } from './auth.config.js';
 
 describe('resolveAuthConfig', () => {
@@ -27,9 +27,9 @@ describe('resolveAuthConfig', () => {
 
   it('falla en claro si faltan secretos fuera de tests', () => {
     expect(() => resolveAuthConfig({ NODE_ENV: 'production' })).toThrow(/JWT_ACCESS_SECRET/);
-    expect(() =>
-      resolveAuthConfig({ NODE_ENV: 'production', JWT_ACCESS_SECRET: 'a' }),
-    ).toThrow(/JWT_REFRESH_SECRET/);
+    expect(() => resolveAuthConfig({ NODE_ENV: 'production', JWT_ACCESS_SECRET: 'a' })).toThrow(
+      /JWT_REFRESH_SECRET/,
+    );
   });
 
   it('lee secretos y TTLs del entorno', () => {
@@ -47,18 +47,18 @@ describe('resolveAuthConfig', () => {
   });
 
   it('rechaza TTLs no positivos', () => {
-    expect(() =>
-      resolveAuthConfig({ NODE_ENV: 'test', JWT_ACCESS_TTL_SECONDS: '0' }),
-    ).toThrow(/JWT_ACCESS_TTL_SECONDS/);
-    expect(() =>
-      resolveAuthConfig({ NODE_ENV: 'test', JWT_REFRESH_TTL_SECONDS: 'abc' }),
-    ).toThrow(/JWT_REFRESH_TTL_SECONDS/);
+    expect(() => resolveAuthConfig({ NODE_ENV: 'test', JWT_ACCESS_TTL_SECONDS: '0' })).toThrow(
+      /JWT_ACCESS_TTL_SECONDS/,
+    );
+    expect(() => resolveAuthConfig({ NODE_ENV: 'test', JWT_REFRESH_TTL_SECONDS: 'abc' })).toThrow(
+      /JWT_REFRESH_TTL_SECONDS/,
+    );
   });
 
   it('exige nombre y contraseña de bootstrap juntos', () => {
-    expect(() =>
-      resolveAuthConfig({ NODE_ENV: 'test', BOOTSTRAP_ADMIN_NAME: 'admin' }),
-    ).toThrow(/BOOTSTRAP_ADMIN_NAME/);
+    expect(() => resolveAuthConfig({ NODE_ENV: 'test', BOOTSTRAP_ADMIN_NAME: 'admin' })).toThrow(
+      /BOOTSTRAP_ADMIN_NAME/,
+    );
     const config = resolveAuthConfig({
       NODE_ENV: 'test',
       BOOTSTRAP_ADMIN_NAME: ' admin ',

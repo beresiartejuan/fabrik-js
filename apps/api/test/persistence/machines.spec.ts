@@ -16,7 +16,9 @@ describe('DrizzleMachineRepository', () => {
   });
 
   it('findById devuelve null cuando no existe', async () => {
-    await expect(ctx.repositories.machines.findById(aMachine(aLocation().id).id)).resolves.toBeNull();
+    await expect(
+      ctx.repositories.machines.findById(aMachine(aLocation().id).id),
+    ).resolves.toBeNull();
   });
 
   it('save + findById hacen round-trip (status por defecto idle)', async () => {
@@ -56,17 +58,19 @@ describe('DrizzleMachineRepository', () => {
     await ctx.repositories.machines.save(otherOven);
 
     expect(await ctx.repositories.machines.list()).toHaveLength(3);
-    expect((await ctx.repositories.machines.list({ locationId: line1.id })).map((m) => m.id).sort()).toEqual(
-      [oven.id, mixer.id].sort(),
-    );
-    expect((await ctx.repositories.machines.list({ type: 'oven' })).map((m) => m.id).sort()).toEqual(
-      [oven.id, otherOven.id].sort(),
-    );
+    expect(
+      (await ctx.repositories.machines.list({ locationId: line1.id })).map((m) => m.id).sort(),
+    ).toEqual([oven.id, mixer.id].sort());
+    expect(
+      (await ctx.repositories.machines.list({ type: 'oven' })).map((m) => m.id).sort(),
+    ).toEqual([oven.id, otherOven.id].sort());
     expect((await ctx.repositories.machines.list({ status: 'running' })).map((m) => m.id)).toEqual([
       mixer.id,
     ]);
     expect(
-      (await ctx.repositories.machines.list({ locationId: line1.id, type: 'mixer' })).map((m) => m.id),
+      (await ctx.repositories.machines.list({ locationId: line1.id, type: 'mixer' })).map(
+        (m) => m.id,
+      ),
     ).toEqual([mixer.id]);
   });
 

@@ -1,5 +1,5 @@
-import { UnauthorizedException } from '@nestjs/common';
 import { Worker, WorkerId, type WorkerRepository } from '@fabrik/domain';
+import { UnauthorizedException } from '@nestjs/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { AuthConfig } from './auth.config.js';
@@ -114,7 +114,9 @@ describe('AuthService', () => {
     });
 
     it('401 si el nombre no existe (sin revelar si existe)', async () => {
-      await expect(service.login('Nadie', 'correcta')).rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(service.login('Nadie', 'correcta')).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
       expect(refreshTokens.records.size).toBe(0);
     });
 
@@ -204,11 +206,9 @@ describe('AuthService', () => {
     });
 
     it('401 si el refresh token fue firmado con otro secreto (jti inexistente)', async () => {
-      const forged = signJwt(
-        { sub: worker.id, typ: 'refresh', jti: 'no-existe' },
-        'otro-secreto',
-        { expiresInSeconds: 900 },
-      );
+      const forged = signJwt({ sub: worker.id, typ: 'refresh', jti: 'no-existe' }, 'otro-secreto', {
+        expiresInSeconds: 900,
+      });
       await expect(service.refresh(forged)).rejects.toBeInstanceOf(UnauthorizedException);
     });
   });

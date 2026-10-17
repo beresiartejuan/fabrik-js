@@ -1,10 +1,10 @@
-import { NotFoundError } from '../errors/index.js';
 import { Recipe, RecipeStep, type RecipeStepProps } from '../entities/recipe.js';
+import { NotFoundError } from '../errors/index.js';
 import type { RecipeFilter, RecipeRepository } from '../ports/recipe-repository.js';
 import type { MaterialId, RecipeId } from '../value-objects/ids.js';
 import type { Quantity } from '../value-objects/quantity.js';
 
-import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor.js';
+import { type Actor, CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole } from './actor.js';
 
 // --- Dependencias ---
 

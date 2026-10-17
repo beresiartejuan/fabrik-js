@@ -1,10 +1,10 @@
 import type { BatchForwardNode, BatchTraceNode } from '@fabrik/domain';
 
 import {
-  serializeBatch,
-  serializeBatchEvent,
   type BatchEventResponse,
   type BatchResponse,
+  serializeBatch,
+  serializeBatchEvent,
 } from '../common/entity-serializers.js';
 
 /**

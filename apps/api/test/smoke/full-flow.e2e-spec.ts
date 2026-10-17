@@ -216,11 +216,7 @@ describe('Smoke — flujo completo de docs/03 (e2e)', () => {
     });
 
     // 4) Arribos ×2 (harina y agua) al almacén.
-    const arrive = async (
-      materialId: string,
-      amount: number,
-      unit: string,
-    ): Promise<BatchBody> => {
+    const arrive = async (materialId: string, amount: number, unit: string): Promise<BatchBody> => {
       const response = await request(server)
         .post('/supplies/arrivals')
         .set('Authorization', worker)
@@ -368,9 +364,24 @@ describe('Smoke — flujo completo de docs/03 (e2e)', () => {
       .set('Authorization', auditor)
       .expect(200);
     expect(productionMovements.body).toMatchObject([
-      { materialId: harinaId, delta: { amount: -2, unit: 'kg' }, reason: 'consumed', timestamp: T1.toISOString() },
-      { materialId: aguaId, delta: { amount: -1, unit: 'l' }, reason: 'consumed', timestamp: T1.toISOString() },
-      { materialId: masaId, delta: { amount: -2, unit: 'kg' }, reason: 'consumed', timestamp: T2.toISOString() },
+      {
+        materialId: harinaId,
+        delta: { amount: -2, unit: 'kg' },
+        reason: 'consumed',
+        timestamp: T1.toISOString(),
+      },
+      {
+        materialId: aguaId,
+        delta: { amount: -1, unit: 'l' },
+        reason: 'consumed',
+        timestamp: T1.toISOString(),
+      },
+      {
+        materialId: masaId,
+        delta: { amount: -2, unit: 'kg' },
+        reason: 'consumed',
+        timestamp: T2.toISOString(),
+      },
     ]);
 
     // --- Trazabilidad hacia atrás desde el producto final (raíz del árbol) ---
@@ -442,9 +453,6 @@ describe('Smoke — flujo completo de docs/03 (e2e)', () => {
       transform1EventId,
       transform2EventId,
     ]);
-    expect((events.body as EventBody[]).map((e) => e.observation)).toEqual([
-      'mezclado',
-      undefined,
-    ]);
+    expect((events.body as EventBody[]).map((e) => e.observation)).toEqual(['mezclado', undefined]);
   });
 });

@@ -1,7 +1,6 @@
 import { rmSync } from 'node:fs';
-
+import { CreateMaterial, type MaterialRepository, WorkerId } from '@fabrik/domain';
 import { Test, type TestingModule } from '@nestjs/testing';
-import { CreateMaterial, WorkerId, type MaterialRepository } from '@fabrik/domain';
 
 import { DomainModule } from '../../src/domain/domain.module.js';
 import { InMemoryEventBus } from '../../src/domain/in-memory-event-bus.js';

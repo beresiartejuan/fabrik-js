@@ -20,7 +20,9 @@ export class IncompatibleUnitError extends DomainError {
   ) {
     const subject = materialId ? ` para ${materialId}` : '';
     if (physicalState) {
-      super(`Unidad incompatible${subject}: ${received} no es válida para estado físico ${physicalState}`);
+      super(
+        `Unidad incompatible${subject}: ${received} no es válida para estado físico ${physicalState}`,
+      );
     } else {
       super(`Unidad incompatible${subject}: se esperaba ${expected} y se recibió ${received}`);
     }

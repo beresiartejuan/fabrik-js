@@ -1,4 +1,12 @@
 import {
+  type Actor,
+  CreateLocation,
+  GetLocation,
+  ListLocations,
+  LocationId,
+  UpdateLocation,
+} from '@fabrik/domain';
+import {
   Body,
   Controller,
   Get,
@@ -9,27 +17,19 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  CreateLocation,
-  GetLocation,
-  ListLocations,
-  LocationId,
-  UpdateLocation,
-  type Actor,
-} from '@fabrik/domain';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
 import {
-  CreateLocationSchema,
-  ListLocationsQuerySchema,
-  UpdateLocationSchema,
-  serializeLocation,
   type CreateLocationDto,
+  CreateLocationSchema,
   type ListLocationsQuery,
+  ListLocationsQuerySchema,
   type LocationResponse,
+  serializeLocation,
   type UpdateLocationDto,
+  UpdateLocationSchema,
 } from './locations.dto.js';
 
 /**

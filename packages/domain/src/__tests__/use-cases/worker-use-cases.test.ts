@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type Actor,
   CreateWorker,
   DeactivateWorker,
   GetWorker,
@@ -9,7 +10,6 @@ import {
   UnauthorizedRoleError,
   UpdateWorker,
   WorkerId,
-  type Actor,
 } from '../../index.js';
 import { inMemoryRepositories } from '../../testing/index.js';
 
@@ -64,7 +64,11 @@ describe('UpdateWorker', () => {
     const { create, update, repos } = setup();
     const worker = await create.execute(ADMIN, { name: 'Beto', role: 'worker' });
 
-    const updated = await update.execute(ADMIN, { id: worker.id, name: 'Alberto', role: 'auditor' });
+    const updated = await update.execute(ADMIN, {
+      id: worker.id,
+      name: 'Alberto',
+      role: 'auditor',
+    });
 
     expect(updated.name).toBe('Alberto');
     expect(updated.role).toBe('auditor');

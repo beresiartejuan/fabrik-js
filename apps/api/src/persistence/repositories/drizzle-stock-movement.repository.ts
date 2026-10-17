@@ -1,5 +1,3 @@
-import { and, eq } from 'drizzle-orm';
-
 import type {
   LocationId,
   MaterialId,
@@ -7,6 +5,7 @@ import type {
   StockMovement,
   StockMovementRepository,
 } from '@fabrik/domain';
+import { and, eq } from 'drizzle-orm';
 
 import type { Executor } from '../executor.js';
 import { rowToStockMovement, stockMovementToRow } from '../mappers.js';
@@ -27,7 +26,10 @@ export class DrizzleStockMovementRepository implements StockMovementRepository {
       .onConflictDoUpdate({ target: stockMovements.id, set: row });
   }
 
-  async listByLocation(locationId: LocationId, materialId?: MaterialId): Promise<readonly StockMovement[]> {
+  async listByLocation(
+    locationId: LocationId,
+    materialId?: MaterialId,
+  ): Promise<readonly StockMovement[]> {
     const conditions = [eq(stockMovements.locationId, locationId)];
     if (materialId !== undefined) {
       conditions.push(eq(stockMovements.materialId, materialId));
@@ -46,7 +48,9 @@ export class DrizzleStockMovementRepository implements StockMovementRepository {
     const rows = await this.db
       .select({ amount: stockMovements.deltaAmount, unit: stockMovements.deltaUnit })
       .from(stockMovements)
-      .where(and(eq(stockMovements.locationId, locationId), eq(stockMovements.materialId, materialId)));
+      .where(
+        and(eq(stockMovements.locationId, locationId), eq(stockMovements.materialId, materialId)),
+      );
     if (rows.length === 0) {
       return null;
     }

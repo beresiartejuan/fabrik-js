@@ -49,8 +49,8 @@ describe('DrizzleLocationRepository', () => {
     expect((await ctx.repositories.locations.list({ kind: 'storage' })).map((l) => l.id)).toEqual([
       storage.id,
     ]);
-    expect((await ctx.repositories.locations.list({ kind: 'production' })).map((l) => l.id)).toEqual(
-      [production.id],
-    );
+    expect(
+      (await ctx.repositories.locations.list({ kind: 'production' })).map((l) => l.id),
+    ).toEqual([production.id]);
   });
 });

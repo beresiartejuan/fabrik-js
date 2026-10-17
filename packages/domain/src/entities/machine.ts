@@ -1,5 +1,5 @@
 import { InvalidLocationKindError, InvalidStateTransitionError } from '../errors/index.js';
-import { LocationId, MachineId } from '../value-objects/ids.js';
+import { type LocationId, MachineId } from '../value-objects/ids.js';
 
 import type { LocationKind } from './location.js';
 

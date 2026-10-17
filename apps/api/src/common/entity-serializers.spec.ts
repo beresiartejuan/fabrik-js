@@ -1,8 +1,8 @@
 import {
   Batch,
   BatchEvent,
-  BatchId,
   BatchEventId,
+  BatchId,
   LocationId,
   MachineId,
   MaterialId,
@@ -68,12 +68,7 @@ describe('entity serializers', () => {
       quantity: { amount: 5, unit: 'unit' },
       status: 'stored',
     });
-    expect(Object.keys(serializeBatch(supply))).toEqual([
-      'id',
-      'materialId',
-      'quantity',
-      'status',
-    ]);
+    expect(Object.keys(serializeBatch(supply))).toEqual(['id', 'materialId', 'quantity', 'status']);
   });
 
   it('serializeBatchEvent expone inputs/outputs, observación normalizada y timestamp ISO', () => {
@@ -98,9 +93,7 @@ describe('entity serializers', () => {
       machineId: 'machine-1',
       workerId: 'worker-1',
       locationId: 'loc-1',
-      inputs: [
-        { batchId: 'batch-in', materialId: 'm-in', quantity: { amount: 2, unit: 'kg' } },
-      ],
+      inputs: [{ batchId: 'batch-in', materialId: 'm-in', quantity: { amount: 2, unit: 'kg' } }],
       outputs: [{ materialId: 'm-out', quantity: { amount: 1, unit: 'unit' } }],
       observation: 'mezclado',
       timestamp: '2026-01-02T03:04:05.000Z',

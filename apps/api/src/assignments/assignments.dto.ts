@@ -1,11 +1,8 @@
-import { z } from 'zod';
 import type { Assignment } from '@fabrik/domain';
+import { z } from 'zod';
 
 import { idSchema, timeSlotSchema } from '../common/catalog-schemas.js';
-import {
-  serializeTimeSlot,
-  type TimeSlotResponse,
-} from '../common/entity-serializers.js';
+import { serializeTimeSlot, type TimeSlotResponse } from '../common/entity-serializers.js';
 
 /** DTOs del recurso `assignments` (Fase 4). */
 

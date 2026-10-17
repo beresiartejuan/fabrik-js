@@ -1,9 +1,9 @@
 import { InvalidStockMovementError } from '../errors/index.js';
 import {
-  StockMovementId,
   type BatchEventId,
   type LocationId,
   type MaterialId,
+  StockMovementId,
 } from '../value-objects/ids.js';
 import type { StockDelta } from '../value-objects/stock-delta.js';
 

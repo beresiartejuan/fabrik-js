@@ -1,4 +1,14 @@
 import {
+  type Actor,
+  CreateMachine,
+  GetMachine,
+  ListMachines,
+  LocationId,
+  MachineId,
+  MoveMachine,
+  UpdateMachine,
+} from '@fabrik/domain';
+import {
   Body,
   Controller,
   Get,
@@ -9,31 +19,21 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  CreateMachine,
-  GetMachine,
-  ListMachines,
-  LocationId,
-  MachineId,
-  MoveMachine,
-  UpdateMachine,
-  type Actor,
-} from '@fabrik/domain';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
 import {
-  CreateMachineSchema,
-  ListMachinesQuerySchema,
-  MoveMachineSchema,
-  UpdateMachineSchema,
-  serializeMachine,
   type CreateMachineDto,
+  CreateMachineSchema,
   type ListMachinesQuery,
+  ListMachinesQuerySchema,
   type MachineResponse,
   type MoveMachineDto,
+  MoveMachineSchema,
+  serializeMachine,
   type UpdateMachineDto,
+  UpdateMachineSchema,
 } from './machines.dto.js';
 
 /**

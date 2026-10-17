@@ -14,17 +14,11 @@ export interface MaterialUpdated
   extends DomainEventBase<'material.updated', MaterialEventPayload> {}
 
 /** Se emite tras crear un material (docs/05). */
-export function materialCreated(
-  payload: MaterialEventPayload,
-  occurredAt?: Date,
-): MaterialCreated {
+export function materialCreated(payload: MaterialEventPayload, occurredAt?: Date): MaterialCreated {
   return createDomainEvent('material.created', payload, occurredAt);
 }
 
 /** Se emite tras actualizar un material (docs/05). */
-export function materialUpdated(
-  payload: MaterialEventPayload,
-  occurredAt?: Date,
-): MaterialUpdated {
+export function materialUpdated(payload: MaterialEventPayload, occurredAt?: Date): MaterialUpdated {
   return createDomainEvent('material.updated', payload, occurredAt);
 }

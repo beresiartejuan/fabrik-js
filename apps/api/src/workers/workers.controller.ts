@@ -1,4 +1,13 @@
 import {
+  type Actor,
+  CreateWorker,
+  DeactivateWorker,
+  GetWorker,
+  ListWorkers,
+  UpdateWorker,
+  WorkerId,
+} from '@fabrik/domain';
+import {
   Body,
   Controller,
   Get,
@@ -9,27 +18,18 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  CreateWorker,
-  DeactivateWorker,
-  GetWorker,
-  ListWorkers,
-  UpdateWorker,
-  WorkerId,
-  type Actor,
-} from '@fabrik/domain';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
 import {
-  CreateWorkerSchema,
-  ListWorkersQuerySchema,
-  UpdateWorkerSchema,
-  serializeWorker,
   type CreateWorkerDto,
+  CreateWorkerSchema,
   type ListWorkersQuery,
+  ListWorkersQuerySchema,
+  serializeWorker,
   type UpdateWorkerDto,
+  UpdateWorkerSchema,
   type WorkerResponse,
 } from './workers.dto.js';
 

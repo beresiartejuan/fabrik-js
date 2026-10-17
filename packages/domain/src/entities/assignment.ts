@@ -1,4 +1,4 @@
-import { AssignmentId, MachineId, WorkerId } from '../value-objects/ids.js';
+import { AssignmentId, type MachineId, type WorkerId } from '../value-objects/ids.js';
 import type { TimeSlot } from '../value-objects/time-slot.js';
 
 export interface AssignmentProps {

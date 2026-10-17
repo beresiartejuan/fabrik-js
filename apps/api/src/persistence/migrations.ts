@@ -12,6 +12,9 @@ import type { Db } from './client.js';
 export const MIGRATIONS_FOLDER = fileURLToPath(new URL('../../drizzle', import.meta.url));
 
 /** Aplica las migraciones pendientes sobre `db` (idempotente). */
-export async function applyMigrations(db: Db, migrationsFolder: string = MIGRATIONS_FOLDER): Promise<void> {
+export async function applyMigrations(
+  db: Db,
+  migrationsFolder: string = MIGRATIONS_FOLDER,
+): Promise<void> {
   await migrate(db, { migrationsFolder });
 }

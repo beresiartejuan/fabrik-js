@@ -1,7 +1,7 @@
-import { z } from 'zod';
 import type { Worker } from '@fabrik/domain';
+import { z } from 'zod';
 
-import { WORKER_ROLES, booleanQuerySchema } from '../common/catalog-schemas.js';
+import { booleanQuerySchema, WORKER_ROLES } from '../common/catalog-schemas.js';
 
 /** DTOs del recurso `workers` (Fase 4). */
 

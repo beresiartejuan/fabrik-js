@@ -1,6 +1,5 @@
-import { and, eq } from 'drizzle-orm';
-
 import type { Worker, WorkerFilter, WorkerId, WorkerRepository } from '@fabrik/domain';
+import { and, eq } from 'drizzle-orm';
 
 import type { Executor } from '../executor.js';
 import { rowToWorker, workerToRow } from '../mappers.js';
@@ -32,9 +31,6 @@ export class DrizzleWorkerRepository implements WorkerRepository {
 
   async save(worker: Worker): Promise<void> {
     const row = workerToRow(worker);
-    await this.db
-      .insert(workers)
-      .values(row)
-      .onConflictDoUpdate({ target: workers.id, set: row });
+    await this.db.insert(workers).values(row).onConflictDoUpdate({ target: workers.id, set: row });
   }
 }

@@ -2,14 +2,14 @@ import {
   Batch,
   BatchEvent,
   BatchEventId,
+  type BatchForwardNode,
   BatchId,
+  type BatchTraceNode,
   LocationId,
   MachineId,
   MaterialId,
   Quantity,
   WorkerId,
-  type BatchForwardNode,
-  type BatchTraceNode,
 } from '@fabrik/domain';
 import { describe, expect, it } from 'vitest';
 

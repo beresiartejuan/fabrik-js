@@ -1,20 +1,15 @@
 import {
   BatchId,
-  Machine,
-  LocationId,
   type BatchRepository,
   type BatchTransformed,
+  LocationId,
+  Machine,
   type MachineRepository,
 } from '@fabrik/domain';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-
-import {
-  BATCH_REPOSITORY,
-  EVENT_BUS,
-  MACHINE_REPOSITORY,
-} from '../../src/domain/tokens.js';
 import { InMemoryEventBus } from '../../src/domain/in-memory-event-bus.js';
+import { BATCH_REPOSITORY, EVENT_BUS, MACHINE_REPOSITORY } from '../../src/domain/tokens.js';
 import { createE2EApp, type E2EContext } from '../support/e2e-app.js';
 
 /**
@@ -108,10 +103,7 @@ describe('Production (e2e)', () => {
     const server = ctx.app.getHttpServer();
     const admin = ctx.auth('admin');
 
-    const create = async (
-      path: string,
-      body: Record<string, unknown>,
-    ): Promise<string> => {
+    const create = async (path: string, body: Record<string, unknown>): Promise<string> => {
       const response = await request(server)
         .post(path)
         .set('Authorization', admin)
@@ -175,18 +167,14 @@ describe('Production (e2e)', () => {
           {
             position: 1,
             machineType: 'mixer',
-            inputs: [
-              { materialId: flourId, quantity: { amount: 2, unit: 'kg' } },
-            ],
+            inputs: [{ materialId: flourId, quantity: { amount: 2, unit: 'kg' } }],
             outputProductId: doughId,
             outputQuantity: { amount: 2, unit: 'kg' },
           },
           {
             position: 2,
             machineType: 'mixer',
-            inputs: [
-              { materialId: doughId, quantity: { amount: 2, unit: 'kg' } },
-            ],
+            inputs: [{ materialId: doughId, quantity: { amount: 2, unit: 'kg' } }],
             outputProductId: breadId,
             outputQuantity: { amount: 1, unit: 'unit' },
           },
@@ -250,9 +238,7 @@ describe('Production (e2e)', () => {
       .get(`/stock/${storageLocationId}`)
       .set('Authorization', ctx.auth('worker'))
       .expect(200);
-    expect(stock.body).toEqual([
-      { materialId: flourId, amount: 5, unit: 'kg' },
-    ]);
+    expect(stock.body).toEqual([{ materialId: flourId, amount: 5, unit: 'kg' }]);
   });
 
   it('POST /production/start: el admin crea el lote raíz in_progress con la cantidad planificada', async () => {
@@ -277,9 +263,7 @@ describe('Production (e2e)', () => {
       .send({
         machineId,
         recipeStepId: step1Id,
-        inputs: [
-          { batchId: flourBatch1Id, quantity: { amount: 2, unit: 'kg' } },
-        ],
+        inputs: [{ batchId: flourBatch1Id, quantity: { amount: 2, unit: 'kg' } }],
         outputs: [{ materialId: doughId, quantity: { amount: 2, unit: 'kg' } }],
         observation: '  mezclado  ',
         timestamp: T1.toISOString(),
@@ -333,12 +317,8 @@ describe('Production (e2e)', () => {
       .send({
         machineId,
         recipeStepId: step2Id,
-        inputs: [
-          { batchId: doughBatchId, quantity: { amount: 2, unit: 'kg' } },
-        ],
-        outputs: [
-          { materialId: breadId, quantity: { amount: 1, unit: 'unit' } },
-        ],
+        inputs: [{ batchId: doughBatchId, quantity: { amount: 2, unit: 'kg' } }],
+        outputs: [{ materialId: breadId, quantity: { amount: 1, unit: 'unit' } }],
         timestamp: T2.toISOString(),
       })
       .expect(201);
@@ -418,8 +398,7 @@ describe('Production (e2e)', () => {
 
   it('emite supply.arrived ×2, batch.created, batch.transformed ×2, batch.stored y production.completed', () => {
     const names = bus.published.map((event) => event.name);
-    const count = (name: string): number =>
-      names.filter((n) => n === name).length;
+    const count = (name: string): number => names.filter((n) => n === name).length;
     expect(count('supply.arrived')).toBe(2);
     expect(count('batch.created')).toBe(1);
     expect(count('batch.transformed')).toBe(2);
@@ -479,9 +458,7 @@ describe('Production (e2e)', () => {
       .set('Authorization', ctx.auth('worker'))
       .send({
         machineId: maintenanceMachineId,
-        inputs: [
-          { batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } },
-        ],
+        inputs: [{ batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } }],
         outputs: [],
         timestamp: T1.toISOString(),
       })
@@ -498,9 +475,7 @@ describe('Production (e2e)', () => {
       .set('Authorization', ctx.auth('worker'))
       .send({
         machineId,
-        inputs: [
-          { batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } },
-        ],
+        inputs: [{ batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } }],
         outputs: [],
         timestamp: T_OUTSIDE.toISOString(),
       })
@@ -556,9 +531,7 @@ describe('Production (e2e)', () => {
       .set('Authorization', ctx.auth('worker'))
       .send({
         machineId,
-        inputs: [
-          { batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } },
-        ],
+        inputs: [{ batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } }],
         outputs: [],
         timestamp: T1.toISOString(),
       })

@@ -1,4 +1,3 @@
-import { Logger, type ArgumentsHost } from '@nestjs/common';
 import {
   AssignmentId,
   BatchId,
@@ -28,6 +27,7 @@ import {
   WorkerId,
   WorkerNotAssignedError,
 } from '@fabrik/domain';
+import { type ArgumentsHost, Logger } from '@nestjs/common';
 
 import { DomainExceptionFilter } from './domain-exception.filter.js';
 
@@ -67,7 +67,11 @@ const cases: ReadonlyArray<readonly [label: string, error: Error, expected: numb
   ],
   ['InactiveMachineError', new InactiveMachineError(MachineId.from('m1'), 'maintenance'), 409],
   ['InactiveWorkerError', new InactiveWorkerError(WorkerId.from('w1')), 409],
-  ['InvalidStateTransitionError', new InvalidStateTransitionError('Batch', 'stored', 'in_progress'), 409],
+  [
+    'InvalidStateTransitionError',
+    new InvalidStateTransitionError('Batch', 'stored', 'in_progress'),
+    409,
+  ],
   [
     'WorkerNotAssignedError',
     new WorkerNotAssignedError(WorkerId.from('w1'), MachineId.from('m1')),
@@ -84,7 +88,11 @@ const cases: ReadonlyArray<readonly [label: string, error: Error, expected: numb
     422,
   ],
   ['IncompatibleUnitError', new IncompatibleUnitError('kg', 'unit', MaterialId.from('m1')), 422],
-  ['RecipeIntegrityError', new RecipeIntegrityError(RecipeId.from('r1'), 'output no coincide'), 422],
+  [
+    'RecipeIntegrityError',
+    new RecipeIntegrityError(RecipeId.from('r1'), 'output no coincide'),
+    422,
+  ],
   ['InvalidQuantityError', new InvalidQuantityError('no positiva'), 422],
   ['InvalidTimeSlotError', new InvalidTimeSlotError('franja inválida'), 422],
   ['InvalidObservationError', new InvalidObservationError(501), 422],

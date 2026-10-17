@@ -1,22 +1,22 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
 import {
+  type Actor,
   GetStockByLocation,
   GetStockMovements,
   LocationId,
   MaterialId,
-  type Actor,
 } from '@fabrik/domain';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 import {
-  serializeStockByLocationEntry,
-  serializeStockMovement,
   type StockByLocationEntryResponse,
   type StockMovementResponse,
+  serializeStockByLocationEntry,
+  serializeStockMovement,
 } from '../common/entity-serializers.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
-import { StockMovementsQuerySchema, type StockMovementsQuery } from './stock.dto.js';
+import { type StockMovementsQuery, StockMovementsQuerySchema } from './stock.dto.js';
 
 /**
  * Inventario (Fase 5, docs/09). RBAC en el dominio:

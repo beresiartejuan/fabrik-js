@@ -1,6 +1,6 @@
-import { UnauthorizedException, type ExecutionContext } from '@nestjs/common';
-import type { Reflector } from '@nestjs/core';
 import { Worker, WorkerId, type WorkerRepository } from '@fabrik/domain';
+import { type ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import type { Reflector } from '@nestjs/core';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ActorGuard, type AuthenticatedRequest } from './actor.guard.js';
@@ -15,7 +15,14 @@ const CONFIG: AuthConfig = {
   refreshTtlSeconds: 3_600,
 };
 
-function accessToken(overrides: { sub?: string; role?: 'admin' | 'worker' | 'auditor'; expiresInSeconds?: number; now?: number } = {}): string {
+function accessToken(
+  overrides: {
+    sub?: string;
+    role?: 'admin' | 'worker' | 'auditor';
+    expiresInSeconds?: number;
+    now?: number;
+  } = {},
+): string {
   return signJwt(
     { sub: overrides.sub ?? 'worker-1', role: overrides.role ?? 'admin', typ: 'access' },
     ACCESS_SECRET,

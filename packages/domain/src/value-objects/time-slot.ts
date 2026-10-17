@@ -41,7 +41,13 @@ export class TimeSlot {
   private readonly startMinutes: number;
   private readonly endMinutes: number;
 
-  private constructor(daysOfWeek: DayOfWeek[], start: string, end: string, startMinutes: number, endMinutes: number) {
+  private constructor(
+    daysOfWeek: DayOfWeek[],
+    start: string,
+    end: string,
+    startMinutes: number,
+    endMinutes: number,
+  ) {
     this.daysOfWeek = Object.freeze(daysOfWeek);
     this.start = start;
     this.end = end;

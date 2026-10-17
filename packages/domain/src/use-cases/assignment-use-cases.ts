@@ -1,14 +1,14 @@
-import { InactiveWorkerError, NotFoundError, OverlappingScheduleError } from '../errors/index.js';
 import { Assignment } from '../entities/assignment.js';
-import type { EventBus } from '../events/event-bus.js';
+import { InactiveWorkerError, NotFoundError, OverlappingScheduleError } from '../errors/index.js';
 import { workerAssigned, workerUnassigned } from '../events/assignment-events.js';
+import type { EventBus } from '../events/event-bus.js';
 import type { AssignmentRepository } from '../ports/assignment-repository.js';
 import type { MachineRepository } from '../ports/machine-repository.js';
 import type { WorkerRepository } from '../ports/worker-repository.js';
 import type { AssignmentId, MachineId, WorkerId } from '../value-objects/ids.js';
 import type { TimeSlot } from '../value-objects/time-slot.js';
 
-import { CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole, type Actor } from './actor.js';
+import { type Actor, CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole } from './actor.js';
 
 // --- Dependencias ---
 

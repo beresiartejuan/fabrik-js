@@ -88,7 +88,8 @@ export function resolveAuthConfig(env: AuthEnv = process.env): AuthConfig {
       'BOOTSTRAP_ADMIN_NAME y BOOTSTRAP_ADMIN_PASSWORD deben definirse juntas (o ninguna).',
     );
   }
-  const bootstrapAdmin = adminName && adminPassword ? { name: adminName, password: adminPassword } : undefined;
+  const bootstrapAdmin =
+    adminName && adminPassword ? { name: adminName, password: adminPassword } : undefined;
 
   return {
     accessSecret,

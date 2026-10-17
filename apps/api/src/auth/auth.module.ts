@@ -6,10 +6,10 @@ import { DB } from '../domain/tokens.js';
 import type { Db } from '../persistence/index.js';
 
 import { ActorGuard } from './actor.guard.js';
-import { AUTH_CONFIG, CREDENTIAL_REPOSITORY, REFRESH_TOKEN_REPOSITORY } from './auth.tokens.js';
 import { resolveAuthConfig } from './auth.config.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
+import { AUTH_CONFIG, CREDENTIAL_REPOSITORY, REFRESH_TOKEN_REPOSITORY } from './auth.tokens.js';
 import { BootstrapAdminService } from './bootstrap-admin.service.js';
 import { DrizzleCredentialRepository } from './credentials.repository.js';
 import { DrizzleRefreshTokenRepository } from './refresh-token.repository.js';

@@ -15,12 +15,12 @@ export const BatchEventsQuerySchema = z.object({
   machineId: idSchema.optional(),
   workerId: idSchema.optional(),
   materialId: idSchema.optional(),
-  from: z
-    .iso.datetime({ offset: true })
+  from: z.iso
+    .datetime({ offset: true })
     .transform((value) => new Date(value))
     .optional(),
-  to: z
-    .iso.datetime({ offset: true })
+  to: z.iso
+    .datetime({ offset: true })
     .transform((value) => new Date(value))
     .optional(),
 });

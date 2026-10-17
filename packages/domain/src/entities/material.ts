@@ -2,9 +2,9 @@ import { IncompatibleUnitError } from '../errors/index.js';
 import { MaterialId } from '../value-objects/ids.js';
 import {
   isUnitCompatibleWith,
-  unitsForPhysicalState,
   type PhysicalState,
   type UnitOfMeasure,
+  unitsForPhysicalState,
 } from '../value-objects/quantity.js';
 
 // Tipo de material: suministro (se consume) o producto (se fabrica) — docs/02.

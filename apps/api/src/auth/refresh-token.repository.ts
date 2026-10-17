@@ -1,8 +1,8 @@
-import { and, eq, isNull } from 'drizzle-orm';
 import { WorkerId } from '@fabrik/domain';
+import { and, eq, isNull } from 'drizzle-orm';
 
 import type { Executor } from '../persistence/executor.js';
-import { refreshTokens, type RefreshTokenRow } from '../persistence/schema.js';
+import { type RefreshTokenRow, refreshTokens } from '../persistence/schema.js';
 
 /**
  * Refresh token persistido. **Nunca** guarda el token en claro: `tokenHash` es

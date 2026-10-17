@@ -1,13 +1,13 @@
+import { type Actor, BatchId, TraceBatch, TraceForward } from '@fabrik/domain';
 import { Controller, Get, Param } from '@nestjs/common';
-import { BatchId, TraceBatch, TraceForward, type Actor } from '@fabrik/domain';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
 
 import {
-  serializeBatchForwardNode,
-  serializeBatchTraceNode,
   type BatchForwardNodeResponse,
   type BatchTraceNodeResponse,
+  serializeBatchForwardNode,
+  serializeBatchTraceNode,
 } from './trace.dto.js';
 
 /**

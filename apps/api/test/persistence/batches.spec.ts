@@ -17,9 +17,7 @@ describe('DrizzleBatchRepository', () => {
 
   it('findById devuelve null cuando no existe', async () => {
     const material = aMaterial();
-    await expect(
-      ctx.repositories.batches.findById(aBatch(material.id).id),
-    ).resolves.toBeNull();
+    await expect(ctx.repositories.batches.findById(aBatch(material.id).id)).resolves.toBeNull();
   });
 
   it('save + findById hacen round-trip (incluye recipeId/originBatchEventId)', async () => {
@@ -67,9 +65,9 @@ describe('DrizzleBatchRepository', () => {
     await ctx.repositories.batches.save(batchPan);
     await ctx.repositories.batches.save(batchHarina);
 
-    expect(
-      (await ctx.repositories.batches.findByMaterial!(pan.id)).map((b) => b.id),
-    ).toEqual([batchPan.id]);
+    expect((await ctx.repositories.batches.findByMaterial!(pan.id)).map((b) => b.id)).toEqual([
+      batchPan.id,
+    ]);
   });
 
   it('list filtra por materialId, status, recipeId y originBatchEventId', async () => {
@@ -89,24 +87,18 @@ describe('DrizzleBatchRepository', () => {
     await ctx.repositories.batches.save(supply);
 
     expect(await ctx.repositories.batches.list()).toHaveLength(3);
+    expect((await ctx.repositories.batches.list({ status: 'stored' })).map((b) => b.id)).toEqual([
+      storedFromRecipe.id,
+    ]);
+    expect((await ctx.repositories.batches.list({ status: 'completed' })).map((b) => b.id)).toEqual(
+      [completed.id],
+    );
     expect(
-      (await ctx.repositories.batches.list({ status: 'stored' })).map(
-        (b) => b.id,
-      ),
-    ).toEqual([storedFromRecipe.id]);
-    expect(
-      (await ctx.repositories.batches.list({ status: 'completed' })).map(
-        (b) => b.id,
-      ),
-    ).toEqual([completed.id]);
-    expect(
-      (
-        await ctx.repositories.batches.list({ materialId: otherMaterial.id })
-      ).map((b) => b.id),
+      (await ctx.repositories.batches.list({ materialId: otherMaterial.id })).map((b) => b.id),
     ).toEqual([supply.id]);
-    expect(
-      (await ctx.repositories.batches.list({ recipeId })).map((b) => b.id),
-    ).toEqual([storedFromRecipe.id]);
+    expect((await ctx.repositories.batches.list({ recipeId })).map((b) => b.id)).toEqual([
+      storedFromRecipe.id,
+    ]);
     expect(
       (
         await ctx.repositories.batches.list({

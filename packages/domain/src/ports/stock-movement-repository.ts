@@ -11,7 +11,10 @@ export interface StockMovementRepository {
   /** Agrega un movimiento inmutable. Idempotente por `id` (re-`add` reemplaza). */
   add(movement: StockMovement): Promise<void>;
   /** Movimientos de un lugar; si se indica `materialId`, filtra por material. */
-  listByLocation(locationId: LocationId, materialId?: MaterialId): Promise<readonly StockMovement[]>;
+  listByLocation(
+    locationId: LocationId,
+    materialId?: MaterialId,
+  ): Promise<readonly StockMovement[]>;
   /**
    * Suma firmada de los deltas de un lugar + material (positivo = entrada,
    * negativo = salida). Devuelve `null` si no hay movimientos, porque el

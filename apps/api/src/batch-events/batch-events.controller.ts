@@ -1,11 +1,11 @@
+import { type Actor, ListBatchEvents, MachineId, MaterialId, WorkerId } from '@fabrik/domain';
 import { Controller, Get, Query } from '@nestjs/common';
-import { ListBatchEvents, MachineId, MaterialId, WorkerId, type Actor } from '@fabrik/domain';
 
 import { Actor as ActorParam } from '../auth/actor.decorator.js';
-import { serializeBatchEvent, type BatchEventResponse } from '../common/entity-serializers.js';
+import { type BatchEventResponse, serializeBatchEvent } from '../common/entity-serializers.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 
-import { BatchEventsQuerySchema, type BatchEventsQuery } from './batch-events.dto.js';
+import { type BatchEventsQuery, BatchEventsQuerySchema } from './batch-events.dto.js';
 
 /**
  * Búsqueda de eventos de transformación (Fase 6, docs/09). RBAC en el dominio

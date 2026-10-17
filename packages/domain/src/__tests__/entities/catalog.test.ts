@@ -70,7 +70,12 @@ describe('Material', () => {
   });
 
   it('fromPersistence valida y conserva el id', () => {
-    const id = Material.create({ name: 'X', kind: 'product', physicalState: 'gas', unitOfMeasure: 'm3' }).id;
+    const id = Material.create({
+      name: 'X',
+      kind: 'product',
+      physicalState: 'gas',
+      unitOfMeasure: 'm3',
+    }).id;
     const material = Material.fromPersistence({
       id,
       name: 'Gas',
@@ -100,7 +105,12 @@ describe('Material', () => {
 
   it('fromPersistence conserva active', () => {
     const material = Material.fromPersistence({
-      id: Material.create({ name: 'X', kind: 'supply', physicalState: 'solid', unitOfMeasure: 'kg' }).id,
+      id: Material.create({
+        name: 'X',
+        kind: 'supply',
+        physicalState: 'solid',
+        unitOfMeasure: 'kg',
+      }).id,
       name: 'Harina',
       kind: 'supply',
       physicalState: 'solid',
@@ -123,7 +133,11 @@ describe('Machine', () => {
   const storage = Location.create({ name: 'Depósito', kind: 'storage' });
 
   it('create arranca en idle', () => {
-    const machine = Machine.create({ name: 'Mezcladora', type: 'mixer', locationId: production.id });
+    const machine = Machine.create({
+      name: 'Mezcladora',
+      type: 'mixer',
+      locationId: production.id,
+    });
     expect(machine.status).toBe('idle');
     expect(machine.type).toBe('mixer');
     expect(Object.isFrozen(machine)).toBe(true);
@@ -131,7 +145,11 @@ describe('Machine', () => {
 
   it('moveTo un lugar de producción actualiza locationId (I2)', () => {
     const other = Location.create({ name: 'Sala 2', kind: 'production' });
-    const machine = Machine.create({ name: 'Mezcladora', type: 'mixer', locationId: production.id });
+    const machine = Machine.create({
+      name: 'Mezcladora',
+      type: 'mixer',
+      locationId: production.id,
+    });
     const moved = machine.moveTo(other);
     expect(moved.locationId).toBe(other.id);
     expect(machine.locationId).toBe(production.id); // inmutable
@@ -139,7 +157,11 @@ describe('Machine', () => {
   });
 
   it('moveTo un lugar de almacenamiento se rechaza (I2)', () => {
-    const machine = Machine.create({ name: 'Mezcladora', type: 'mixer', locationId: production.id });
+    const machine = Machine.create({
+      name: 'Mezcladora',
+      type: 'mixer',
+      locationId: production.id,
+    });
     expect(() => machine.moveTo(storage)).toThrow(InvalidLocationKindError);
   });
 

@@ -1,13 +1,12 @@
-import { z } from 'zod';
 import {
   OpenAPIRegistry,
   OpenApiGeneratorV3,
   type RouteConfig,
 } from '@asteasolutions/zod-to-openapi';
-
+import { z } from 'zod';
+import { CreateAssignmentSchema } from '../assignments/assignments.dto.js';
 import { LoginSchema, RefreshSchema } from '../auth/dto.js';
 import { BatchEventsQuerySchema } from '../batch-events/batch-events.dto.js';
-import { CreateAssignmentSchema } from '../assignments/assignments.dto.js';
 import {
   CreateLocationSchema,
   ListLocationsQuerySchema,
@@ -106,9 +105,7 @@ const BAD_REQUEST = {
 };
 
 /** Cuerpo JSON a partir de un schema zod (sin duplicar la forma). */
-function jsonBody(
-  schema: z.ZodType,
-): NonNullable<RouteConfig['request']>['body'] {
+function jsonBody(schema: z.ZodType): NonNullable<RouteConfig['request']>['body'] {
   return { content: { 'application/json': { schema } } };
 }
 
@@ -132,8 +129,7 @@ export const OPENAPI_ROUTES: RouteConfig[] = [
   {
     method: 'post',
     path: '/auth/login',
-    summary:
-      'Login por nombre de worker + contraseña. Devuelve access + refresh.',
+    summary: 'Login por nombre de worker + contraseña. Devuelve access + refresh.',
     tags: ['auth'],
     security: [],
     request: { body: jsonBody(LoginSchema) },
@@ -450,8 +446,7 @@ export const OPENAPI_ROUTES: RouteConfig[] = [
   {
     method: 'patch',
     path: '/recipes/{id}',
-    summary:
-      'Actualiza una receta; enviar `steps` reemplaza la lista completa.',
+    summary: 'Actualiza una receta; enviar `steps` reemplaza la lista completa.',
     tags: ['recipes'],
     request: { params: pathParam('id'), body: jsonBody(UpdateRecipeSchema) },
     responses: {
@@ -520,8 +515,7 @@ export const OPENAPI_ROUTES: RouteConfig[] = [
   {
     method: 'post',
     path: '/supplies/arrivals',
-    summary:
-      'Registra el arribo de un suministro (crea lote `stored` + movimiento `supply_in`).',
+    summary: 'Registra el arribo de un suministro (crea lote `stored` + movimiento `supply_in`).',
     tags: ['supplies'],
     request: { body: jsonBody(RegisterSupplyArrivalSchema) },
     responses: {
@@ -535,8 +529,7 @@ export const OPENAPI_ROUTES: RouteConfig[] = [
   {
     method: 'post',
     path: '/production/start',
-    summary:
-      'Inicia una orden de producción desde una receta (crea el lote raíz).',
+    summary: 'Inicia una orden de producción desde una receta (crea el lote raíz).',
     tags: ['production'],
     request: { body: jsonBody(StartProductionSchema) },
     responses: {
@@ -648,8 +641,7 @@ export const OPENAPI_ROUTES: RouteConfig[] = [
   {
     method: 'get',
     path: '/batch-events',
-    summary:
-      'Lista eventos de transformación (filtros machineId/workerId/materialId/from/to).',
+    summary: 'Lista eventos de transformación (filtros machineId/workerId/materialId/from/to).',
     tags: ['batch-events'],
     request: { query: BatchEventsQuerySchema },
     responses: {
@@ -665,9 +657,7 @@ export const OPENAPI_ROUTES: RouteConfig[] = [
  * Construye el documento OpenAPI a partir de los schemas zod. Globalmente exige
  * `bearerAuth`; las rutas `@Public()` lo anulan con `security: []`.
  */
-export function buildOpenApiDocument(): ReturnType<
-  OpenApiGeneratorV3['generateDocument']
-> {
+export function buildOpenApiDocument(): ReturnType<OpenApiGeneratorV3['generateDocument']> {
   const registry = new OpenAPIRegistry();
 
   registry.registerComponent('securitySchemes', 'bearerAuth', {

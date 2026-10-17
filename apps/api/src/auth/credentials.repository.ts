@@ -1,8 +1,8 @@
-import { eq } from 'drizzle-orm';
 import { WorkerId } from '@fabrik/domain';
+import { eq } from 'drizzle-orm';
 
 import type { Executor } from '../persistence/executor.js';
-import { authCredentials, type AuthCredentialRow } from '../persistence/schema.js';
+import { type AuthCredentialRow, authCredentials } from '../persistence/schema.js';
 
 /**
  * Credencial de acceso de un worker (capa API, no dominio). `passwordHash` es el

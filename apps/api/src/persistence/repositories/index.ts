@@ -3,8 +3,8 @@ import type { Repositories } from '@fabrik/domain';
 import type { Executor } from '../executor.js';
 
 import { DrizzleAssignmentRepository } from './drizzle-assignment.repository.js';
-import { DrizzleBatchEventRepository } from './drizzle-batch-event.repository.js';
 import { DrizzleBatchRepository } from './drizzle-batch.repository.js';
+import { DrizzleBatchEventRepository } from './drizzle-batch-event.repository.js';
 import { DrizzleLocationRepository } from './drizzle-location.repository.js';
 import { DrizzleMachineRepository } from './drizzle-machine.repository.js';
 import { DrizzleMaterialRepository } from './drizzle-material.repository.js';
@@ -13,8 +13,8 @@ import { DrizzleStockMovementRepository } from './drizzle-stock-movement.reposit
 import { DrizzleWorkerRepository } from './drizzle-worker.repository.js';
 
 export { DrizzleAssignmentRepository } from './drizzle-assignment.repository.js';
-export { DrizzleBatchEventRepository } from './drizzle-batch-event.repository.js';
 export { DrizzleBatchRepository } from './drizzle-batch.repository.js';
+export { DrizzleBatchEventRepository } from './drizzle-batch-event.repository.js';
 export { DrizzleLocationRepository } from './drizzle-location.repository.js';
 export { DrizzleMachineRepository } from './drizzle-machine.repository.js';
 export { DrizzleMaterialRepository } from './drizzle-material.repository.js';
