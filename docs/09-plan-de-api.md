@@ -366,25 +366,128 @@ entidades), `test:e2e` (**70 tests**, +25: 18 producción + 7 stock), `build` y 
 
 ---
 
-## Fase 6 — Trazabilidad
+## Fase 6 — Trazabilidad ✅
 
-- [ ] `GET /trace/:batchId` (hacia atrás) y `GET /trace/:batchId/forward` (recall).
-- [ ] `GET /batch-events` con filtros (máquina, worker, material, rango de fechas).
+- [x] `GET /trace/:batchId` (hacia atrás) y `GET /trace/:batchId/forward` (recall).
+- [x] `GET /batch-events` con filtros (máquina, worker, material, rango de fechas).
 
-**Criterio de salida:** dado el flujo de la Fase 5, los endpoints devuelven el árbol
-genealógico esperado y el listado filtrado de eventos en orden cronológico.
+**✅ Completada:** `apps/api/src/` gana dos módulos siguiendo el patrón de la Fase 4:
+`trace/` (`TraceController` → `TraceBatch`/`TraceForward`) y `batch-events/`
+(`BatchEventsController` → `ListBatchEvents`). Ambos importan `DomainModule` y el
+RBAC sigue **delegado al dominio** (`worker` → 403; `admin`/`auditor` leen).
+
+Decisiones:
+
+- **Serialización recursiva de los árboles.** `trace.dto.ts` recorre los nodos del
+  dominio (`BatchTraceNode`/`BatchForwardNode`) y reutiliza los serializadores
+  compartidos `serializeBatch`/`serializeBatchEvent` (`src/common/entity-serializers.ts`),
+  de modo que los `event` embebidos salen con `Date` → ISO 8601 y la observación
+  normalizada. La forma del wire copia exactamente los DTO del dominio: en el árbol
+  hacia atrás cada nodo lleva `batch` y, si lo tiene, `event`; en el hacia adelante
+  un nodo lleva `batch` **o** `event` (nunca ambos), con los eventos colgando del
+  lote que consumen. Los opcionales (`event`, `cycleDetected`) se **omiten** cuando
+  no aplican; `cycleDetected` solo se emite cuando la rama se cortó por un ciclo en
+  datos corruptos.
+- **`from`/`to` ISO 8601 → `dateRange` inclusivo.** El query de `batch-events`
+  valida la forma y convierte los extremos a `Date`; el `dateRange` solo se arma si
+  llega al menos uno de los dos. El filtro por `materialId` coincide si el material
+  aparece en **inputs o outputs** (lo implementa el repositorio).
+- **404 de un `batchId` desconocido** lo lanza el dominio (`NotFoundError`) en ambas
+  rutas de trace; no hay validación de existencia en la API.
+
+**Criterio de salida:** cumplido — el e2e reconstruye la cadena de la Fase 5
+(arribo ×2 → start → transform paso 1 con observación → store → transform paso 2
+con merma → complete) y verifica el árbol hacia atrás (profundidad, evento con
+`machineId`/`workerId`/observación, hojas = lotes de suministro), el árbol hacia
+adelante (recall que alcanza los eventos consumidores y todos los lotes
+descendientes) y el listado filtrado de eventos en orden cronológico (sin filtro,
+máquina, worker, material por inputs **o** outputs y rango inclusivo), más RBAC
+(worker 403 en los tres endpoints, auditor 200) y 404 de lote desconocido.
+
+Verificación: `pnpm --filter api test` (**131 tests**, +3 serializadores de árboles),
+`test:e2e` (**80 tests**, +10 trazabilidad), `build` y `lint` (oxlint, 0 warnings /
+0 errors) verdes.
+
+| Recurso | Método y ruta | Caso de uso |
+|---|---|---|
+| trace | `GET /trace/:batchId` | `TraceBatch` |
+| trace | `GET /trace/:batchId/forward` | `TraceForward` |
+| batch-events | `GET /batch-events` | `ListBatchEvents` |
+
 
 ---
 
-## Fase 7 — Endurecimiento
+## Fase 7 — Endurecimiento ✅
 
-- [ ] Seeds de demo (factory, catálogos mínimos, receta de ejemplo) para arrancar la API.
-- [ ] `apps/api/README.md`: arranque, env vars, migraciones, comandos.
-- [ ] OpenAPI con `@nestjs/swagger` (decidir y documentar) expuesto en `/docs`.
-- [ ] E2E smoke del flujo completo de `docs/03-flujo-de-produccion.md`.
+- [x] Seeds de demo (factory, catálogos mínimos, receta de ejemplo) para arrancar la API.
+- [x] `apps/api/README.md`: arranque, env vars, migraciones, comandos.
+- [x] OpenAPI con `@nestjs/swagger` (decidir y documentar) expuesto en `/docs`.
+- [x] E2E smoke del flujo completo de `docs/03-flujo-de-produccion.md`.
 
-**Criterio de salida:** `pnpm --filter api test` y `test:e2e` verdes; `pnpm build`
-global verde; el smoke recorre el ciclo de producción de punta a punta.
+**Seed de demo:** `apps/api/src/persistence/seed.ts` (+ `pnpm --filter api db:seed` vía
+`tsx`, idempotente). Siembra 1 fábrica (inserción directa: `factories` no tiene puerto
+en el dominio), 1 almacén + 1 planta de producción, 2 suministros (`Harina` kg, `Agua`
+l), 1 producto intermedio (`Masa`) + 1 final (`Pan`), 1 `Mezcladora` en la planta, 1
+receta de dos pasos (`harina + agua → masa → pan`), 3 usuarios de demo con credenciales
+(`admin`/`admin123`, `operario`/`operario123`, `auditor`/`auditor123`) y la asignación del
+operario a la máquina de lunes a domingo todo el día (I3). La idempotencia se basa en
+IDs fijos + *upsert* por `id`; las credenciales solo se crean si no existen. Aplica las
+migraciones antes de sembrar. Documentado en `src/persistence/README.md`.
+
+**Smoke:** `apps/api/test/smoke/full-flow.e2e-spec.ts` recorre el ciclo de docs/03 **solo
+por HTTP** (salvo el bootstrap de usuarios del helper e2e): login admin → alta de
+catálogo (lugares, materiales, máquina, receta) → asignación → arribos ×2 → `start` →
+`transform` paso 1 con observación → `store` del intermedio → `transform` paso 2 con
+merma → `complete`; y luego, como **auditor**, reconstruye el recorrido: stock de ambos
+lugares, movimientos (orden y filtros), `trace` hacia atrás desde el producto final
+(hojas = suministros), `trace` hacia adelante (recall) desde un suministro, el árbol de
+la orden raíz y `batch-events` filtrado por máquina.
+
+**README:** `apps/api/README.md` se reescribe como documento de *endurecimiento*:
+arranque rápido (install → `db:migrate` → `db:seed` → `start:dev`), tabla de
+variables de entorno (`FABRIK_DB_FILE`, `JWT_*`, `BOOTSTRAP_ADMIN_*`, `PORT`),
+**una** tabla de endpoints consolidando las de las Fases 3–6 (42 rutas con caso de
+uso y marca de públicas), resumen de estructura y de comandos, y enlaces a
+`docs/09` y a los READMEs de módulo. El detalle por recurso no se duplica: vive en
+los READMEs de módulo y en este plan.
+
+**OpenAPI (decisión: generación zod → OpenAPI, no decoradores).** Los controladores
+validan con **zod** (`ZodValidationPipe`), no con `class-validator`, así que el
+plugin automático de `@nestjs/swagger` no puede documentar los cuerpos (no hay
+clases decoradas que inspeccionar). Se descartó `@ApiBody`/`@ApiProperty` manuales
+por duplicar la forma ya descrita por el schema. Se eligió **`@asteasolutions/zod-to-openapi`**
+(peer `zod: ^4.0.0`; zod instalado **4.6.7**) para convertir los **mismos** schemas
+en schemas OpenAPI, con **`@nestjs/swagger@12`** como único servidor (`SwaggerModule.setup`);
+sus peers `class-validator`/`class-transformer` son **opcionales**, así que no se
+reintroduce `class-validator`. `@anatine/zod-openapi` (zod v3) y `nestjs-zod`
+(`@nestjs/common` hasta `^11`, no Nest 12) quedaron fuera. El documento se sirve en
+**`/docs`** (UI) y **`/docs-json`** (`/docs-yaml`), con título/versión, esquema
+`bearerAuth` (http/bearer/JWT, global salvo rutas `@Public()`), las 42 rutas con
+resumen y `tags` por recurso, cuerpos/querys derivados de los schemas zod y las
+respuestas de error. La tabla de rutas (`OPENAPI_ROUTES`) es explícita porque los
+controladores no llevan decoradores; un e2e enumera las rutas **montadas** de verdad
+por Nest y exige igualdad exacta (anti-drift). Detalle en
+`apps/api/src/openapi/README.md`.
+
+**Limpieza de tipos.** `tsc -p tsconfig.json --noEmit` (que cubre `src/` **y**
+`test/`, a diferencia del `tsconfig.build.json` de `nest build`) reportaba 3 errores
+preexistentes en specs: dos métodos **opcionales** de puerto (`existsByName?`,
+`findByMaterial?`) invocados sin estrechar, y un *cast* mutable sobre `outputs`
+`readonly` de `BatchTransformedPayload`. Se corrigieron de raíz (aserción no-nula
+explícita en los dos primeros —el adaptador Drizzle los implementa— y un *type
+predicate* `event is BatchTransformed` en el tercero) sin tocar la estrictez; la
+verificación `tsc -p tsconfig.json --noEmit` queda **limpia**.
+
+**Criterio de salida:** cumplido — `pnpm --filter api test` (136), `test:e2e` (85:
++5 OpenAPI incluyendo el smoke de `/docs-json` y el anti-drift), `build` y `lint`
+(oxlint, 0 warnings / 0 errors), `tsc -p tsconfig.json --noEmit` limpio y
+`pnpm build` global (turbo, 3/3 tareas) verdes.
+
+**✅ Fase 7 completada.** Con el seed + smoke ya hechos, esta fase cierra el
+`apps/api/README.md` como documento operativo, añade OpenAPI en `/docs` generado
+desde zod y deja `tsc` limpio. **Estado global del plan: Fases 0–7 completadas**;
+los riesgos/decisiones pendientes (tabla error→HTTP contra consumidores reales,
+Turso remoto, CORS para `apps/web`, rate limiting) siguen listados abajo.
 
 ---
 
