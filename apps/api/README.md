@@ -95,6 +95,35 @@ E2E: `apps/api/test/{materials,locations,machines,workers,recipes,assignments}/*
 sobre el helper compartido `test/support/e2e-app.ts` (base temporal, admin por env y
 siembra de `worker`/`auditor`).
 
+## Producción e inventario (Fase 5)
+
+Tres módulos siguiendo el patrón de la Fase 4: `src/supplies/`, `src/production/` y
+`src/stock/`. El RBAC sigue en el dominio (`UnauthorizedRoleError` → 403):
+`StartProduction` es solo `admin`, `RecordTransformation` solo `worker`, y
+`StoreBatch`/`CompleteProduction`/`RegisterSupplyArrival` son `admin`/`worker`.
+
+- **`workerId` del `Actor`, nunca del cuerpo.** `POST /production/transform` no acepta
+  `workerId`; el controlador inyecta `actor.workerId` (el dominio exige que coincidan).
+- **`timestamp` opcional** (ISO 8601 → `Date`) en `transform`, para tests
+  deterministas de la ventana I3.
+- **`transform` devuelve el evento y los lotes de output** (el caso de uso solo
+  devuelve el `BatchEvent`; el controlador resuelve los outputs por
+  `originBatchEventId`). `start`/`transform` responden **201**; `store`/`complete`, **200**.
+- **Serializadores compartidos**: `Batch`, `BatchEvent` y `StockMovement` en
+  `src/common/entity-serializers.ts` (lista blanca; `Date` → ISO 8601).
+- **Stock**: `GET /stock/:locationId` es A/Au/**W** (el operario lee existencias);
+  `GET /stock/:locationId/movements` es A/Au. El lugar de la máquina puede mostrar
+  `amount` negativo tras un consumo.
+
+| Método y ruta | Caso de uso |
+|---|---|
+| `POST /supplies/arrivals` | `RegisterSupplyArrival` |
+| `POST /production/start` · `POST /production/transform` · `POST /production/store` · `POST /production/complete` | `StartProduction` · `RecordTransformation` · `StoreBatch` · `CompleteProduction` |
+| `GET /stock/:locationId` · `GET /stock/:locationId/movements` | `GetStockByLocation` · `GetStockMovements` |
+
+E2E: `apps/api/test/production/production.e2e-spec.ts` (flujo completo con merma +
+RBAC + errores del camino) y `apps/api/test/stock/stock.e2e-spec.ts`.
+
 ## Comandos
 
 ```bash

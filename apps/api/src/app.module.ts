@@ -9,7 +9,10 @@ import { HealthController } from './health/health.controller.js';
 import { LocationsModule } from './locations/locations.module.js';
 import { MachinesModule } from './machines/machines.module.js';
 import { MaterialsModule } from './materials/materials.module.js';
+import { ProductionModule } from './production/production.module.js';
 import { RecipesModule } from './recipes/recipes.module.js';
+import { StockModule } from './stock/stock.module.js';
+import { SuppliesModule } from './supplies/supplies.module.js';
 import { WorkersModule } from './workers/workers.module.js';
 
 @Module({
@@ -22,6 +25,9 @@ import { WorkersModule } from './workers/workers.module.js';
     WorkersModule,
     RecipesModule,
     AssignmentsModule,
+    SuppliesModule,
+    ProductionModule,
+    StockModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],

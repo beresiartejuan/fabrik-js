@@ -296,15 +296,73 @@ Verificación: `pnpm --filter api test` (**115 tests**, +2: serializadores de
 
 ---
 
-## Fase 5 — Endpoints de producción e inventario
+## Fase 5 — Endpoints de producción e inventario ✅
 
-- [ ] `POST /supplies/arrivals` (`RegisterSupplyArrival`).
-- [ ] `POST /production/start`, `POST /production/transform`, `POST /production/store`,
+- [x] `POST /supplies/arrivals` (`RegisterSupplyArrival`).
+- [x] `POST /production/start`, `POST /production/transform`, `POST /production/store`,
       `POST /production/complete`.
-- [ ] `GET /stock/:locationId`, `GET /stock/:locationId/movements`.
+- [x] `GET /stock/:locationId`, `GET /stock/:locationId/movements`.
 
-**Criterio de salida:** e2e del flujo de producción (arribo → transformación con merma →
-store → complete) con eventos emitidos y estados correctos; e2e de stock y movimientos.
+**✅ Completada:** `apps/api/src/` gana tres módulos: `supplies/`
+(`SuppliesController` → `RegisterSupplyArrival`), `production/`
+(`ProductionController` → start/transform/store/complete) y `stock/`
+(`StockController` → stock y movimientos), siguiendo el patrón de la Fase 4
+(`*.controller.ts` + `*.dto.ts` + `*.module.ts`, `DomainModule` importado, RBAC
+delegado al dominio con `@Actor()`).
+
+Decisiones:
+
+- **`workerId` viene del `Actor`, no del cuerpo.** En `RecordTransformation` el
+  dominio exige `actor.workerId === command.workerId`; el schema de
+  `POST /production/transform` **no** incluye `workerId` y el controlador inyecta
+  `actor.workerId`, de modo que un worker no puede registrar la transformación de
+  otro. Es un endurecimiento del wire (no una regla nueva: la regla vive en el dominio).
+- **`timestamp` opcional.** `RecordTransformation` acepta un `timestamp` inyectable
+  (ISO 8601 → `Date`) que llega al dominio tal cual; imprescindible para tests
+  deterministas de la ventana I3. Por defecto el dominio usa el instante actual.
+- **Respuesta de `transform` = evento + lotes de output.** El caso de uso devuelve
+  solo el `BatchEvent` (no los ids de los lotes que crea), así que el controlador
+  inyecta `BatchRepository` y resuelve los outputs con
+  `list({ originBatchEventId })`; así el cliente encadena el `store` del intermedio
+  con la propia respuesta. Es la única lectura de apoyo del controlador.
+- **`POST /production/store` (y no `POST /batches/:id/store`).** Se mantiene la ruta
+  del plan; el cuerpo lleva `{ batchId, locationId }` porque aún no existe un
+  recurso `batches`. `start` y `transform` devuelven **201** (crean recursos) y
+  `store`/`complete` **200** (transicionan uno existente).
+- **Serializadores de entidades compartidas.** `Batch`/`BatchEvent`/`StockMovement`
+  las consumen varios módulos, así que sus serializadores viven en
+  `src/common/entity-serializers.ts` (junto a `Quantity`/`TimeSlot`): lista blanca
+  de campos y `Date` → ISO 8601. `BatchEvent` normaliza la observación (trim) y los
+  opcionales se **omiten** del JSON.
+- **Stock de un lugar de producción con deltas negativos.** `GET /stock/:locationId`
+  agrega movimientos: tras una transformación el lugar de la máquina muestra
+  `amount` negativo (consumo). `GetStockByLocation` es A/Au/**W**;
+  `GetStockMovements` es A/Au (worker → 403).
+
+**Criterio de salida:** e2e del flujo de producción completo (arribo ×2 → start →
+transform paso 1 con observación → store del intermedio → transform paso 2 con merma
+→ complete) que afirma estados de lote, matemática de stock por lugar (consumo debita
+la máquina, `produced` acredita el almacén), orden de movimientos y eventos emitidos
+(`supply.arrived` ×2, `batch.created`, `batch.transformed` ×2, `batch.stored`,
+`production.completed`) vía `InMemoryEventBus`; más los errores del camino
+(máquina en mantenimiento → 409, fuera de la franja I3 → 409, input inexistente →
+404, output con unidad incompatible → 422) y RBAC (worker no puede `start` → 403,
+auditor no transforma → 403, worker lee stock → 200). E2E de stock y movimientos
+(filtro por material, lugar inexistente → 404, historial de worker → 403).
+
+Verificación: `pnpm --filter api test` (**128 tests**, +4 serializadores de
+entidades), `test:e2e` (**70 tests**, +25: 18 producción + 7 stock), `build` y `lint`
+(oxlint, 0 warnings / 0 errors) verdes.
+
+| Recurso | Método y ruta | Caso de uso |
+|---|---|---|
+| supplies | `POST /supplies/arrivals` | `RegisterSupplyArrival` |
+| production | `POST /production/start` | `StartProduction` |
+| production | `POST /production/transform` | `RecordTransformation` |
+| production | `POST /production/store` | `StoreBatch` |
+| production | `POST /production/complete` | `CompleteProduction` |
+| stock | `GET /stock/:locationId` | `GetStockByLocation` |
+| stock | `GET /stock/:locationId/movements` | `GetStockMovements` |
 
 ---
 
