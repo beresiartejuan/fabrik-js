@@ -11,7 +11,9 @@ import {
   InvalidQuantityError,
   InvalidTimeSlotError,
   InvalidTransformationError,
+  LastAdminError,
   MachineId,
+  MachineTypeMismatchError,
   MaterialId,
   MaterialKindMismatchError,
   NotAProductionOrderError,
@@ -19,6 +21,8 @@ import {
   Quantity,
   RecipeId,
   RecipeIntegrityError,
+  RecipeStepId,
+  SelfModificationNotAllowedError,
   UnauthorizedRoleError,
   WorkerId,
   WorkerNotAssignedError,
@@ -172,6 +176,38 @@ describe('NotAProductionOrderError', () => {
   });
 });
 
+describe('Errores anti-lockout y de tipo de máquina', () => {
+  it('SelfModificationNotAllowedError transporta worker, caso de uso y campo', () => {
+    const error = new SelfModificationNotAllowedError(WORKER_ID, 'DeactivateWorker', 'active');
+    expect(error).toBeInstanceOf(DomainError);
+    expect(error.name).toBe('SelfModificationNotAllowedError');
+    expect(error.workerId).toBe(WORKER_ID);
+    expect(error.useCase).toBe('DeactivateWorker');
+    expect(error.field).toBe('active');
+  });
+
+  it('LastAdminError transporta worker, caso de uso y acción', () => {
+    const error = new LastAdminError(WORKER_ID, 'UpdateWorker', 'demote');
+    expect(error).toBeInstanceOf(DomainError);
+    expect(error.name).toBe('LastAdminError');
+    expect(error.workerId).toBe(WORKER_ID);
+    expect(error.useCase).toBe('UpdateWorker');
+    expect(error.action).toBe('demote');
+    expect(error.message).toContain('último administrador activo');
+  });
+
+  it('MachineTypeMismatchError transporta paso, tipos y máquina opcional', () => {
+    const stepId = RecipeStepId.from('step-1');
+    const error = new MachineTypeMismatchError(stepId, 'mixer', 'cooker', MACHINE_ID);
+    expect(error).toBeInstanceOf(DomainError);
+    expect(error.name).toBe('MachineTypeMismatchError');
+    expect(error.recipeStepId).toBe(stepId);
+    expect(error.expected).toBe('mixer');
+    expect(error.received).toBe('cooker');
+    expect(error.machineId).toBe(MACHINE_ID);
+  });
+});
+
 describe('Errores de value objects (Fase 1)', () => {
   it('InvalidQuantityError hereda de DomainError', () => {
     const error = new InvalidQuantityError('cantidad inválida');
@@ -205,6 +241,15 @@ describe('Catálogo completo de errores', () => {
     ['MaterialKindMismatchError', new MaterialKindMismatchError(MATERIAL_ID, 'supply', 'product')],
     ['InvalidTransformationError', new InvalidTransformationError('empty', 'x')],
     ['NotAProductionOrderError', new NotAProductionOrderError(BATCH_ID)],
+    [
+      'SelfModificationNotAllowedError',
+      new SelfModificationNotAllowedError(WORKER_ID, 'x', 'role'),
+    ],
+    ['LastAdminError', new LastAdminError(WORKER_ID, 'x', 'deactivate')],
+    [
+      'MachineTypeMismatchError',
+      new MachineTypeMismatchError(RecipeStepId.from('step-1'), 'mixer', 'cooker'),
+    ],
   ];
 
   it.each(CASES)('%s hereda de DomainError con su nombre', (name, error) => {

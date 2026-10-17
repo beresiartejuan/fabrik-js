@@ -27,6 +27,7 @@ import {
   Recipe,
   RecipeId,
   RecipeStep,
+  RecipeStepId,
   RecordTransformation,
   RegisterSupplyArrival,
   StartProduction,
@@ -201,6 +202,18 @@ async function seedSupplies(fixture: Fixture): Promise<{ aceite: Batch; sosa: Ba
     locationId: fixture.storage.id,
   });
   return { aceite, sosa };
+}
+
+// Lote con `recipeId`: aporta contexto de receta para validar `recipeStepId`.
+async function seedRecipeContextBatch(fixture: Fixture): Promise<Batch> {
+  const batch = Batch.create({
+    materialId: fixture.aceite.id,
+    quantity: Quantity.create(5, 'l'),
+    recipeId: fixture.recipe.id,
+    status: 'stored',
+  });
+  await fixture.repos.batches.save(batch);
+  return batch;
 }
 
 describe('flujo completo de producción (docs/03)', () => {
@@ -628,6 +641,70 @@ describe('RecordTransformation', () => {
         ...stepOneCommand(fixture, BatchId.create(), sosa.id),
       }),
     ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it('valida el paso de receta cuando un input aporta recipeId (paso válido)', async () => {
+    const fixture = await seedFixture();
+    const { sosa } = await seedSupplies(fixture);
+    const recipeBatch = await seedRecipeContextBatch(fixture);
+
+    const event = await fixture.recordTransformation.execute(
+      juanActor(fixture),
+      stepOneCommand(fixture, recipeBatch.id, sosa.id),
+    );
+
+    expect(event.recipeStepId).toBe(fixture.step1.id);
+  });
+
+  it('lanza NotFoundError(RecipeStep) si el paso no existe en la receta del input', async () => {
+    const fixture = await seedFixture();
+    const { sosa } = await seedSupplies(fixture);
+    const recipeBatch = await seedRecipeContextBatch(fixture);
+    const unknownStep = RecipeStepId.create();
+
+    await expect(
+      fixture.recordTransformation.execute(juanActor(fixture), {
+        ...stepOneCommand(fixture, recipeBatch.id, sosa.id),
+        recipeStepId: unknownStep,
+      }),
+    ).rejects.toMatchObject({
+      name: 'NotFoundError',
+      entity: 'RecipeStep',
+      id: unknownStep,
+    });
+  });
+
+  it('rechaza si el tipo de máquina no coincide con el del paso (MachineTypeMismatchError)', async () => {
+    const fixture = await seedFixture();
+    const { sosa } = await seedSupplies(fixture);
+    const recipeBatch = await seedRecipeContextBatch(fixture);
+
+    // El paso 2 exige una cocinera; el comando usa la mezcladora.
+    await expect(
+      fixture.recordTransformation.execute(juanActor(fixture), {
+        ...stepOneCommand(fixture, recipeBatch.id, sosa.id),
+        recipeStepId: fixture.step2.id,
+      }),
+    ).rejects.toMatchObject({
+      name: 'MachineTypeMismatchError',
+      recipeStepId: fixture.step2.id,
+      expected: 'cooker',
+      received: 'mixer',
+      machineId: fixture.mixer.id,
+    });
+  });
+
+  it('permite transformaciones ad-hoc sin contexto de receta aunque haya recipeStepId', async () => {
+    const fixture = await seedFixture();
+    const { aceite, sosa } = await seedSupplies(fixture);
+    const unknownStep = RecipeStepId.create();
+
+    const event = await fixture.recordTransformation.execute(juanActor(fixture), {
+      ...stepOneCommand(fixture, aceite.id, sosa.id),
+      recipeStepId: unknownStep,
+    });
+
+    expect(event.recipeStepId).toBe(unknownStep);
   });
 
   it('lanza NotFoundError si un material de output no existe', async () => {

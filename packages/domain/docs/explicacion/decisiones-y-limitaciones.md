@@ -77,12 +77,30 @@ La interfaz `StockMoved`, su payload y la fábrica `stockMoved` existen y se exp
 emitido por "cualquier `StockMovement`", lo cual no ocurre todavía: los eventos publicados
 son los enumerados por caso de uso.
 
-### `TimeSlot` en hora local, sin zona horaria
+### `TimeSlot`: zona horaria del servidor (política)
 
 `TimeSlot.overlaps` y `TimeSlot.contains(date)` usan `Date.getDay()`, `getHours()` y
-`getMinutes()`, es decir, la **hora local del proceso**, sin zona horaria explícita ni
-`Intl`. Si la API y el front corren en zonas distintas, o si se persisten instantes en
-UTC, el cálculo puede diferir. `docs/02`/`docs/04` no fijan una zona.
+`getMinutes()`, es decir, la **zona local del proceso**, sin zona horaria explícita ni
+`Intl`. La política es que esa zona local sea **la del servidor de la API**, que es la
+**fuente de verdad para I3** (asignación vigente en el instante de la transformación).
+
+Consecuencias:
+
+- El cliente **no debe recalcular** la vigencia de una franja con su propia zona: un
+  navegador en otra zona podría concluir algo distinto. Las evaluaciones de "activo
+  ahora" se harán server-side.
+- La API expondrá `/me/schedule` con un campo `activeNow` calculado en el servidor
+  (próximamente; el dominio ya ofrece `TimeSlot.contains`).
+- El servidor debe configurarse con la zona de la fábrica (p. ej. `TZ=America/...`) y
+  operar de forma consistente; si se persisten instantes en UTC, la conversión a la
+  zona local ocurre antes de llamar a `contains`.
+- `docs/02`/`docs/04` no fijan una zona explícita: esta política cubre ese hueco sin
+  introducir una dependencia de `Intl` en el dominio.
+
+`TimeSlot` sí acota la representación: `start` va de `00:00` a `23:59` y `end` admite
+además `24:00` (1440 minutos) para expresar el fin de jornada. La semántica sigue siendo
+`[start, end)`, por lo que `00:00–24:00` cubre el día completo y `end: '24:00'` nunca
+incluye las `00:00` del día siguiente (pertenecen a la franja de ese otro día).
 
 ### Cantidad planificada del lote raíz
 
@@ -90,6 +108,19 @@ UTC, el cálculo puede diferir. `docs/02`/`docs/04` no fijan una zona.
 `StartProduction` usa `recipe.outputQuantity` como **cantidad objetivo planificada** del
 lote raíz, que representa la *orden*, no producto físico. Las cantidades reales viven en
 los lotes de output de cada `RecordTransformation`, lo que permite ver mermas al auditar.
+
+### `RecordTransformation`: validación de `recipeStepId`
+
+Cuando el comando referencia un paso de receta y **algún lote de input aporta
+`recipeId`** (típicamente el lote raíz de la orden), se carga esa receta y se exige que
+el paso exista en ella (`NotFoundError('RecipeStep')`) y que el tipo de la máquina
+coincida con `step.machineType` (`MachineTypeMismatchError`).
+
+Si **ningún input tiene `recipeId`** (transformación ad-hoc, o pasos intermedios cuyos
+lotes no heredan la receta), no hay receta contra la cual resolver el paso: la
+validación se omite y la transformación se registra igualmente. Es una decisión
+pragmática para no bloquear flujos válidos mientras los lotes intermedios no propaguen
+`recipeId`.
 
 ### `RecordTransformation`: validaciones que no se hacen
 

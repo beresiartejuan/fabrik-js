@@ -21,6 +21,10 @@ export const CATALOG_READ_ROLES: readonly WorkerRole[] = ['admin', 'auditor'];
 /**
  * Todos los roles del sistema (docs/04, `GetStockByLocation`: A, Au, W). Pensado
  * para lecturas de stock abiertas al operario que consume el material.
+ *
+ * También se usa en `ListWorkerSchedule`, donde el rol `worker` solo puede leer
+ * su propia agenda: el caso de uso comprueba `actor.workerId === command.workerId`
+ * después del guard y lanza `UnauthorizedRoleError` si intenta leer la de otro.
  */
 export const ALL_ROLES: readonly WorkerRole[] = ['admin', 'worker', 'auditor'];
 

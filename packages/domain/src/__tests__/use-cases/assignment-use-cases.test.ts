@@ -388,12 +388,38 @@ describe('ListWorkerSchedule', () => {
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  it('rechaza al rol worker', async () => {
-    const { listWorkerSchedule } = setup();
+  it('permite a un worker leer su propia agenda (auto-lectura)', async () => {
+    const { assign, listWorkerSchedule, repos } = setup();
+    const worker = await seedWorker(repos);
+    const machine = await seedMachine(repos);
+    await assign.execute(ADMIN, {
+      workerId: worker.id,
+      machineId: machine.id,
+      slot: MONDAY_MORNING(),
+    });
 
     await expect(
-      listWorkerSchedule.execute(WORKER, { workerId: WorkerId.create() }),
-    ).rejects.toBeInstanceOf(UnauthorizedRoleError);
+      listWorkerSchedule.execute({ workerId: worker.id, role: 'worker' }, { workerId: worker.id }),
+    ).resolves.toHaveLength(1);
+  });
+
+  it('rechaza a un worker que intenta leer la agenda de otro (403)', async () => {
+    const { assign, listWorkerSchedule, repos } = setup();
+    const worker = await seedWorker(repos);
+    const machine = await seedMachine(repos);
+    await assign.execute(ADMIN, {
+      workerId: worker.id,
+      machineId: machine.id,
+      slot: MONDAY_MORNING(),
+    });
+
+    await expect(listWorkerSchedule.execute(WORKER, { workerId: worker.id })).rejects.toMatchObject(
+      {
+        name: 'UnauthorizedRoleError',
+        role: 'worker',
+        useCase: 'ListWorkerSchedule',
+      },
+    );
   });
 });
 

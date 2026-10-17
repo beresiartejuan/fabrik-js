@@ -20,6 +20,27 @@ describe('TimeSlot', () => {
     expect(() => TimeSlot.create([MONDAY], '08:60', '12:00')).toThrow(InvalidTimeSlotError);
     expect(() => TimeSlot.create([MONDAY], '24:00', '25:00')).toThrow(InvalidTimeSlotError);
     expect(() => TimeSlot.create([MONDAY], '0800', '12:00')).toThrow(InvalidTimeSlotError);
+    expect(() => TimeSlot.create([MONDAY], '08:00', '24:01')).toThrow(InvalidTimeSlotError);
+    expect(() => TimeSlot.create([MONDAY], '08:00', '24:60')).toThrow(InvalidTimeSlotError);
+  });
+
+  it('acepta end 24:00 (fin de jornada) y cubre el día completo', () => {
+    const fullDay = TimeSlot.create([MONDAY], '00:00', '24:00');
+    expect(fullDay.end).toBe('24:00');
+    // 2026-10-12 es lunes; 2026-10-13 es martes.
+    expect(fullDay.contains(new Date(2026, 9, 12, 0, 0))).toBe(true);
+    expect(fullDay.contains(new Date(2026, 9, 12, 23, 59))).toBe(true);
+    expect(fullDay.contains(new Date(2026, 9, 13, 0, 0))).toBe(false);
+
+    const lateShift = TimeSlot.create([MONDAY], '08:00', '24:00');
+    expect(lateShift.contains(new Date(2026, 9, 12, 8, 0))).toBe(true);
+    expect(lateShift.contains(new Date(2026, 9, 12, 23, 59))).toBe(true);
+    expect(lateShift.contains(new Date(2026, 9, 12, 7, 59))).toBe(false);
+
+    // Sigue siendo [start, end): una franja que empieza a las 24:00 no existe,
+    // pero una adyacente a 24:00 no solapa.
+    expect(lateShift.overlaps(TimeSlot.create([MONDAY], '00:00', '08:00'))).toBe(false);
+    expect(fullDay.overlaps(TimeSlot.create([MONDAY], '10:00', '11:00'))).toBe(true);
   });
 
   it('rechaza start >= end (sin rangos que crucen medianoche)', () => {

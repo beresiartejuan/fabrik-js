@@ -12,6 +12,7 @@
 
 import { Batch } from '../entities/batch.js';
 import { BatchEvent } from '../entities/batch-event.js';
+import type { RecipeStep } from '../entities/recipe.js';
 import { StockMovement } from '../entities/stock-movement.js';
 import type { WorkerRole } from '../entities/worker.js';
 import {
@@ -20,6 +21,7 @@ import {
   IncompatibleUnitError,
   InvalidLocationKindError,
   InvalidTransformationError,
+  MachineTypeMismatchError,
   MaterialKindMismatchError,
   NotAProductionOrderError,
   NotFoundError,
@@ -246,6 +248,10 @@ export class StartProduction {
  *  e. **I3**: el worker tiene una asignación a ESA máquina cuya franja contiene
  *     el `timestamp` (`WorkerNotAssignedError`);
  *  f. cada lote de input existe (`NotFoundError`);
+ *  f.2 si se referencia un `recipeStepId` y algún lote de input aporta contexto
+ *     de receta (`batch.recipeId`, típicamente el lote raíz que se consume), el
+ *     paso debe existir en esa receta (`NotFoundError('RecipeStep')`) y la
+ *     máquina debe ser del tipo exigido por el paso (`MachineTypeMismatchError`);
  *  g. **I6**: cada material de output existe y su cantidad usa la unidad del
  *     material (`IncompatibleUnitError`).
  *
@@ -253,6 +259,11 @@ export class StartProduction {
  * `StockMovement` `consumed` (delta negativo, `batchEventId`) por input en el
  * lugar de la máquina, y un `Batch` `in_progress` con `originBatchEventId` por
  * output. Emite `batch.transformed` tras el commit.
+ *
+ * Decisión sobre `recipeStepId`: si ningún lote de input tiene `recipeId`
+ * (transformación ad-hoc o pasos intermedios cuyos lotes no heredan la receta), no
+ * hay receta contra la cual resolver el paso y la validación se omite; el evento
+ * se registra igualmente con el `recipeStepId` declarado.
  *
  * Diferido (documentado): la suficiencia de stock **I5** no se valida todavía.
  * El stock consumido se descuenta en el lugar de la máquina y los outputs solo
@@ -329,6 +340,37 @@ export class RecordTransformation {
           throw new NotFoundError('Batch', input.batchId);
         }
         resolvedInputs.push({ batch, quantity: input.quantity });
+      }
+
+      // (f.2) Validar el paso de receta cuando los inputs aportan contexto de
+      // receta. Sin contexto (transformación ad-hoc) no hay receta que consultar
+      // y se omite la comprobación, tal como documenta el caso de uso.
+      if (command.recipeStepId) {
+        const recipeIds = new Set<RecipeId>();
+        for (const { batch } of resolvedInputs) {
+          if (batch.recipeId) {
+            recipeIds.add(batch.recipeId);
+          }
+        }
+        if (recipeIds.size > 0) {
+          let step: RecipeStep | undefined;
+          for (const recipeId of recipeIds) {
+            const recipe = await repos.recipes.findById(recipeId);
+            if (!recipe) {
+              throw new NotFoundError('Recipe', recipeId);
+            }
+            step = recipe.steps.find((candidate) => candidate.id === command.recipeStepId);
+            if (step) {
+              break;
+            }
+          }
+          if (!step) {
+            throw new NotFoundError('RecipeStep', command.recipeStepId);
+          }
+          if (step.machineType !== machine.type) {
+            throw new MachineTypeMismatchError(step.id, step.machineType, machine.type, machine.id);
+          }
+        }
       }
 
       // (g) outputs: material existente + coherencia de unidad (I6).

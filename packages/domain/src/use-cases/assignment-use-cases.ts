@@ -1,5 +1,10 @@
 import { Assignment } from '../entities/assignment.js';
-import { InactiveWorkerError, NotFoundError, OverlappingScheduleError } from '../errors/index.js';
+import {
+  InactiveWorkerError,
+  NotFoundError,
+  OverlappingScheduleError,
+  UnauthorizedRoleError,
+} from '../errors/index.js';
 import { workerAssigned, workerUnassigned } from '../events/assignment-events.js';
 import type { EventBus } from '../events/event-bus.js';
 import type { AssignmentRepository } from '../ports/assignment-repository.js';
@@ -8,7 +13,13 @@ import type { WorkerRepository } from '../ports/worker-repository.js';
 import type { AssignmentId, MachineId, WorkerId } from '../value-objects/ids.js';
 import type { TimeSlot } from '../value-objects/time-slot.js';
 
-import { type Actor, CATALOG_READ_ROLES, CATALOG_WRITE_ROLES, requireRole } from './actor.js';
+import {
+  type Actor,
+  ALL_ROLES,
+  CATALOG_READ_ROLES,
+  CATALOG_WRITE_ROLES,
+  requireRole,
+} from './actor.js';
 
 // --- Dependencias ---
 
@@ -118,14 +129,22 @@ export class UnassignWorker {
 }
 
 /**
- * `ListWorkerSchedule` (roles A, Au): asignaciones de un worker. Valida que el
- * worker exista (`NotFoundError`) para no devolver una agenda vacía engañosa.
+ * `ListWorkerSchedule` (roles A, Au y W): asignaciones de un worker.
+ *
+ * Un `worker` solo puede leer **su propia** agenda (`actor.workerId ===
+ * command.workerId`); si intenta leer la de otro se lanza `UnauthorizedRoleError`
+ * (auto-lectura sin exponer agendas ajenas). A y Au pueden leer cualquiera.
+ * Valida que el worker exista (`NotFoundError`) para no devolver una agenda
+ * vacía engañosa.
  */
 export class ListWorkerSchedule {
   constructor(private readonly deps: AssignmentReadDeps) {}
 
   async execute(actor: Actor, command: ListWorkerScheduleCommand): Promise<readonly Assignment[]> {
-    requireRole(actor, CATALOG_READ_ROLES, 'ListWorkerSchedule');
+    requireRole(actor, ALL_ROLES, 'ListWorkerSchedule');
+    if (actor.role === 'worker' && actor.workerId !== command.workerId) {
+      throw new UnauthorizedRoleError(actor.role, 'ListWorkerSchedule');
+    }
 
     const worker = await this.deps.workers.findById(command.workerId);
     if (!worker) {

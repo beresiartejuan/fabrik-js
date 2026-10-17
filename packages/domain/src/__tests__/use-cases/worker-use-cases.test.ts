@@ -103,6 +103,55 @@ describe('UpdateWorker', () => {
       UnauthorizedRoleError,
     );
   });
+
+  it('permite a un admin actualizar su propio nombre', async () => {
+    const { create, update } = setup();
+    const admin = await create.execute(ADMIN, { name: 'Admin', role: 'admin' });
+
+    const updated = await update.execute(
+      { workerId: admin.id, role: 'admin' },
+      { id: admin.id, name: 'Admin renovado' },
+    );
+
+    expect(updated.name).toBe('Admin renovado');
+    expect(updated.role).toBe('admin');
+  });
+
+  it('rechaza que un admin cambie su propio rol', async () => {
+    const { create, update } = setup();
+    const admin = await create.execute(ADMIN, { name: 'Admin', role: 'admin' });
+
+    await expect(
+      update.execute({ workerId: admin.id, role: 'admin' }, { id: admin.id, role: 'worker' }),
+    ).rejects.toMatchObject({
+      name: 'SelfModificationNotAllowedError',
+      workerId: admin.id,
+      useCase: 'UpdateWorker',
+      field: 'role',
+    });
+  });
+
+  it('rechaza degradar al último admin activo', async () => {
+    const { create, update } = setup();
+    const admin = await create.execute(ADMIN, { name: 'Admin', role: 'admin' });
+
+    await expect(update.execute(ADMIN, { id: admin.id, role: 'worker' })).rejects.toMatchObject({
+      name: 'LastAdminError',
+      workerId: admin.id,
+      useCase: 'UpdateWorker',
+      action: 'demote',
+    });
+  });
+
+  it('permite degradar a un admin cuando hay otro admin activo', async () => {
+    const { create, update } = setup();
+    const admin = await create.execute(ADMIN, { name: 'Admin', role: 'admin' });
+    await create.execute(ADMIN, { name: 'Admin 2', role: 'admin' });
+
+    const updated = await update.execute(ADMIN, { id: admin.id, role: 'worker' });
+
+    expect(updated.role).toBe('worker');
+  });
 });
 
 describe('DeactivateWorker', () => {
@@ -142,6 +191,42 @@ describe('DeactivateWorker', () => {
     await expect(deactivate.execute(AUDITOR, { id: worker.id })).rejects.toBeInstanceOf(
       UnauthorizedRoleError,
     );
+  });
+
+  it('rechaza que un admin se desactive a sí mismo', async () => {
+    const { create, deactivate } = setup();
+    const admin = await create.execute(ADMIN, { name: 'Admin', role: 'admin' });
+
+    await expect(
+      deactivate.execute({ workerId: admin.id, role: 'admin' }, { id: admin.id }),
+    ).rejects.toMatchObject({
+      name: 'SelfModificationNotAllowedError',
+      workerId: admin.id,
+      useCase: 'DeactivateWorker',
+      field: 'active',
+    });
+  });
+
+  it('rechaza desactivar al último admin activo', async () => {
+    const { create, deactivate } = setup();
+    const admin = await create.execute(ADMIN, { name: 'Admin', role: 'admin' });
+
+    await expect(deactivate.execute(ADMIN, { id: admin.id })).rejects.toMatchObject({
+      name: 'LastAdminError',
+      workerId: admin.id,
+      useCase: 'DeactivateWorker',
+      action: 'deactivate',
+    });
+  });
+
+  it('permite desactivar a un admin cuando hay otro admin activo', async () => {
+    const { create, deactivate } = setup();
+    const admin = await create.execute(ADMIN, { name: 'Admin', role: 'admin' });
+    await create.execute(ADMIN, { name: 'Admin 2', role: 'admin' });
+
+    const inactive = await deactivate.execute(ADMIN, { id: admin.id });
+
+    expect(inactive.active).toBe(false);
   });
 });
 
