@@ -258,10 +258,10 @@ filas = asignaciones del rango) o una lista agrupada por worker.
 ### 9. `/produccion`
 
 Lista de **producciones activas** (lotes `in_progress`) con enlace a trazabilidad y acción
-"Registrar transformación". **Gap:** la API no expone `GET /batches` ni `GET /batches/:id`;
-v1 muestra los lotes iniciados/producidos **en la sesión actual** (respuestas de `start` /
-`transform`, persistidas en `sessionStorage`) y ofrece un buscador por ID que usa
-`GET /trace/:batchId` (devuelve el `batch` con su `status`). Ver *gaps*.
+"Registrar transformación". **Gap resuelto:** la API ya expone `GET /batches` (filtros
+`status`/`materialId`/`recipeId`/`originBatchEventId`) y `GET /batches/:id`, así que la lista
+se carga del servidor (`GET /batches?status=in_progress`) en vez del `sessionStorage` de v1.
+Ver *gaps*.
 
 ### 10. `/produccion/nueva` (admin)
 
@@ -454,10 +454,11 @@ render completo de cada página más allá de un smoke. No se testea shadcn (ter
   Query. Si el volumen de caché/invalidación crece, evaluar TanStack Query como decisión
   posterior.
 - **Gaps de API detectados (no se inventan rutas):**
-  - **Lotes:** no hay `GET /batches` ni `GET /batches/:id`. Impacta `/produccion` (lotes
-    activos), el picker de inputs de la transformación y la búsqueda por material. v1
-    mitiga con estado local + `GET /batch-events` + `GET /trace/:batchId`; **recomendado
-    añadir `GET /batches?status=&materialId=&recipeId=` a la API** (decisión pendiente).
+  - **Lotes: RESUELTO.** Se añadieron a la API `GET /batches` (filtros `status`,
+    `materialId`, `recipeId` y `originBatchEventId`) y `GET /batches/:id`. Cubren `/produccion`
+    (lotes activos), el picker de inputs de la transformación y la búsqueda por material, así
+    que v1 ya no necesita el estado local + `GET /batch-events` + `GET /trace/:batchId` para
+    listar lotes. Ver el post-plan en `docs/09-plan-de-api.md`.
   - **"Mis máquinas activas":** no hay endpoint; se calcula en cliente con
     `GET /workers/:id/schedule` + `GET /machines` + `TimeSlot.contains(now)`.
   - **Estado de máquina:** no hay endpoints de transición (`start`/`stop`/`maintenance`); el
@@ -468,9 +469,10 @@ render completo de cada página más allá de un smoke. No se testea shadcn (ter
     máquina/worker.
   - **Reactivar worker:** ya anotado como deuda en `docs/09`.
   - **`factory`:** sin endpoint/port; el dashboard no muestra el nombre de la fábrica.
-- **CORS:** la API no habilita CORS aún (`docs/09`). Decidir entre proxy con `rewrites` de
-  Next o abrir CORS en la API; bloquea probar el front contra `localhost:3001` fuera de
-  tests.
+- **CORS: RESUELTO.** La API habilita CORS por env `CORS_ORIGINS` (lista separada por comas;
+  default de desarrollo `http://localhost:3000`, el puerto de `next dev`), sin credenciales
+  (Bearer, no cookies). Ya no bloquea probar el front contra `localhost:3001`; no hace falta
+  proxy con `rewrites`.
 - **Mapeo de errores:** depende del `error` (nombre de clase) y `context` del
   `DomainExceptionFilter`; si cambia su forma, se rompen los mensajes. Cubrir con tests.
 - **i18n:** español hardcodeado en v1; no se introduce framework de traducción.

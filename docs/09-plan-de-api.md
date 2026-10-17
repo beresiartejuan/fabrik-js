@@ -491,6 +491,28 @@ Turso remoto, CORS para `apps/web`, rate limiting) siguen listados abajo.
 
 ---
 
+## Post-plan — huecos del plan de web ✅
+
+Rutas añadidas **después** de cerrar las Fases 0–7 (no se reescriben las fases). El
+plan de web (`docs/10-plan-de-web.md`) detectó que la pantalla `/produccion` no tenía
+forma de listar lotes; se añadieron dos endpoints de **solo lectura**:
+
+- `GET /batches` (`ListBatches`): listado con los filtros opcionales de `BatchFilter`
+  —`status`, `materialId`, `recipeId` y `originBatchEventId`—; sin filtros devuelve todo.
+- `GET /batches/:id` (`GetBatch`): un lote por id; `NotFoundError` → 404.
+
+Ambos son **A/Au/W** (abiertos al worker porque la pantalla de producción la consume
+el operario) y se serializan con `serializeBatch` (compartido con `production`/`trace`).
+No hay endpoint de escritura: los lotes se crean por los flujos de `production` y
+`supplies`. Documentados en OpenAPI (`OPENAPI_ROUTES`) → **44 rutas** en total.
+
+También se habilitó **CORS** (`enableCors`, `src/common/cors.ts`) leyendo `CORS_ORIGINS`
+(lista separada por comas; default de desarrollo `http://localhost:3000`, el puerto de
+`next dev`), **sin credenciales** porque la API autentica con `Authorization: Bearer` y no
+usa cookies. La misma política se monta en `main.ts` y en el helper e2e.
+
+---
+
 ## Riesgos y decisiones pendientes
 
 - **Confirmar la tabla error→HTTP** (sobre todo 409 vs 422 y el fallback 500) contra los
@@ -501,5 +523,7 @@ Turso remoto, CORS para `apps/web`, rate limiting) siguen listados abajo.
   requisito explícito.
 - **Turso local (archivo) vs remoto**: local para desarrollo/tests; definir la URL remota y
   el *seeding* en despliegue.
-- **CORS** para `apps/web`: pendiente de la URL del front (dev/prod).
+- **CORS** para `apps/web`: **resuelto** — `CORS_ORIGINS` (lista por comas, default
+  `http://localhost:3000`) con `credentials: false`. En producción hay que fijar la URL
+  real del front; ver el post-plan.
 - **Rate limiting** fuera de alcance en esta etapa (anotado como deuda).
