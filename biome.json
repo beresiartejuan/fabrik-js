@@ -59,6 +59,12 @@
           }
         }
       }
+    },
+    {
+      "includes": ["apps/web/src/components/ui/**"],
+      "linter": {
+        "enabled": false
+      }
     }
   ],
   "javascript": {
