@@ -29,9 +29,10 @@ interface Tokens {
  * login, llamada protegida (rol correcto 200 / rol incorrecto 403), sin token o
  * token vencido 401, y rotación/revocación de refresh tokens.
  *
- * Se apoya en la ruta de andamiaje `POST /dev/auth-smoke/materials` (ver
- * `src/dev/auth-smoke.controller.ts`) para forzar un `UnauthorizedRoleError` real
- * del dominio, porque la Fase 4 todavía no expone recursos de catálogo.
+ * La llamada protegida usa ya el recurso real `POST /materials` (Fase 4): con
+ * `admin` devuelve 201 y con `auditor` fuerza un `UnauthorizedRoleError` del
+ * dominio → 403. La antigua ruta de andamiaje `POST /dev/auth-smoke/materials` se
+ * retiró al llegar los controladores de catálogo.
  */
 describe('Auth (e2e)', () => {
   let app: INestApplication<App>;
@@ -147,27 +148,27 @@ describe('Auth (e2e)', () => {
     expect((response.body as { workerId: string }).workerId).toBeTypeOf('string');
   });
 
-  it('rol correcto: admin crea material en la ruta de smoke → 201', async () => {
+  it('rol correcto: admin crea material → 201', async () => {
     const { accessToken } = await login(ADMIN.name, ADMIN.password);
     const response = await request(app.getHttpServer())
-      .post('/dev/auth-smoke/materials')
+      .post('/materials')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ name: 'Harina', kind: 'supply', physicalState: 'solid', unitOfMeasure: 'kg' })
       .expect(201);
-    expect(response.body).toMatchObject({ name: 'Harina' });
+    expect(response.body).toMatchObject({ name: 'Harina', kind: 'supply', active: true });
   });
 
-  it('rol incorrecto: auditor en la ruta de smoke → 403 (UnauthorizedRoleError)', async () => {
+  it('rol incorrecto: auditor crea material → 403 (UnauthorizedRoleError)', async () => {
     const { accessToken } = await login(AUDITOR.name, AUDITOR.password);
     const response = await request(app.getHttpServer())
-      .post('/dev/auth-smoke/materials')
+      .post('/materials')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ name: 'Harina', kind: 'supply', physicalState: 'solid', unitOfMeasure: 'kg' })
       .expect(403);
     expect(response.body).toMatchObject({ statusCode: 403, error: 'UnauthorizedRoleError' });
   });
 
-  it('el refresh rota el token: el viejo queda revocado (401) y el nuevo sirve', async () => {
+  it('el refresh rota el token y el reuso del viejo invalida toda la cadena (401)', async () => {
     const first = await login(ADMIN.name, ADMIN.password);
     const rotated = await request(app.getHttpServer())
       .post('/auth/refresh')
@@ -175,14 +176,18 @@ describe('Auth (e2e)', () => {
       .expect(200);
     const second = rotated.body as Tokens;
 
+    // Replay del token ya rotado → 401 (detección de reuso).
     await request(app.getHttpServer())
       .post('/auth/refresh')
       .send({ refreshToken: first.refreshToken })
       .expect(401);
+
+    // Contención: la cadena entera del worker quedó revocada, incluido el refresh
+    // legítimo recién emitido.
     await request(app.getHttpServer())
       .post('/auth/refresh')
       .send({ refreshToken: second.refreshToken })
-      .expect(200);
+      .expect(401);
   });
 
   it('logout revoca los refresh del worker (401 al refrescar después)', async () => {

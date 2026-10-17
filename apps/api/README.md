@@ -82,6 +82,37 @@ La autenticación vive **solo** en `apps/api/src/auth/` y se guarda por `workerI
 | `BOOTSTRAP_ADMIN_PASSWORD` | no | — | Contraseña de ese admin (junto con la anterior). |
 | `FABRIK_DB_FILE` | no | `./data/fabrik.db` | Archivo SQLite. |
 
+## Catálogos y asignaciones (Fase 4)
+
+Un módulo por recurso (`src/materials/`, `locations/`, `machines/`, `workers/`,
+`recipes/`, `assignments/`): `*.controller.ts` + `*.dto.ts` (schema zod y tipo
+`z.infer` + serializador explícito) + `*.module.ts`. Todos importan `DomainModule`
+y **no reimplementan RBAC**: inyectan el `Actor` y el caso de uso aplica
+`requireRole` (`admin` escribe; `admin`/`auditor` leen) → `UnauthorizedRoleError`
+→ 403 por el filtro global.
+
+- La baja de material/worker es lógica (`POST :id/deactivate`, idempotente); la
+  desasignación sí borra (`DELETE /assignments/:id` → 204).
+- `workers` solo expone `deactivate` (el dominio no tiene caso de uso de
+  reactivación).
+- `recipes` usa `PATCH`; enviar `steps` reemplaza la lista completa.
+- `TimeSlot` en el wire: `{ daysOfWeek: number[] (0=domingo…6=sábado), start, end }`
+  con horas `HH:mm`; `TimeSlot.create` normaliza días y valida el rango (422).
+- Filtros de listado: `?kind=`, `?physicalState=`, `?locationId=`, `?status=`,
+  `?type=`, `?role=`, `?active=true|false`, `?outputProductId=`.
+
+| Método y ruta | Caso de uso |
+|---|---|
+| `POST /materials` · `GET /materials` · `GET /materials/:id` · `PATCH /materials/:id` · `POST /materials/:id/deactivate` | `CreateMaterial` · `ListMaterials` · `GetMaterial` · `UpdateMaterial` · `DeactivateMaterial` |
+| `POST /locations` · `GET /locations` · `GET /locations/:id` · `PATCH /locations/:id` | `CreateLocation` · `ListLocations` · `GetLocation` · `UpdateLocation` |
+| `POST /machines` · `GET /machines` · `GET /machines/:id` · `PATCH /machines/:id` · `POST /machines/:id/move` | `CreateMachine` · `ListMachines` · `GetMachine` · `UpdateMachine` · `MoveMachine` |
+| `POST /workers` · `GET /workers` · `GET /workers/:id` · `PATCH /workers/:id` · `POST /workers/:id/deactivate` | `CreateWorker` · `ListWorkers` · `GetWorker` · `UpdateWorker` · `DeactivateWorker` |
+| `POST /recipes` · `GET /recipes` · `GET /recipes/:id` · `PATCH /recipes/:id` | `CreateRecipe` · `ListRecipes` · `GetRecipe` · `UpdateRecipe` |
+| `POST /assignments` · `DELETE /assignments/:id` · `GET /workers/:id/schedule` · `GET /machines/:id/schedule` | `AssignWorkerToMachine` · `UnassignWorker` · `ListWorkerSchedule` · `ListMachineSchedule` |
+
+E2E: `apps/api/test/{materials,locations,machines,workers,recipes,assignments}/*.e2e-spec.ts`
+sobre el helper compartido `test/support/e2e-app.ts` (base temporal, admin por env y
+siembra de `worker`/`auditor`).
 
 ## Project setup
 

@@ -1,14 +1,28 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 
+import { AssignmentsModule } from './assignments/assignments.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { DomainExceptionFilter } from './common/filters/domain-exception.filter.js';
-import { DevModule } from './dev/dev.module.js';
 import { DomainModule } from './domain/domain.module.js';
 import { HealthController } from './health/health.controller.js';
+import { LocationsModule } from './locations/locations.module.js';
+import { MachinesModule } from './machines/machines.module.js';
+import { MaterialsModule } from './materials/materials.module.js';
+import { RecipesModule } from './recipes/recipes.module.js';
+import { WorkersModule } from './workers/workers.module.js';
 
 @Module({
-  imports: [DomainModule, AuthModule, DevModule],
+  imports: [
+    DomainModule,
+    AuthModule,
+    MaterialsModule,
+    LocationsModule,
+    MachinesModule,
+    WorkersModule,
+    RecipesModule,
+    AssignmentsModule,
+  ],
   controllers: [HealthController],
   providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
 })

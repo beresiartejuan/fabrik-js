@@ -208,15 +208,91 @@ Verificación: `pnpm --filter api test` (**113 tests**, 35 nuevos), `test:e2e`
 
 ---
 
-## Fase 4 — Endpoints de catálogos + asignaciones
+## Fase 4 — Endpoints de catálogos + asignaciones ✅
 
-- [ ] Recursos REST: `materials`, `locations`, `machines`, `workers`, `recipes`,
+- [x] Recursos REST: `materials`, `locations`, `machines`, `workers`, `recipes`,
       `assignments` con DTOs de request/response (zod).
-- [ ] El RBAC se delega al dominio (solo se pasa el `Actor`); la API no reimplementa roles.
-- [ ] Endpoints de agenda: `GET /workers/:id/schedule`, `GET /machines/:id/schedule`.
+- [x] El RBAC se delega al dominio (solo se pasa el `Actor`); la API no reimplementa roles.
+- [x] Endpoints de agenda: `GET /workers/:id/schedule`, `GET /machines/:id/schedule`.
 
-**Criterio de salida:** un e2e por recurso (crear/listar/leer/actualizar) + un caso 403
-por rol indebido (p. ej. `worker` escribiendo catálogo).
+**✅ Completada:** `apps/api/src/` gana un módulo por recurso
+(`materials/`, `locations/`, `machines/`, `workers/`, `recipes/`, `assignments/`),
+cada uno con `*.controller.ts` + `*.dto.ts` (schemas zod + serializadores) +
+`*.module.ts`. Las agendas viven en `assignments/schedule.controller.ts` (controlador
+sin prefijo, rutas anidadas bajo `workers`/`machines`) porque dependen de los casos de
+uso de asignaciones.
+
+Rutas (caso de uso → ver la tabla de abajo): `materials` (POST/GET/GET :id/PATCH/
+POST :id/deactivate), `locations` (POST/GET/GET :id/PATCH), `machines` (POST/GET/
+GET :id/PATCH/POST :id/move), `workers` (POST/GET/GET :id/PATCH/POST :id/deactivate),
+`recipes` (POST/GET/GET :id/PATCH), `assignments` (POST/DELETE :id) y las agendas
+(`GET /workers/:id/schedule`, `GET /machines/:id/schedule`).
+
+Decisiones:
+
+- **Baja lógica con `POST :id/deactivate` (no `DELETE`).** El dominio no borra
+  material/worker (es `active = false`, idempotente); un `DELETE` sugeriría un
+  borrado duro inexistente. `DELETE /assignments/:id` sí existe porque
+  `UnassignWorker` elimina de verdad la asignación (204).
+- **`workers` no expone reactivación.** `Worker.activate()` existe en la entidad,
+  pero no hay caso de uso que la envuelva y el plan no lo pide; se documenta como
+  deuda (endpoint simétrico trivial de añadir).
+- **`recipes` usa `PATCH`** (por coherencia); enviar `steps` **reemplaza la lista
+  completa** (no merge por posición).
+- **Serialización explícita por recurso.** Las entidades son instancias congeladas
+  con props planas (`{ ...entity }` sería suficiente), pero `TimeSlot` guarda
+  `startMinutes`/`endMinutes` como props propias: un spread filtraría detalles
+  internos. `src/common/entity-serializers.ts` serializa `Quantity`/`TimeSlot` con
+  lista blanca y cada recurso su entidad. Sin `Date` en el catálogo (las fechas solo
+  existen en auth/trazabilidad).
+- **TimeSlot wire format:** `{ daysOfWeek: number[] (0=domingo…6=sábado), start,
+  end }` con horas `HH:mm`. Zod valida la forma; `TimeSlot.create` normaliza
+  (deduplica/ordena días), valida el formato y `start < end` → `InvalidTimeSlotError`
+  → 422.
+- **Filtros de listado** (`?kind=`, `?physicalState=`, `?locationId=`, `?status=`,
+  `?type=`, `?role=`, `?active=true|false`, `?outputProductId=`) mapeados a los
+  `*Filter` del dominio. `?active` usa un union `"true"|"false"` (no
+  `z.coerce.boolean()`, que trataría `"false"` como `true`).
+- **Se retiró el andamiaje `src/dev/`** (`DevModule` + `POST /dev/auth-smoke/materials`);
+  el e2e de auth ahora prueba el 403 real con `POST /materials`.
+
+**Criterio de salida:** un e2e por recurso (crear/listar/leer/actualizar; +baja,
+move, assign→agendas→unassign con 409 por solapamiento real) + 403 por rol indebido
+(worker/auditor escribiendo) + auditor leyendo.
+
+Verificación: `pnpm --filter api test` (**115 tests**, +2: serializadores de
+`Quantity`/`TimeSlot`), `test:e2e` (**41 tests**, +27), `build` y `lint` (oxlint,
+0 warnings / 0 errors) verdes.
+
+| Recurso | Método y ruta | Caso de uso |
+|---|---|---|
+| materials | `POST /materials` | `CreateMaterial` |
+| materials | `GET /materials` | `ListMaterials` |
+| materials | `GET /materials/:id` | `GetMaterial` |
+| materials | `PATCH /materials/:id` | `UpdateMaterial` |
+| materials | `POST /materials/:id/deactivate` | `DeactivateMaterial` |
+| locations | `POST /locations` | `CreateLocation` |
+| locations | `GET /locations` | `ListLocations` |
+| locations | `GET /locations/:id` | `GetLocation` |
+| locations | `PATCH /locations/:id` | `UpdateLocation` |
+| machines | `POST /machines` | `CreateMachine` |
+| machines | `GET /machines` | `ListMachines` |
+| machines | `GET /machines/:id` | `GetMachine` |
+| machines | `PATCH /machines/:id` | `UpdateMachine` |
+| machines | `POST /machines/:id/move` | `MoveMachine` |
+| workers | `POST /workers` | `CreateWorker` |
+| workers | `GET /workers` | `ListWorkers` |
+| workers | `GET /workers/:id` | `GetWorker` |
+| workers | `PATCH /workers/:id` | `UpdateWorker` |
+| workers | `POST /workers/:id/deactivate` | `DeactivateWorker` |
+| recipes | `POST /recipes` | `CreateRecipe` |
+| recipes | `GET /recipes` | `ListRecipes` |
+| recipes | `GET /recipes/:id` | `GetRecipe` |
+| recipes | `PATCH /recipes/:id` | `UpdateRecipe` |
+| assignments | `POST /assignments` | `AssignWorkerToMachine` |
+| assignments | `DELETE /assignments/:id` | `UnassignWorker` |
+| assignments | `GET /workers/:id/schedule` | `ListWorkerSchedule` |
+| assignments | `GET /machines/:id/schedule` | `ListMachineSchedule` |
 
 ---
 
