@@ -1,0 +1,5 @@
+# Base de datos SQLite local (FABRIK_DB_FILE por defecto)
+/data
+*.db
+*.db-shm
+*.db-wal

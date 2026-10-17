@@ -25,6 +25,64 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Persistencia (Fase 1)
+
+La capa de persistencia (Drizzle + Turso/SQLite) implementa los 9 puertos de
+repositorio de `@fabrik/domain` y `UnitOfWork`. Detalle de la **elección de
+cliente**, layout, decisiones de esquema y comandos en
+[`src/persistence/README.md`](./src/persistence/README.md).
+
+- Cliente elegido: **`@tursodatabase/database`** (SDK actual del motor Turso) con
+  el driver `drizzle-orm/tursodatabase/database` de **Drizzle v1.0 RC** (el
+  Drizzle estable solo soporta el SDK anterior `@libsql/client`).
+- Base local por env var `FABRIK_DB_FILE` (default `./data/fabrik.db`).
+- Migraciones: `pnpm --filter api db:generate` y `pnpm --filter api db:migrate`.
+
+## Dominio (Fase 2)
+
+El `DomainModule` (`src/domain/`) cablea los 9 puertos a sus adaptadores Drizzle y
+registra los **37 casos de uso** del dominio como providers (un factory explícito
+por caso de uso, sin reflexión). Detalle del patrón, tokens de DI, filtro de
+errores y validación en [`src/domain/README.md`](./src/domain/README.md).
+
+- `EventBus` in-process (`InMemoryEventBus`); en producción es no-op salvo por el
+  histórico que usan los tests.
+- `DomainExceptionFilter` global (`APP_FILTER`): `DomainError → HTTP` según la
+  tabla de `docs/09-plan-de-api.md`, fallback 500.
+- Validación con **zod** (`ZodValidationPipe`): schemas compartibles con
+  `apps/web` y tipos inferidos; decisión documentada frente a `class-validator`.
+- Health check: `GET /health` → `{ ok: true }`.
+
+## Auth (Fase 3)
+
+La autenticación vive **solo** en `apps/api/src/auth/` y se guarda por `workerId`
+(el `Worker` del dominio no tiene password). Detalle de decisiones en
+[`src/auth/README.md`](./src/auth/README.md).
+
+- Contraseñas con **scrypt** (`node:crypto`, sal por usuario, `timingSafeEqual`).
+- **JWT manual** HMAC-SHA256 (`header.payload.signature`, base64url), sin
+  `jsonwebtoken`: access ~15 min + refresh rotativo ~30 días. El refresh se
+  persiste **hasheado** (SHA-256) en `refresh_tokens`; al rotar se revoca el viejo.
+- `ActorGuard` global con `@Public()`: valida el access token y **recarga el
+  worker** (rol fresco, debe estar activo). `@Actor()` inyecta el `Actor`. El guard
+  autentica (401); la autorización por rol es del dominio (403).
+- Endpoints: `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`,
+  `GET /auth/me`.
+- Tablas `auth_credentials` y `refresh_tokens` (migración en `apps/api/drizzle/`).
+
+### Variables de entorno
+
+| Variable | Obligatoria | Default | Descripción |
+|---|---|---|---|
+| `JWT_ACCESS_SECRET` | fuera de tests | — | Secreto HMAC del access token. |
+| `JWT_REFRESH_SECRET` | fuera de tests | — | Secreto HMAC del refresh token. |
+| `JWT_ACCESS_TTL_SECONDS` | no | `900` | Vida del access token. |
+| `JWT_REFRESH_TTL_SECONDS` | no | `2592000` | Vida del refresh token. |
+| `BOOTSTRAP_ADMIN_NAME` | no | — | Crea un admin al arrancar si no existe. |
+| `BOOTSTRAP_ADMIN_PASSWORD` | no | — | Contraseña de ese admin (junto con la anterior). |
+| `FABRIK_DB_FILE` | no | `./data/fabrik.db` | Archivo SQLite. |
+
+
 ## Project setup
 
 ```bash
