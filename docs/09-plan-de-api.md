@@ -109,7 +109,13 @@ verdes; `oxlint` sin errores ni warnings.
 | `InvalidQuantityError` / `InvalidTimeSlotError` / `InvalidObservationError` | 422 |
 | `InvalidTransformationError` / `InvalidStockMovementError` / `NotAProductionOrderError` | 422 |
 | `WorkerNotAssignedError` (violación de I3) | 409 |
+| `SelfModificationNotAllowedError` / `LastAdminError` (anti-lockout) | 409 |
+| `MachineTypeMismatchError` (paso ↔ tipo de máquina) | 422 |
 | `DomainError` (resto) | 500 |
+
+> `LastAdminError` mapea a 409, pero **hoy es inalcanzable por HTTP**: la
+> autoprotección (`SelfModificationNotAllowedError`) corta antes el camino. Queda
+> como guarda de dominio para flujos futuros.
 
 **Criterio de salida:** un `TestingModule` resuelve un use case y lo ejecuta end-to-end
 contra SQLite; test *table-driven* verifica que cada error del catálogo se mapea al
@@ -246,9 +252,11 @@ Decisiones:
   lista blanca y cada recurso su entidad. Sin `Date` en el catálogo (las fechas solo
   existen en auth/trazabilidad).
 - **TimeSlot wire format:** `{ daysOfWeek: number[] (0=domingo…6=sábado), start,
-  end }` con horas `HH:mm`. Zod valida la forma; `TimeSlot.create` normaliza
+  end }` con horas `HH:mm` (`end` admite además `24:00`, 1440, para fin de jornada;
+  rango semiabierto `[start, end)`). Zod valida la forma; `TimeSlot.create` normaliza
   (deduplica/ordena días), valida el formato y `start < end` → `InvalidTimeSlotError`
-  → 422.
+  → 422. La vigencia se evalúa en la **zona local del servidor** (fuente de verdad
+  de I3); el cliente usa `activeNow` de `GET /me/schedule`.
 - **Filtros de listado** (`?kind=`, `?physicalState=`, `?locationId=`, `?status=`,
   `?type=`, `?role=`, `?active=true|false`, `?outputProductId=`) mapeados a los
   `*Filter` del dominio. `?active` usa un union `"true"|"false"` (no
@@ -317,9 +325,10 @@ Decisiones:
   `POST /production/transform` **no** incluye `workerId` y el controlador inyecta
   `actor.workerId`, de modo que un worker no puede registrar la transformación de
   otro. Es un endurecimiento del wire (no una regla nueva: la regla vive en el dominio).
-- **`timestamp` opcional.** `RecordTransformation` acepta un `timestamp` inyectable
-  (ISO 8601 → `Date`) que llega al dominio tal cual; imprescindible para tests
-  deterministas de la ventana I3. Por defecto el dominio usa el instante actual.
+- **`timestamp` opcional (solo tests).** `RecordTransformation` acepta un `timestamp`
+  inyectable (ISO 8601 → `Date`) para tests deterministas de la ventana I3, pero la
+  API **lo descarta** y usa el reloj del servidor salvo que
+  `FABRIK_ALLOW_CLIENT_TIMESTAMP=true` (pensado para e2e; nunca en producción).
 - **Respuesta de `transform` = evento + lotes de output.** El caso de uso devuelve
   solo el `BatchEvent` (no los ids de los lotes que crea), así que el controlador
   inyecta `BatchRepository` y resuelve los outputs con
@@ -444,8 +453,9 @@ lugares, movimientos (orden y filtros), `trace` hacia atrás desde el producto f
 la orden raíz y `batch-events` filtrado por máquina.
 
 **README:** `apps/api/README.md` se reescribe como documento de *endurecimiento*:
-arranque rápido (install → `db:migrate` → `db:seed` → `start:dev`), tabla de
-variables de entorno (`FABRIK_DB_FILE`, `JWT_*`, `BOOTSTRAP_ADMIN_*`, `PORT`),
+arranque rápido (copiar `apps/api/.env.example` a `.env` → install → `db:migrate` →
+`db:seed` → `start:dev`), tabla de variables de entorno (`FABRIK_DB_FILE`, `JWT_*`,
+`BOOTSTRAP_ADMIN_*`, `CORS_ORIGINS`, `FABRIK_ALLOW_CLIENT_TIMESTAMP`, `PORT`),
 **una** tabla de endpoints consolidando las de las Fases 3–6 (42 rutas con caso de
 uso y marca de públicas), resumen de estructura y de comandos, y enlaces a
 `docs/09` y a los READMEs de módulo. El detalle por recurso no se duplica: vive en
@@ -504,12 +514,23 @@ forma de listar lotes; se añadieron dos endpoints de **solo lectura**:
 Ambos son **A/Au/W** (abiertos al worker porque la pantalla de producción la consume
 el operario) y se serializan con `serializeBatch` (compartido con `production`/`trace`).
 No hay endpoint de escritura: los lotes se crean por los flujos de `production` y
-`supplies`. Documentados en OpenAPI (`OPENAPI_ROUTES`) → **44 rutas** en total.
+`supplies`. Documentados en OpenAPI (`OPENAPI_ROUTES`); con el resto de las rutas
+posteriores, el total es **45 rutas**.
 
 También se habilitó **CORS** (`enableCors`, `src/common/cors.ts`) leyendo `CORS_ORIGINS`
 (lista separada por comas; default de desarrollo `http://localhost:3000`, el puerto de
 `next dev`), **sin credenciales** porque la API autentica con `Authorization: Bearer` y no
 usa cookies. La misma política se monta en `main.ts` y en el helper e2e.
+
+**Auditoría de endurecimiento (post-plan).** Además de `GET /me/schedule`
+(`ListWorkerSchedule` del propio actor + máquina enriquecida + `activeNow` calculado
+**server-side** con el reloj del servidor; cualquier rol autenticado lee su agenda,
+que es el contrato de I3 para el front), se añadieron las invariantes anti-lockout
+(`SelfModificationNotAllowedError` / `LastAdminError`) y la validación
+paso↔máquina (`MachineTypeMismatchError`), ya reflejadas en la tabla error→HTTP.
+`apps/api/.env.example` queda como plantilla de arranque (`cp .env.example .env`) y
+documenta `FABRIK_ALLOW_CLIENT_TIMESTAMP`, apagado por defecto y reservado a e2e.
+OpenAPI documenta las 45 rutas (anti-drift e2e incluido).
 
 ---
 
@@ -526,4 +547,10 @@ usa cookies. La misma política se monta en `main.ts` y en el helper e2e.
 - **CORS** para `apps/web`: **resuelto** — `CORS_ORIGINS` (lista por comas, default
   `http://localhost:3000`) con `credentials: false`. En producción hay que fijar la URL
   real del front; ver el post-plan.
+- **`timestamp` del cliente**: **decidido** que manda el reloj del servidor. El
+  `timestamp` del body de `POST /production/transform` solo se honra con
+  `FABRIK_ALLOW_CLIENT_TIMESTAMP=true` (e2e deterministas); apagado, se ignora.
+- **Arranque local**: copiar `apps/api/.env.example` a `apps/api/.env`
+  (`cp .env.example .env` desde `apps/api`) antes de `db:migrate`/`start:dev`; el
+  ejemplo ya trae defaults de desarrollo y todas las variables documentadas.
 - **Rate limiting** fuera de alcance en esta etapa (anotado como deuda).

@@ -22,7 +22,8 @@ Material {
   id, name, description?,
   kind: 'supply' | 'product',
   physicalState: 'solid' | 'liquid' | 'gas',
-  unitOfMeasure: UnitOfMeasure   // coherente con physicalState
+  unitOfMeasure: UnitOfMeasure,  // coherente con physicalState
+  active: boolean                // baja lógica (DeactivateMaterial)
 }
 ```
 
@@ -61,7 +62,12 @@ Machine {
 ```
 
 ### Recipe
-Cadena ordenada e inmutable de pasos para fabricar un producto.
+Cadena ordenada de pasos para fabricar un producto.
+
+Las entidades del dominio son **inmutables como semántica de valor**: toda
+modificación se hace copy-on-write (se construye una instancia nueva). Eso no
+impide que el contenido de una receta se reemplace vía `UpdateRecipe`; enviar
+`steps` **reemplaza la lista completa** (no es merge por posición).
 
 ```
 Recipe {
@@ -103,7 +109,7 @@ trazabilidad.**
 BatchEvent {
   id,
   machineId, workerId, locationId,
-  recipeStepId/position?,             // paso de receta que se estaba ejecutando
+  recipeStepId?,                      // paso de receta que se estaba ejecutando
   inputs:  BatchQuantity[],           // batches consumidos + cantidades
   outputs: BatchQuantity[],           // batches producidos + cantidades
   observation?: string,               // ← nota opcional del trabajador
@@ -144,12 +150,19 @@ No existe un campo editable de stock. Esto da trazabilidad nativa del inventario
 
 ```
 Quantity   { amount: number, unit: UnitOfMeasure }   // amount > 0
-TimeSlot   { daysOfWeek: Day[], start: HH:mm, end: HH:mm }
+TimeSlot   { daysOfWeek: Day[], start: HH:mm, end: HH:mm | '24:00' }
            + overlaps(other): boolean
+           + contains(date): boolean
 ```
 
 - `Quantity` valida coherencia unidad/estado físico al combinarse con un Material.
+- `TimeSlot` es un rango **semiabierto** `[start, end)`: `contains` incluye el
+  inicio y excluye el fin. `end` puede ser `"24:00"` (1440) para cubrir el final
+  del día (`00:00–24:00` = día completo); `start` va de `00:00` a `23:59`.
 - `TimeSlot.overlaps` se usa para el invariante de asignaciones.
+- **Zona horaria:** los slots se evalúan en la **zona local del servidor**
+  (`Date.getDay/getHours/getMinutes`). La API es la fuente de verdad para I3; los
+  clientes no recalculan la vigencia y consumen `activeNow` de `GET /me/schedule`.
 
 ## Relaciones
 
@@ -182,7 +195,8 @@ erDiagram
    vigente a esa máquina en ese horario.
 4. **I4** — Los `BatchEvent` y `StockMovement` son inmutables.
 5. **I5** — El stock nunca puede quedar negativo en un lugar (una salida requiere
-   stock suficiente).
+   stock suficiente). *Implementación diferida en `RecordTransformation`; ver
+   `docs/04-casos-de-uso.md` y `docs/06-inventario.md`.*
 6. **I6** — Las `Quantity` de un `BatchEvent`/`StockMovement` deben ser coherentes
    con el `unitOfMeasure` del material.
 7. **I7** — El `output` de la receta debe coincidir con el output de su último paso.

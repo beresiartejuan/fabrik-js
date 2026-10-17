@@ -69,7 +69,8 @@ apps/web/src/app/
 Guardas: `RequireAuth` envuelve `(app)` (sin `workerId` en sesión → `redirect('/login')`) y
 `RequireRole roles={['admin']}` protege las pantallas de escritura. La navegación del
 sidebar se filtra por rol (misma matriz que la API: el RBAC real lo decide el dominio y se
-traduce a 403).
+traduce a 403). Las pantallas de fases futuras se marcan con `enabled: false` en
+`src/lib/nav.ts` y no se renderizan (sidebar ni CTAs del dashboard) hasta que existan.
 
 ### Capa HTTP (axios)
 
@@ -168,7 +169,7 @@ El `DomainExceptionFilter` responde `{ statusCode, error, message, context? }` d
 | # | Ruta | Propósito | Roles | Datos (endpoints) |
 |---|---|---|---|---|
 | 1 | `/login` | Login por nombre + contraseña | público | `POST /auth/login`, `GET /auth/me` |
-| 2 | `/` | Dashboard rol-aware | A/W/Au | `GET /auth/me`, `GET /batch-events`, `GET /materials`, `GET /workers`, `GET /workers/:id/schedule` |
+| 2 | `/` | Dashboard rol-aware | A/W/Au | `GET /auth/me`, `GET /me/schedule`, `GET /batch-events`, `GET /materials`, `GET /machines`, `GET /workers` |
 | 3 | `/materiales` | Catálogo de materiales | A / Au (lectura) | `GET/POST /materials`, `PATCH /materials/:id`, `POST /materials/:id/deactivate` |
 | 4 | `/ubicaciones` | Catálogo de lugares | A / Au | `GET/POST /locations`, `PATCH /locations/:id` |
 | 5 | `/maquinas` | Catálogo de máquinas | A / Au | `GET/POST /machines`, `PATCH /machines/:id`, `POST /machines/:id/move` |
@@ -177,7 +178,7 @@ El `DomainExceptionFilter` responde `{ statusCode, error, message, context? }` d
 | 8 | `/asignaciones` | Grilla horaria máquina/worker | A / Au | `GET /machines`, `GET /workers`, `GET /machines/:id/schedule`, `GET /workers/:id/schedule`, `POST /assignments`, `DELETE /assignments/:id` |
 | 9 | `/produccion` | Producciones activas (lotes en curso) | A/W/Au | `GET /batch-events` (helper), `GET /trace/:batchId` — **gap de listado de lotes** |
 | 10 | `/produccion/nueva` | Iniciar producción desde receta | A | `GET /recipes`, `POST /production/start` |
-| 11 | `/produccion/registrar` | Registrar transformación | W | `GET /auth/me`, `GET /workers/:id/schedule`, `GET /machines`, `GET /materials`, `POST /production/transform`, `POST /production/store`, `POST /production/complete` |
+| 11 | `/produccion/registrar` | Registrar transformación | W | `GET /auth/me`, `GET /me/schedule`, `GET /machines`, `GET /materials`, `POST /production/transform`, `POST /production/store`, `POST /production/complete` |
 | 12 | `/suministros/arribo` | Arribo de suministros | A/W | `GET /materials?kind=supply`, `GET /locations?kind=storage`, `POST /supplies/arrivals` |
 | 13 | `/stock` | Stock por lugar + movimientos | A/Au/W | `GET /locations`, `GET /stock/:locationId`, `GET /stock/:locationId/movements`, `GET /materials` |
 | 14 | `/trazabilidad` | Genealogía atrás + recall adelante | A/Au | `GET /trace/:batchId`, `GET /trace/:batchId/forward`, `GET /batch-events` |
@@ -197,8 +198,10 @@ Si ya hay sesión, redirige a `/`.
 - **Admin:** accesos a Catálogos + acciones rápidas ("Nueva producción", "Registrar
   arribo") + contadores de catálogo (`materials`/`machines`/`workers` activos, desde los
   listados).
-- **Worker:** "Mis máquinas de ahora" (ver *Registrar transformación* para el cálculo) con
-  botón directo a registrar, y acceso a "Arribo de suministros".
+- **Worker:** "Mis máquinas de ahora" desde `GET /me/schedule` (asignaciones +
+  máquina resuelta + `activeNow` **calculado en el servidor**) con botón directo a
+  registrar, y acceso a "Arribo de suministros". Ya no se recalcula el horario en
+  cliente.
 - **Auditor:** últimos eventos (`GET /batch-events`, recorte en cliente) + accesos a `/stock`
   y `/trazabilidad`.
 
@@ -271,11 +274,11 @@ receta inexistente (404).
 
 ### 11. `/produccion/registrar` (worker)
 
-- **Máquina:** selector con **solo las máquinas asignadas al worker en este momento**. Cálculo
-  en cliente: `GET /auth/me` → `workerId`; `GET /workers/:id/schedule` → asignaciones;
-  `GET /machines` → detalles; filtrar por `TimeSlot.contains(now)`. Si el worker elige una
-  máquina fuera de franja, la API responde 409 (`WorkerNotAssignedError`) y se muestra el
-  aviso. (Gap: no hay endpoint "mis máquinas activas".)
+- **Máquina:** selector con **solo las máquinas asignadas al worker en este momento**,
+  tomadas de `GET /me/schedule` (la asignación ya trae la máquina resuelta y
+  `activeNow` calculado server-side). Si el worker elige una máquina fuera de franja,
+  la API responde 409 (`WorkerNotAssignedError`) y se muestra el aviso. La vigencia
+  de I3 **no se recalcula en el cliente**.
 - **Paso de receta (opcional):** `recipeStepId` derivado de la receta del lote, filtrado por
   tipo de máquina.
 - **Inputs:** filas `{ batchId, quantity }`. Sin endpoint de listado/búsqueda de lotes, v1
@@ -358,12 +361,13 @@ auditor.
   transformación"). Topbar con nombre + rol y "Cerrar sesión" (`POST /auth/logout` → limpieza
   local → `/login`).
 - **Dashboard `/`:** admin → contadores (`materials`/`machines`/`workers`), acciones rápidas
-  y accesos a catálogos; worker → "Mis máquinas de ahora" calculadas con
-  `GET /workers/:id/schedule` + `GET /machines` + `TimeSlot.contains(now)` del dominio;
-  auditor → últimos eventos (`GET /batch-events`, recorte en cliente) + accesos a
-  `/stock`/`/trazabilidad`. Skeletons y estados vacíos en español.
+  y accesos a catálogos; worker → "Mis máquinas de ahora" desde `GET /me/schedule`
+  (`activeNow` server-side; sin recálculo en cliente); auditor → últimos eventos
+  (`GET /batch-events`, recorte en cliente) + accesos a `/stock`/`/trazabilidad`.
+  Skeletons y estados vacíos en español.
 - **Módulos de API nuevos** (mínimos para el dashboard): `materialsApi`, `machinesApi`,
-  `workersApi`, `batchEventsApi`, `assignmentsApi` (agendas). `session-store` gana un `name`
+  `workersApi`, `batchEventsApi`, `assignmentsApi` (agendas) y `meApi` (`GET /me/schedule`).
+  `session-store` gana un `name`
   opcional (el login lo persiste) para el topbar, ya que `GET /auth/me` no expone el nombre y
   `GET /workers/:id` es A/Au.
 
@@ -526,7 +530,9 @@ render completo de cada página más allá de un smoke. No se testea shadcn (ter
     (lotes activos), el picker de inputs de la transformación y la búsqueda por material, así
     que v1 ya no necesita el estado local + `GET /batch-events` + `GET /trace/:batchId` para
     listar lotes. Ver el post-plan en `docs/09-plan-de-api.md`.
-  - **"Mis máquinas activas":** no hay endpoint; se calcula en cliente con
+  - **"Mis máquinas activas": RESUELTO.** `GET /me/schedule` devuelve las asignaciones
+    del propio actor con la máquina enriquecida y `activeNow` calculado en el servidor
+    (mismo reloj/zona que I3). Se elimina el cálculo en cliente con
     `GET /workers/:id/schedule` + `GET /machines` + `TimeSlot.contains(now)`.
   - **Estado de máquina:** no hay endpoints de transición (`start`/`stop`/`maintenance`); el
     `status` es solo lectura en v1.
