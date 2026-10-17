@@ -80,6 +80,14 @@ export function signJwt(claims: JwtClaims, secret: string, options: SignJwtOptio
   return `${signingInput}.${base64url(hmac(signingInput, secret))}`;
 }
 
+/**
+ * Alfabeto base64url **sin padding**: `[A-Za-z0-9_-]`. Se valida cada segmento
+ * antes de decodificar para rechazar entradas como `sig=` (padding) o con
+ * espacios, que `Buffer.from(..., 'base64url')` tolera silenciosamente y podrían
+ * colar variantes no canónicas del mismo token.
+ */
+const BASE64URL_SEGMENT = /^[A-Za-z0-9_-]+$/;
+
 function isPayload(value: unknown): value is JwtPayload {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -102,6 +110,14 @@ export function verifyJwt(token: string, secret: string, options: VerifyJwtOptio
     throw new JwtError('malformed', 'El token no tiene el formato JWT compacto');
   }
   const [header, payload, signature] = segments as [string, string, string];
+
+  if (
+    !BASE64URL_SEGMENT.test(header) ||
+    !BASE64URL_SEGMENT.test(payload) ||
+    !BASE64URL_SEGMENT.test(signature)
+  ) {
+    throw new JwtError('malformed', 'Los segmentos del token no son base64url');
+  }
 
   const expected = hmac(`${header}.${payload}`, secret);
   const provided = Buffer.from(signature, 'base64url');

@@ -35,6 +35,12 @@ export class BootstrapAdminService implements OnApplicationBootstrap {
       return;
     }
 
+    if (process.env.NODE_ENV === 'production') {
+      this.logger.warn(
+        'Bootstrap de admin activo en producción (`BOOTSTRAP_ADMIN_*`): desactívalo y siembra el admin por otra vía.',
+      );
+    }
+
     const existing = (await this.workers.list()).find((worker) => worker.name === admin.name);
     const worker = existing ?? Worker.create({ name: admin.name, role: 'admin' });
     if (!existing) {

@@ -54,6 +54,26 @@ describe('jwt (HMAC-SHA256 manual)', () => {
     }
   });
 
+  it('rechaza segmentos base64url no canónicos (padding "=" o espacios)', () => {
+    const token = signJwt({ sub: 'w' }, SECRET, { expiresInSeconds: 60, now: 0 });
+    const [header, payload, signature] = token.split('.') as [string, string, string];
+
+    const malformed = [
+      `${signature}=`, // padding de base64 clásico, prohibido en base64url
+      ` ${signature}`, // espacio dentro del segmento de firma
+      `${header}=.${payload}.${signature}`, // padding en el header
+      `${header}.${payload} .${signature}`, // espacio en el payload
+    ];
+    for (const bad of malformed) {
+      expect(() => verifyJwt(bad, SECRET, { now: 1 })).toThrow(JwtError);
+      try {
+        verifyJwt(bad, SECRET, { now: 1 });
+      } catch (error) {
+        expect((error as JwtError).reason).toBe('malformed');
+      }
+    }
+  });
+
   it('hashToken es determinista y secureEqual compara sin filtrar longitud', () => {
     expect(hashToken('token')).toBe(hashToken('token'));
     expect(hashToken('token')).not.toBe(hashToken('otro'));

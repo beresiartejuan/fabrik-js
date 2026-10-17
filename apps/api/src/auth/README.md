@@ -34,7 +34,9 @@ apps/api/src/auth/
   que no hay columna `salt` aparte.
 - `refresh_tokens`: `id` (`jti`), `worker_id`, `token_hash` (SHA-256), `expires_at`,
   `revoked_at`, `created_at`. Se guarda **solo el hash**: el token en claro solo
-  existe en el cliente. `revoked_at` marca la rotación o el logout.
+  existe en el cliente. `revoked_at` marca la rotación o el logout. La rotación
+  es un **compare-and-swap**: `revoke()` solo pasa `revoked_at` de `NULL` a fecha
+  y devuelve si ganó la carrera; ante reuso se revoca toda la cadena del worker.
 - Sin foreign keys, igual que el resto del esquema; la relación con `workers` es por
   convención (`worker_id`).
 
@@ -66,16 +68,17 @@ apps/api/src/auth/
 | Método y ruta | Público | Descripción |
 |---|---|---|
 | `POST /auth/login` | sí | `{ name, password }` → `{ accessToken, refreshToken, tokenType, expiresIn }`. |
-| `POST /auth/refresh` | sí | `{ refreshToken }` → par nuevo; revoca el viejo (rotación). |
+| `POST /auth/refresh` | sí | `{ refreshToken }` → par nuevo; rota el viejo (CAS). Si el token ya estaba revocado (reuso), revoca toda la cadena del worker → 401. |
 | `POST /auth/logout` | no | 204; revoca **todos** los refresh del actor. |
 | `GET /auth/me` | no | Devuelve el `Actor` (smoke del guard y utilidad para el front). |
-| `POST /dev/auth-smoke/materials` | no | Andamiaje: ejecuta `CreateMaterial` para probar el 403 por rol. |
 
 ## Tests
 
 - Unitarios (colocados): `password.spec.ts`, `jwt.spec.ts`, `auth.config.spec.ts`,
   `actor.guard.spec.ts` (con repos mockeados) y `auth.service.spec.ts` (dobles
-  in-memory: login, rotación, replay del refresh revocado y logout).
+  in-memory: login, rotación, refresh concurrente donde solo uno gana, reuso que
+  revoca la cadena y logout).
 - E2E `test/auth/auth.e2e-spec.ts`: bootstrap admin por env → login → `GET /auth/me`
-  (200) → ruta protegida (admin 201 / auditor 403) → refresh rota (viejo 401) →
-  logout revoca (401) → sin token / token vencido 401.
+  (200) → ruta protegida (admin 201 / auditor 403) → refresh rota (viejo 401) y el
+  reuso del viejo invalida también el par nuevo (401) → logout revoca (401) → sin
+  token / token vencido 401.

@@ -23,8 +23,13 @@ export interface RefreshTokenRecord {
 export interface RefreshTokenRepository {
   save(record: RefreshTokenRecord): Promise<void>;
   findById(id: string): Promise<RefreshTokenRecord | null>;
-  /** Revoca un token concreto (rotación). Idempotente. */
-  revoke(id: string, at: Date): Promise<void>;
+  /**
+   * Revoca un token concreto **con compare-and-swap**: solo pasa `revoked_at` de
+   * `NULL` a `at` si seguía vivo. Devuelve `true` si esta llamada fue la que
+   * revocó la fila (la ganó en una rotación concurrente), `false` si ya estaba
+   * revocada o no existe. Nunca lanza por un segundo `revoke`: es idempotente.
+   */
+  revoke(id: string, at: Date): Promise<boolean>;
   /** Revoca todos los tokens vivos de un worker (logout). Idempotente. */
   revokeAllForWorker(workerId: WorkerId, at: Date): Promise<void>;
 }
@@ -65,11 +70,15 @@ export class DrizzleRefreshTokenRepository implements RefreshTokenRepository {
     return rows.length > 0 ? rowToRecord(rows[0]) : null;
   }
 
-  async revoke(id: string, at: Date): Promise<void> {
-    await this.db
+  async revoke(id: string, at: Date): Promise<boolean> {
+    // `returning` + `isNull(revokedAt)` en el WHERE hacen que solo la primera
+    // llamada (la que ve la fila viva) reciba una fila; el resto recibe [].
+    const revoked = await this.db
       .update(refreshTokens)
       .set({ revokedAt: at })
-      .where(and(eq(refreshTokens.id, id), isNull(refreshTokens.revokedAt)));
+      .where(and(eq(refreshTokens.id, id), isNull(refreshTokens.revokedAt)))
+      .returning({ id: refreshTokens.id });
+    return revoked.length === 1;
   }
 
   async revokeAllForWorker(workerId: WorkerId, at: Date): Promise<void> {

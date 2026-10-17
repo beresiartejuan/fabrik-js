@@ -66,12 +66,22 @@ export function encodeDays(days: readonly DayOfWeek[]): string {
   return [...days].sort((a, b) => a - b).join(',');
 }
 
-/** Reconstruye `daysOfWeek` desde `"0,2,5"`. */
+/** Días válidos como string canónico (los que produce `encodeDays`). */
+const VALID_DAY_TOKENS = new Set(['0', '1', '2', '3', '4', '5', '6']);
+
+/**
+ * Reconstruye `daysOfWeek` desde `"0,2,5"`. Parseo **estricto**: un token que no
+ * sea exactamente `"0"`..`"6"` indica una fila corrupta, así que lanza un
+ * `Error` plano (problema de datos del servidor, no una entrada de usuario: no
+ * se mapea a 422 como los errores de dominio de `TimeSlot`).
+ */
 export function decodeDays(raw: string): DayOfWeek[] {
-  return raw
-    .split(',')
-    .map((part) => Number.parseInt(part, 10))
-    .filter((day): day is DayOfWeek => Number.isInteger(day) && day >= 0 && day <= 6);
+  return raw.split(',').map((part) => {
+    if (!VALID_DAY_TOKENS.has(part)) {
+      throw new Error(`daysOfWeek inválido en la base de datos: "${part}"`);
+    }
+    return Number.parseInt(part, 10) as DayOfWeek;
+  });
 }
 
 function optionalId<T>(raw: string | null, from: (value: string) => T): T | undefined {

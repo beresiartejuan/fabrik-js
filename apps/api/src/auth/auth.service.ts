@@ -29,7 +29,10 @@ export interface AuthTokens {
  *   quiere inventar un campo de identidad nuevo. Documentado como limitación:
  *   `name` debería ser único; hoy lo garantiza el seeding/uso, no el esquema.
  * - Access token corto (JWT HMAC) + refresh token rotativo persistido (JWT HMAC
- *   con `jti`, guardado **hasheado**). Al refrescar se revoca el viejo.
+ *   con `jti`, guardado **hasheado**). Al refrescar se revoca el viejo con
+ *   compare-and-swap (rotación segura ante carreras).
+ * - **Detección de reuso**: presentar un refresh ya revocado (o perder la
+ *   carrera de rotación) revoca toda la cadena viva del worker y responde 401.
  * - `logout` revoca todos los refresh vivos del worker.
  */
 @Injectable()
@@ -77,11 +80,21 @@ export class AuthService {
     }
 
     const record = await this.refreshTokens.findById(jti);
-    if (!record || record.revokedAt !== null || record.expiresAt.getTime() <= now.getTime()) {
+    if (!record || record.expiresAt.getTime() <= now.getTime()) {
       throw new UnauthorizedException('Refresh token revocado o vencido');
     }
+    // El hash se compara antes que el estado: un token con jti conocido pero
+    // cuerpo manipulado no debe disparar la contención por reuso.
     if (!secureEqual(record.tokenHash, hashToken(refreshToken))) {
       throw new UnauthorizedException('Refresh token inválido');
+    }
+
+    // Reuso: presentar un refresh ya revocado es señal de robo. Se revocan TODOS
+    // los refresh vivos del worker (contención: la cadena entera queda muerta,
+    // incluida cualquier rotación legítima posterior) y se responde 401.
+    if (record.revokedAt !== null) {
+      await this.refreshTokens.revokeAllForWorker(record.workerId, now);
+      throw new UnauthorizedException('Refresh token revocado o reutilizado');
     }
 
     const worker = await this.workers.findById(record.workerId);
@@ -89,8 +102,14 @@ export class AuthService {
       throw new UnauthorizedException('El worker está inactivo');
     }
 
-    // Rotación: el token usado queda revocado antes de emitir el nuevo par.
-    await this.refreshTokens.revoke(record.id, now);
+    // Rotación como compare-and-swap: solo el request que realmente pasa la fila
+    // de `revoked_at NULL` → fecha emite el par nuevo. Si otro request
+    // concurrente la ganó, este pierde y se trata como reuso (misma contención).
+    const rotated = await this.refreshTokens.revoke(record.id, now);
+    if (!rotated) {
+      await this.refreshTokens.revokeAllForWorker(record.workerId, now);
+      throw new UnauthorizedException('Refresh token revocado o reutilizado');
+    }
     return this.issueTokens(worker, now);
   }
 

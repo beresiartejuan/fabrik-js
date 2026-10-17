@@ -49,11 +49,13 @@ class FakeRefreshTokens implements RefreshTokenRepository {
     return this.records.get(id) ?? null;
   }
 
-  async revoke(id: string, at: Date): Promise<void> {
+  async revoke(id: string, at: Date): Promise<boolean> {
     const record = this.records.get(id);
-    if (record && record.revokedAt === null) {
-      this.records.set(id, { ...record, revokedAt: at });
+    if (!record || record.revokedAt !== null) {
+      return false;
     }
+    this.records.set(id, { ...record, revokedAt: at });
+    return true;
   }
 
   async revokeAllForWorker(workerId: WorkerId, at: Date): Promise<void> {
@@ -145,12 +147,56 @@ describe('AuthService', () => {
       expect(second.refreshToken).not.toBe(first.refreshToken);
       expect(refreshTokens.records.get(jtiOf(first.refreshToken))?.revokedAt).not.toBeNull();
 
-      // El refresh viejo ya no sirve.
+      // El nuevo token sirve para seguir rotando.
+      await expect(service.refresh(second.refreshToken)).resolves.toBeDefined();
+    });
+
+    it('refresh concurrente del mismo token: solo el primero gana la rotación', async () => {
+      const first = await service.login('Admin', 'correcta');
+
+      const results = await Promise.allSettled([
+        service.refresh(first.refreshToken),
+        service.refresh(first.refreshToken),
+      ]);
+
+      const fulfilled = results.filter((result) => result.status === 'fulfilled');
+      const rejected = results.filter((result) => result.status === 'rejected');
+      expect(fulfilled).toHaveLength(1);
+      expect(rejected).toHaveLength(1);
+      expect((rejected[0] as PromiseRejectedResult).reason).toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('si pierde el compare-and-swap de la rotación → 401 y revoca la cadena', async () => {
+      const first = await service.login('Admin', 'correcta');
+      // Simula otro request que revocó la fila entre nuestro `findById` (que aún
+      // la ve viva) y nuestro `revoke` (que pierde el CAS → false).
+      const revokeSpy = vi.spyOn(refreshTokens, 'revoke').mockResolvedValue(false);
+      const revokeAllSpy = vi.spyOn(refreshTokens, 'revokeAllForWorker');
+
       await expect(service.refresh(first.refreshToken)).rejects.toBeInstanceOf(
         UnauthorizedException,
       );
-      // El nuevo sí.
-      await expect(service.refresh(second.refreshToken)).resolves.toBeDefined();
+      expect(revokeAllSpy).toHaveBeenCalledWith(worker.id, expect.any(Date));
+
+      revokeSpy.mockRestore();
+      revokeAllSpy.mockRestore();
+    });
+
+    it('reuso de un refresh ya revocado → 401 y revoca también el par nuevo (cadena completa)', async () => {
+      const first = await service.login('Admin', 'correcta');
+      const second = await service.refresh(first.refreshToken);
+      const secondJti = jtiOf(second.refreshToken);
+
+      // Replay del token viejo: señal de robo.
+      await expect(service.refresh(first.refreshToken)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+
+      // Contención: el token legítimo recién emitido también queda revocado.
+      expect(refreshTokens.records.get(secondJti)?.revokedAt).not.toBeNull();
+      await expect(service.refresh(second.refreshToken)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
     });
 
     it('401 con un refresh token con firma inválida o formato basura', async () => {
