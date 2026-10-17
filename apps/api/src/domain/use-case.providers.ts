@@ -12,6 +12,7 @@ import {
   DeactivateMaterial,
   DeactivateWorker,
   type EventBus,
+  GetBatch,
   GetLocation,
   GetMachine,
   GetMaterial,
@@ -20,6 +21,7 @@ import {
   GetStockMovements,
   GetWorker,
   ListBatchEvents,
+  ListBatches,
   ListLocations,
   ListMachineSchedule,
   ListMachines,
@@ -64,7 +66,7 @@ import {
   WORKER_REPOSITORY,
 } from './tokens.js';
 
-// Wiring de los 37 casos de uso del dominio (Fase 2, docs/09).
+// Wiring de los 39 casos de uso del dominio (Fase 2, docs/09).
 //
 // Patrón: **un factory provider por caso de uso**. Cada entrada construye la
 // clase con las dependencias que declara su constructor (`{ puertos, events }`)
@@ -335,6 +337,16 @@ export const traceabilityUseCaseProviders: FactoryProvider[] = [
     provide: ListBatchEvents,
     useFactory: (batchEvents: BatchEventRepository) => new ListBatchEvents({ batchEvents }),
     inject: [BATCH_EVENT_REPOSITORY],
+  },
+  {
+    provide: GetBatch,
+    useFactory: (batches: BatchRepository) => new GetBatch({ batches }),
+    inject: [BATCH_REPOSITORY],
+  },
+  {
+    provide: ListBatches,
+    useFactory: (batches: BatchRepository) => new ListBatches({ batches }),
+    inject: [BATCH_REPOSITORY],
   },
 ];
 

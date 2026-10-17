@@ -4,6 +4,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { AssignmentsModule } from './assignments/assignments.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { BatchEventsModule } from './batch-events/batch-events.module.js';
+import { BatchesModule } from './batches/batches.module.js';
 import { DomainExceptionFilter } from './common/filters/domain-exception.filter.js';
 import { DomainModule } from './domain/domain.module.js';
 import { HealthController } from './health/health.controller.js';
@@ -32,6 +33,7 @@ import { WorkersModule } from './workers/workers.module.js';
     StockModule,
     TraceModule,
     BatchEventsModule,
+    BatchesModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],

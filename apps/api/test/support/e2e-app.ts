@@ -9,6 +9,7 @@ import { AppModule } from '../../src/app.module.js';
 import { CREDENTIAL_REPOSITORY } from '../../src/auth/auth.tokens.js';
 import type { CredentialRepository } from '../../src/auth/credentials.repository.js';
 import { hashPassword } from '../../src/auth/password.js';
+import { enableCors } from '../../src/common/cors.js';
 import { DB, WORKER_REPOSITORY } from '../../src/domain/tokens.js';
 import { createTestDatabase, type TestDatabase } from '../persistence/test-db.js';
 
@@ -77,6 +78,8 @@ export async function createE2EApp(options: E2EOptions = {}): Promise<E2EContext
     .compile();
 
   const app = module.createNestApplication();
+  // Misma política CORS que `main.ts` (config real, no una copia en tests).
+  enableCors(app);
   options.beforeInit?.(app);
   await app.init();
 

@@ -9,7 +9,7 @@ import { useCaseProviders, useCaseTokens } from './use-case.providers.js';
  * Módulo de wiring del dominio (Fase 2, docs/09).
  *
  * Reúne la infraestructura (conexión + 9 adaptadores + `UnitOfWork` vía
- * `PersistenceModule`) con los 37 casos de uso del dominio como providers. Los
+ * `PersistenceModule`) con los 39 casos de uso del dominio como providers. Los
  * casos de uso se exponen **por su propia clase** como token y los puertos por
  * los `symbol` de `tokens.ts`, de modo que en la Fase 4 los controladores inyectan
  * tanto `CreateMaterial` como `MaterialRepository` sin conocer adaptadores.

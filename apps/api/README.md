@@ -1,7 +1,7 @@
 # fabrik-api
 
 API HTTP del monorepo `fabrik-js` (NestJS 12, ESM, Drizzle + Turso/SQLite, zod).
-Expone los casos de uso de `@fabrik/domain` sobre **42 rutas**; la autorización por
+Expone los casos de uso de `@fabrik/domain` sobre **44 rutas**; la autorización por
 rol (`admin`/`worker`/`auditor`) la decide el dominio (`403`).
 
 - Plan y decisiones globales: [`docs/09-plan-de-api.md`](../../docs/09-plan-de-api.md).
@@ -37,6 +37,7 @@ demo: `admin`/`admin123`, `operario`/`operario123`, `auditor`/`auditor123`. El
 | `BOOTSTRAP_ADMIN_PASSWORD` | no | — | Contraseña de ese admin. |
 | `FABRIK_DB_FILE` | no | `./data/fabrik.db` | Archivo SQLite local (relativo al cwd, normalmente `apps/api`). |
 | `PORT` | no | `3001` | Puerto HTTP. |
+| `CORS_ORIGINS` | no | `http://localhost:3000` | Orígenes permitidos por CORS (lista separada por comas). Sin credenciales (Bearer, sin cookies). En producción hay que definirla. |
 
 Detalle de auth en [`src/auth/README.md`](./src/auth/README.md); el resto de
 variables (tests) las inyecta Vitest automáticamente.
@@ -92,6 +93,8 @@ token inválido/vencido → `401`. La autorización por rol vive en el dominio
 | trace | `GET /trace/:batchId` | `TraceBatch` |
 | trace | `GET /trace/:batchId/forward` | `TraceForward` |
 | batch-events | `GET /batch-events` | `ListBatchEvents` |
+| batches | `GET /batches` | `ListBatches` |
+| batches | `GET /batches/:id` | `GetBatch` |
 
 Semántica y decisiones de cada recurso (filtros, formatos, RBAC concreto, errores)
 están en `docs/09-plan-de-api.md`; el mapeo error de dominio → HTTP está en la Fase 2

@@ -16,6 +16,7 @@ export const UNITS_OF_MEASURE = ['g', 'kg', 'unit', 'ml', 'l', 'm3'] as const;
 export const LOCATION_KINDS = ['production', 'storage'] as const;
 export const MACHINE_STATUSES = ['idle', 'running', 'maintenance'] as const;
 export const WORKER_ROLES = ['admin', 'worker', 'auditor'] as const;
+export const BATCH_STATUSES = ['in_progress', 'completed', 'stored'] as const;
 
 /**
  * Identificador. En el wire es un string; el dominio lo revalida con

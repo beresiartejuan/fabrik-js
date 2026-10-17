@@ -91,6 +91,7 @@ describe('buildOpenApiDocument', () => {
       'stock',
       'trace',
       'batch-events',
+      'batches',
     ]);
   });
 });

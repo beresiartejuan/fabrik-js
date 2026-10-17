@@ -11,7 +11,7 @@ apps/api/src/
 ├─ domain/                              # wiring del dominio
 │  ├─ tokens.ts                         # symbols de DI (puertos, DB, EventBus, UnitOfWork)
 │  ├─ persistence.module.ts             # DB + DbLifecycle + 9 adaptadores + UnitOfWork
-│  ├─ use-case.providers.ts             # 1 factory provider por caso de uso (37)
+│  ├─ use-case.providers.ts             # 1 factory provider por caso de uso (39)
 │  ├─ in-memory-event-bus.ts            # EventBus in-process
 │  └─ domain.module.ts                  # DomainModule: une infra + casos de uso y exporta
 ├─ common/

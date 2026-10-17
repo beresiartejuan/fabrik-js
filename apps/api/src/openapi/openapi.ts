@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { CreateAssignmentSchema } from '../assignments/assignments.dto.js';
 import { LoginSchema, RefreshSchema } from '../auth/dto.js';
 import { BatchEventsQuerySchema } from '../batch-events/batch-events.dto.js';
+import { ListBatchesQuerySchema } from '../batches/batches.dto.js';
 import {
   CreateLocationSchema,
   ListLocationsQuerySchema,
@@ -74,6 +75,7 @@ const TAGS = [
   'stock',
   'trace',
   'batch-events',
+  'batches',
 ] as const;
 
 /** Parámetro de path (`:id`, `:locationId`, …): string no vacío. */
@@ -649,6 +651,33 @@ export const OPENAPI_ROUTES: RouteConfig[] = [
       ...UNAUTHENTICATED,
       ...FORBIDDEN,
       ...BAD_REQUEST,
+    },
+  },
+
+  // --- batches (post-plan, hueco del plan de web) ---
+  {
+    method: 'get',
+    path: '/batches',
+    summary: 'Lista lotes (filtros status/materialId/recipeId/originBatchEventId).',
+    tags: ['batches'],
+    request: { query: ListBatchesQuerySchema },
+    responses: {
+      200: { description: 'Listado de lotes.' },
+      ...UNAUTHENTICATED,
+      ...FORBIDDEN,
+      ...BAD_REQUEST,
+    },
+  },
+  {
+    method: 'get',
+    path: '/batches/{id}',
+    summary: 'Obtiene un lote por id.',
+    tags: ['batches'],
+    request: { params: pathParam('id') },
+    responses: {
+      200: { description: 'Lote.' },
+      ...PROTECTED,
+      ...NOT_FOUND,
     },
   },
 ];
