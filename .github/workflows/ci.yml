@@ -33,6 +33,12 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Biome check (root)
+        run: pnpm check
+
+      - name: Typecheck domain
+        run: pnpm --filter @fabrik/domain typecheck
+
       - name: Build
         run: pnpm build
 
