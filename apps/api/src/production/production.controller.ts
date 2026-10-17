@@ -27,6 +27,7 @@ import { BATCH_REPOSITORY } from '../domain/tokens.js';
 import {
   type CompleteProductionDto,
   CompleteProductionSchema,
+  clientTimestampAllowed,
   type RecordTransformationDto,
   RecordTransformationSchema,
   type StartProductionDto,
@@ -45,6 +46,8 @@ import {
  * - `POST /production/start` (201): crea el lote raíz `in_progress` desde la receta.
  * - `POST /production/transform` (201): registra la transformación. El `workerId` se
  *   toma **del `Actor` autenticado**, nunca del cuerpo (ver `production.dto.ts`).
+ *   El `timestamp` del cuerpo solo se usa con `FABRIK_ALLOW_CLIENT_TIMESTAMP=true`
+ *   (tests); en producción manda el reloj del servidor.
  *   Devuelve el evento y los lotes de output creados.
  * - `POST /production/store` (200): mueve un lote `in_progress` a almacenamiento.
  *   Se mantiene `/production/store` (no `POST /batches/:id/store`) para seguir el
@@ -97,7 +100,9 @@ export class ProductionController {
         quantity: Quantity.create(output.quantity.amount, output.quantity.unit),
       })),
       observation: body.observation,
-      timestamp: body.timestamp,
+      // El `timestamp` del cuerpo solo se honra con el flag de tests; si no, se
+      // deja `undefined` y el dominio usa `new Date()` en el servidor (MEDIA #3).
+      timestamp: clientTimestampAllowed() ? body.timestamp : undefined,
     });
     const outputBatches = await this.batches.list({ originBatchEventId: event.id });
     return { event: serializeBatchEvent(event), outputBatches: outputBatches.map(serializeBatch) };

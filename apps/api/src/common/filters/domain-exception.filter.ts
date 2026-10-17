@@ -11,11 +11,14 @@ import {
   InvalidStockMovementError,
   InvalidTimeSlotError,
   InvalidTransformationError,
+  LastAdminError,
+  MachineTypeMismatchError,
   MaterialKindMismatchError,
   NotAProductionOrderError,
   NotFoundError,
   OverlappingScheduleError,
   RecipeIntegrityError,
+  SelfModificationNotAllowedError,
   UnauthorizedRoleError,
   WorkerNotAssignedError,
 } from '@fabrik/domain';
@@ -47,11 +50,17 @@ const CONFLICT_ERRORS = [
   InactiveWorkerError,
   InvalidStateTransitionError,
   WorkerNotAssignedError,
+  // Invariantes anti-lockout (Fase 8): el estado actual impide la operación.
+  SelfModificationNotAllowedError,
+  LastAdminError,
 ] as const;
 
 // Errores de dominio que representan datos/entradas de la petición no procesables.
 const UNPROCESSABLE_ERRORS = [
   MaterialKindMismatchError,
+  // La combinación paso de receta ↔ tipo de máquina es inválida, igual que un
+  // material/lugar de la clase equivocada (mismo grupo 422).
+  MachineTypeMismatchError,
   InvalidLocationKindError,
   IncompatibleUnitError,
   RecipeIntegrityError,
@@ -71,12 +80,20 @@ const UNPROCESSABLE_ERRORS = [
  * |---|---|
  * | `NotFoundError` | 404 |
  * | `UnauthorizedRoleError` | 403 |
- * | `OverlappingScheduleError`, `InsufficientStockError`, `InactiveMachineError`, `InactiveWorkerError`, `InvalidStateTransitionError`, `WorkerNotAssignedError` | 409 |
- * | resto del grupo 422 (kind/unidad/receta/cantidad/franja/observación/transformación/stock/orden) | 422 |
+ * | `OverlappingScheduleError`, `InsufficientStockError`, `InactiveMachineError`, `InactiveWorkerError`, `InvalidStateTransitionError`, `WorkerNotAssignedError`, `SelfModificationNotAllowedError`, `LastAdminError` | 409 |
+ * | resto del grupo 422 (kind/unidad/receta/cantidad/franja/observación/transformación/stock/orden/tipo de máquina) | 422 |
  * | `DomainError` restante | 500 |
  *
  * `WorkerNotAssignedError` se añadió a la tabla de docs/09 en la Fase 3 (violación
  * de I3) y por eso mapea a 409.
+ *
+ * Las invariantes anti-lockout (`SelfModificationNotAllowedError`,
+ * `LastAdminError`) son **conflictos con el estado actual** —el recurso existe,
+ * pero la operación dejaría el sistema sin administración—, no entradas
+ * malformadas: 409, coherente con `InvalidStateTransitionError`.
+ * `MachineTypeMismatchError` es una combinación inválida de datos de la petición
+ * (paso de receta ↔ tipo de máquina), análoga a `MaterialKindMismatchError` e
+ * `InvalidLocationKindError`, por eso 422.
  */
 export function httpStatusForDomainError(error: DomainError): number {
   if (error instanceof NotFoundError) {

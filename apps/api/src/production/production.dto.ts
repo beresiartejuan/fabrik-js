@@ -12,6 +12,14 @@ import type { BatchEventResponse, BatchResponse } from '../common/entity-seriali
  * desde el cuerpo: un worker no puede registrar una transformación a nombre de
  * otro. `timestamp` es opcional (ISO 8601) y se convierte a `Date`; permite tests
  * deterministas de la ventana I3.
+ *
+ * **`timestamp` del cliente (auditoría MEDIA #3).** Aceptar un instante arbitrario
+ * permite declarar una transformación fuera de la franja real del worker (I3 se
+ * evalúa contra el `timestamp` recibido). Por eso el valor del cuerpo **solo** se
+ * usa cuando `FABRIK_ALLOW_CLIENT_TIMESTAMP === 'true'` (tests e2e deterministas);
+ * en cualquier otro caso el controlador lo descarta y el dominio aplica
+ * `new Date()` en el proceso servidor. El schema sigue validando la forma si el
+ * campo viene presente, pero un timestamp descartado no tiene efecto.
  */
 
 /** `POST /production/start`. */
@@ -48,12 +56,26 @@ export const RecordTransformationSchema = z.object({
   inputs: z.array(TransformationInputSchema),
   outputs: z.array(TransformationOutputSchema),
   observation: z.string().optional(),
+  /**
+   * Solo se aplica si `FABRIK_ALLOW_CLIENT_TIMESTAMP === 'true'` (ver cabecera);
+   * fuera de tests el controlador lo descarta y el dominio usa el reloj servidor.
+   */
   timestamp: z.iso
     .datetime({ offset: true })
     .transform((value) => new Date(value))
     .optional(),
 });
 export type RecordTransformationDto = z.infer<typeof RecordTransformationSchema>;
+
+/**
+ * Indica si la API debe honrar el `timestamp` enviado por el cliente. Apagado por
+ * defecto (se usa el reloj del servidor); los e2e lo activan con
+ * `FABRIK_ALLOW_CLIENT_TIMESTAMP=true` para fijar la ventana I3. Se lee en cada
+ * petición (no al importar el módulo) para que los tests puedan cambiarlo.
+ */
+export function clientTimestampAllowed(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env.FABRIK_ALLOW_CLIENT_TIMESTAMP === 'true';
+}
 
 /** `POST /production/store`. */
 export const StoreBatchSchema = z.object({

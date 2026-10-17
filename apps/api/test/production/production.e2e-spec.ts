@@ -90,6 +90,8 @@ describe('Production (e2e)', () => {
   let step2Id: string;
   let workerId: string;
   let assignmentId: string;
+  let ovenMachineId: string;
+  let ovenTimestamp: Date;
 
   let flourBatch1Id: string;
   let rootBatchId: string;
@@ -196,6 +198,32 @@ describe('Production (e2e)', () => {
       workerId,
       machineId,
       slot: { daysOfWeek: [T1.getDay()], start: '09:00', end: '11:00' },
+    });
+
+    // Máquina de otro tipo + franja en un día que **no** es hoy ni el de la
+    // asignación de la mezcladora: sirve para (a) `MachineTypeMismatchError` con
+    // un `timestamp` inyectado y (b) demostrar que sin el flag el servidor ignora
+    // ese timestamp (el worker no está asignado a esa máquina *ahora*).
+    ovenMachineId = await create('/machines', {
+      name: 'Horno',
+      type: 'oven',
+      locationId: productionLocationId,
+    });
+    const today = new Date().getDay();
+    const candidateDays = [0, 1, 2, 3, 4, 5, 6].filter(
+      (day) => day !== today && day !== T1.getDay(),
+    );
+    const ovenDay = candidateDays[0];
+    ovenTimestamp = new Date();
+    ovenTimestamp.setDate(ovenTimestamp.getDate() + 1);
+    while (ovenTimestamp.getDay() !== ovenDay) {
+      ovenTimestamp.setDate(ovenTimestamp.getDate() + 1);
+    }
+    ovenTimestamp.setHours(10, 0, 0, 0);
+    await create('/assignments', {
+      workerId,
+      machineId: ovenMachineId,
+      slot: { daysOfWeek: [ovenDay], start: '09:00', end: '11:00' },
     });
   });
 
@@ -335,6 +363,32 @@ describe('Production (e2e)', () => {
       materialId: breadId,
       quantity: { amount: 1, unit: 'unit' },
       status: 'in_progress',
+    });
+  });
+
+  it('transformar con un recipeStepId de otro tipo de máquina → 422 (MachineTypeMismatchError)', async () => {
+    // El lote raíz aporta el contexto de receta (`batch.recipeId`); el paso 1
+    // exige `mixer`, pero la máquina asignada para ese instante es un horno.
+    const response = await request(ctx.app.getHttpServer())
+      .post('/production/transform')
+      .set('Authorization', ctx.auth('worker'))
+      .send({
+        machineId: ovenMachineId,
+        recipeStepId: step1Id,
+        inputs: [{ batchId: rootBatchId, quantity: { amount: 1, unit: 'unit' } }],
+        outputs: [],
+        timestamp: ovenTimestamp.toISOString(),
+      })
+      .expect(422);
+    expect(response.body).toMatchObject({
+      statusCode: 422,
+      error: 'MachineTypeMismatchError',
+      context: {
+        recipeStepId: step1Id,
+        expected: 'mixer',
+        received: 'oven',
+        machineId: ovenMachineId,
+      },
     });
   });
 
@@ -545,5 +599,44 @@ describe('Production (e2e)', () => {
   it('el lote raíz completado persiste como completed (vía repositorio)', async () => {
     const root = await batches.findById(BatchId.from(rootBatchId));
     expect(root?.status).toBe('completed');
+  });
+
+  // --- MEDIA #3: el `timestamp` del cliente está gobernado por env ---
+
+  it('sin FABRIK_ALLOW_CLIENT_TIMESTAMP el timestamp del cuerpo se ignora (I3 usa ahora)', async () => {
+    const server = ctx.app.getHttpServer();
+    const body = {
+      machineId: ovenMachineId,
+      inputs: [{ batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } }],
+      outputs: [],
+      timestamp: ovenTimestamp.toISOString(),
+    };
+
+    // Flag apagado: si el timestamp se respetara, la asignación del horno lo
+    // cubriría (201). Al descartarlo, el dominio evalúa I3 con `new Date()` y el
+    // worker no está asignado ahora a esa máquina → 409.
+    delete process.env.FABRIK_ALLOW_CLIENT_TIMESTAMP;
+    try {
+      const ignored = await request(server)
+        .post('/production/transform')
+        .set('Authorization', ctx.auth('worker'))
+        .send(body)
+        .expect(409);
+      expect(ignored.body).toMatchObject({
+        statusCode: 409,
+        error: 'WorkerNotAssignedError',
+      });
+
+      // Control positivo: con el flag activo el mismo cuerpo sí es válido. La
+      // prueba de que el 409 anterior se debía al descarte del timestamp.
+      process.env.FABRIK_ALLOW_CLIENT_TIMESTAMP = 'true';
+      await request(server)
+        .post('/production/transform')
+        .set('Authorization', ctx.auth('worker'))
+        .send(body)
+        .expect(201);
+    } finally {
+      process.env.FABRIK_ALLOW_CLIENT_TIMESTAMP = 'true';
+    }
   });
 });

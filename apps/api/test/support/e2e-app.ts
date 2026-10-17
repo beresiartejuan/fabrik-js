@@ -70,6 +70,9 @@ export async function createE2EApp(options: E2EOptions = {}): Promise<E2EContext
   process.env.JWT_REFRESH_SECRET = 'e2e-refresh-secret';
   process.env.BOOTSTRAP_ADMIN_NAME = ADMIN.name;
   process.env.BOOTSTRAP_ADMIN_PASSWORD = ADMIN.password;
+  // Tests deterministas de la ventana I3: el e2e puede inyectar `timestamp` en
+  // `POST /production/transform`. En producción/desarrollo el flag está apagado.
+  process.env.FABRIK_ALLOW_CLIENT_TIMESTAMP = 'true';
 
   const testDb = await createTestDatabase();
   const module = await Test.createTestingModule({ imports: [AppModule] })
@@ -130,6 +133,7 @@ export async function createE2EApp(options: E2EOptions = {}): Promise<E2EContext
       delete process.env.JWT_REFRESH_SECRET;
       delete process.env.BOOTSTRAP_ADMIN_NAME;
       delete process.env.BOOTSTRAP_ADMIN_PASSWORD;
+      delete process.env.FABRIK_ALLOW_CLIENT_TIMESTAMP;
     },
   };
 }

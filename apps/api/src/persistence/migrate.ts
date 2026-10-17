@@ -1,3 +1,4 @@
+import { loadDotEnv } from '../common/env.js';
 import { closeDb, createDb } from './client.js';
 import { resolveDbFile } from './config.js';
 import { applyMigrations } from './migrations.js';
@@ -10,6 +11,7 @@ import { applyMigrations } from './migrations.js';
  * indicado por `FABRIK_DB_FILE` (default `./data/fabrik.db`).
  */
 async function main(): Promise<void> {
+  loadDotEnv();
   const dbFile = resolveDbFile();
   const db = createDb(dbFile);
   try {

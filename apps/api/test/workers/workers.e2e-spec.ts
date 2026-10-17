@@ -52,6 +52,45 @@ describe('Workers (e2e)', () => {
     expect(deactivated.body).toMatchObject({ id, active: false });
   });
 
+  it('un admin no puede quitarse su propio rol → 409 (SelfModificationNotAllowedError)', async () => {
+    const server = ctx.app.getHttpServer();
+    const me = await request(server)
+      .get('/auth/me')
+      .set('Authorization', ctx.auth('admin'))
+      .expect(200);
+    const adminId = (me.body as { workerId: string }).workerId;
+
+    const response = await request(server)
+      .patch(`/workers/${adminId}`)
+      .set('Authorization', ctx.auth('admin'))
+      .send({ role: 'auditor' })
+      .expect(409);
+    expect(response.body).toMatchObject({
+      statusCode: 409,
+      error: 'SelfModificationNotAllowedError',
+      context: { workerId: adminId, useCase: 'UpdateWorker', field: 'role' },
+    });
+  });
+
+  it('un admin no puede desactivarse a sí mismo → 409 (SelfModificationNotAllowedError)', async () => {
+    const server = ctx.app.getHttpServer();
+    const me = await request(server)
+      .get('/auth/me')
+      .set('Authorization', ctx.auth('admin'))
+      .expect(200);
+    const adminId = (me.body as { workerId: string }).workerId;
+
+    const response = await request(server)
+      .post(`/workers/${adminId}/deactivate`)
+      .set('Authorization', ctx.auth('admin'))
+      .expect(409);
+    expect(response.body).toMatchObject({
+      statusCode: 409,
+      error: 'SelfModificationNotAllowedError',
+      context: { workerId: adminId, useCase: 'DeactivateWorker', field: 'active' },
+    });
+  });
+
   it('un worker no puede crear trabajadores → 403', async () => {
     const response = await request(ctx.app.getHttpServer())
       .post('/workers')

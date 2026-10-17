@@ -3,9 +3,14 @@ import { type OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module.js';
 import { enableCors } from './common/cors.js';
+import { loadDotEnv } from './common/env.js';
 import { buildOpenApiDocument } from './openapi/openapi.js';
 
 async function bootstrap() {
+  // Carga `.env` (si existe) antes de que Nest resuelva la config de auth,
+  // persistencia y CORS. Sin dependencia de `dotenv`: usa `process.loadEnvFile`.
+  loadDotEnv();
+
   const app = await NestFactory.create(AppModule);
 
   // CORS para `apps/web` (Next, otro origen): lista blanca por `CORS_ORIGINS`

@@ -1,7 +1,7 @@
 # fabrik-api
 
 API HTTP del monorepo `fabrik-js` (NestJS 12, ESM, Drizzle + Turso/SQLite, zod).
-Expone los casos de uso de `@fabrik/domain` sobre **44 rutas**; la autorización por
+Expone los casos de uso de `@fabrik/domain` sobre **45 rutas**; la autorización por
 rol (`admin`/`worker`/`auditor`) la decide el dominio (`403`).
 
 - Plan y decisiones globales: [`docs/09-plan-de-api.md`](../../docs/09-plan-de-api.md).
@@ -13,17 +13,24 @@ rol (`admin`/`worker`/`auditor`) la decide el dominio (`403`).
 
 ```bash
 $ pnpm install                              # desde la raíz del monorepo
+$ cp apps/api/.env.example apps/api/.env     # secretos y DB de desarrollo
 $ pnpm --filter api db:migrate              # aplica las migraciones sobre FABRIK_DB_FILE
 $ pnpm --filter api db:seed                 # siembra la demo (idempotente)
 $ pnpm --filter api start:dev               # watch en http://localhost:3001
 ```
+
+`main.ts`, `db:migrate` y `db:seed` cargan `.env` (si existe) con la API nativa de
+Node (`process.loadEnvFile`, sin `dotenv`); las variables ya exportadas en el
+entorno tienen prioridad. Los secretos de `.env.example` son de desarrollo:
+cámbialos antes de desplegar.
 
 Con la API arriba: `GET /health` → `{ ok: true }` y la documentación interactiva en
 `http://localhost:3001/docs` (JSON en `/docs-json`).
 
 La **auth** necesita secretos (siguiente tabla); el **seed** crea tres usuarios de
 demo: `admin`/`admin123`, `operario`/`operario123`, `auditor`/`auditor123`. El
-`BOOTSTRAP_ADMIN_*` crea/actualiza un admin al arrancar (útil para e2e/desarrollo).
+`BOOTSTRAP_ADMIN_*` **crea** un admin al arrancar solo si no existe (nunca
+actualiza rol ni contraseña de uno existente); es útil para e2e/desarrollo.
 
 ## Variables de entorno
 
@@ -38,6 +45,7 @@ demo: `admin`/`admin123`, `operario`/`operario123`, `auditor`/`auditor123`. El
 | `FABRIK_DB_FILE` | no | `./data/fabrik.db` | Archivo SQLite local (relativo al cwd, normalmente `apps/api`). |
 | `PORT` | no | `3001` | Puerto HTTP. |
 | `CORS_ORIGINS` | no | `http://localhost:3000` | Orígenes permitidos por CORS (lista separada por comas). Sin credenciales (Bearer, sin cookies). En producción hay que definirla. |
+| `FABRIK_ALLOW_CLIENT_TIMESTAMP` | no | apagado | Solo `true` (exacto) hace que `POST /production/transform` use el `timestamp` del cuerpo. Apagado, el timestamp se descarta y se usa el reloj del servidor (I3). Pensado para e2e; no lo actives en producción. |
 
 Detalle de auth en [`src/auth/README.md`](./src/auth/README.md); el resto de
 variables (tests) las inyecta Vitest automáticamente.
@@ -83,6 +91,7 @@ token inválido/vencido → `401`. La autorización por rol vive en el dominio
 | assignments | `DELETE /assignments/:id` | `UnassignWorker` |
 | assignments | `GET /workers/:id/schedule` | `ListWorkerSchedule` |
 | assignments | `GET /machines/:id/schedule` | `ListMachineSchedule` |
+| me | `GET /me/schedule` | `ListWorkerSchedule` + `activeNow` server-side |
 | supplies | `POST /supplies/arrivals` | `RegisterSupplyArrival` |
 | production | `POST /production/start` | `StartProduction` |
 | production | `POST /production/transform` | `RecordTransformation` |
@@ -113,7 +122,9 @@ apps/api/
 │  ├─ persistence/            # Drizzle + Turso, schema, migraciones, seed         → README
 │  ├─ openapi/                # documento OpenAPI generado desde zod              → README
 │  ├─ common/                 # ZodValidationPipe, serializadores, schemas compartidos
-│  └─ <recurso>/              # *.controller.ts + *.dto.ts + *.module.ts por recurso
+│  ├─ assignments/             # assign/unassign + agendas por worker/máquina
+│  ├─ me/                     # GET /me/schedule (agenda propia + activeNow)
+│  ├─ <recurso>/              # *.controller.ts + *.dto.ts + *.module.ts por recurso
 ├─ drizzle/                   # migraciones SQL versionadas (drizzle-kit generate)
 └─ test/                      # unit colocados (src/**/*.spec.ts) + e2e (test/**/*.e2e-spec.ts)
 ```

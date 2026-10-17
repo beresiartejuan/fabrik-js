@@ -23,6 +23,7 @@ import {
 import type { CredentialRepository } from '../auth/credentials.repository.js';
 import { DrizzleCredentialRepository } from '../auth/credentials.repository.js';
 import { hashPassword } from '../auth/password.js';
+import { loadDotEnv } from '../common/env.js';
 
 import { closeDb, createDb, type Db } from './client.js';
 import { resolveDbFile } from './config.js';
@@ -257,7 +258,7 @@ export async function seed(db: Db): Promise<SeedSummary> {
       id: AssignmentId.from(IDS.assignment),
       workerId: WorkerId.from(IDS.worker),
       machineId: MachineId.from(IDS.machine),
-      slot: TimeSlot.create([0, 1, 2, 3, 4, 5, 6], '00:00', '23:59'),
+      slot: TimeSlot.create([0, 1, 2, 3, 4, 5, 6], '00:00', '24:00'),
     }),
   );
 
@@ -279,6 +280,7 @@ export async function seed(db: Db): Promise<SeedSummary> {
 }
 
 async function main(): Promise<void> {
+  loadDotEnv();
   const dbFile = resolveDbFile();
   const db = createDb(dbFile);
   try {

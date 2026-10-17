@@ -512,6 +512,19 @@ export const OPENAPI_ROUTES: RouteConfig[] = [
       ...NOT_FOUND,
     },
   },
+  {
+    method: 'get',
+    path: '/me/schedule',
+    summary: 'Agenda del propio actor con `activeNow` calculado en el servidor.',
+    tags: ['assignments'],
+    responses: {
+      200: {
+        description:
+          'Asignaciones del actor + máquina enriquecida (nombre/tipo/estado) + vigencia ahora (I3).',
+      },
+      ...UNAUTHENTICATED,
+    },
+  },
 
   // --- supplies, production y stock (Fase 5) ---
   {
