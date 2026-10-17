@@ -43,9 +43,44 @@ Consecuencias a tener en cuenta (motor Turso beta):
 pnpm --filter api db:generate      # drizzle-kit generate (diff schema → SQL)
 pnpm --filter api db:migrate       # aplica migraciones (tsx)
 pnpm --filter api db:migrate:prod  # aplica migraciones (node dist/…)
+pnpm --filter api db:seed          # siembra el contexto de demo (tsx, idempotente)
 ```
 
 Las migraciones versionadas viven en `apps/api/drizzle/`.
+
+## Seed de demo (Fase 7) — `db:seed`
+
+`src/persistence/seed.ts` prepara un contexto mínimo pero completo para arrancar
+la API y recorrer el flujo de `docs/03-flujo-de-produccion.md`. Corre contra el
+archivo indicado por `FABRIK_DB_FILE` (default `./data/fabrik.db`) y **aplica las
+migraciones antes de sembrar**, así que sirve sobre una base recién creada:
+
+```bash
+FABRIK_DB_FILE=/tmp/fabrik-demo.db pnpm --filter api db:seed
+```
+
+Contenido:
+
+| Entidad | Qué siembra |
+|---|---|
+| `factories` | `Fábrica Demo` (sin puerto en el dominio → inserción directa con upsert) |
+| `locations` | `Almacén central` (`storage`) y `Planta de producción` (`production`) |
+| `materials` | suministros `Harina` (kg) y `Agua` (l); intermedio `Masa` (kg); final `Pan` (unit) |
+| `machines` | `Mezcladora` (`mixer`) en la planta |
+| `recipes` | `Pan artesanal`: paso 1 `harina 2 kg + agua 1 l → masa 2 kg`; paso 2 `masa 2 kg → pan 1 unit` |
+| `workers` + `auth_credentials` | usuarios de demo `admin`/`admin123`, `operario`/`operario123` (worker), `auditor`/`auditor123` |
+| `assignments` | `operario` → `Mezcladora`, lunes a domingo `00:00`–`23:59` (cubre cualquier hora local: I3) |
+
+**Idempotencia.** Todas las entidades usan **IDs fijos** (UUID deterministas) y
+`save` es *upsert* por `id`, de modo que re-ejecutar el seed no duplica filas. Las
+credenciales se crean **solo si no existen** (no se re-hashea la contraseña en cada
+corrida): para restablecer una contraseña de demo hay que borrar la fila de
+`auth_credentials` y volver a correr el seed. El seed es independiente del
+bootstrap de admin por env (`BOOTSTRAP_ADMIN_*`, Fase 3): la API crea ese admin
+(con el nombre que diga el entorno) además de los usuarios de demo.
+
+> Las contraseñas sembradas son de **desarrollo**. Antes de desplegar, cámbialas
+> o elimina los usuarios de demo.
 
 ## Layout
 
@@ -61,6 +96,7 @@ apps/api/
    ├─ mappers.ts                 # fila ↔ entidad (fromPersistence)
    ├─ migrations.ts              # applyMigrations + ruta de `drizzle/`
    ├─ migrate.ts                 # entrypoint CLI (db:migrate)
+   ├─ seed.ts                    # entrypoint CLI (db:seed) + contexto de demo
    ├─ drizzle-unit-of-work.ts    # DrizzleUnitOfWork (commit/rollback)
    ├─ repositories/              # 9 adaptadores + createRepositories(executor)
    └─ index.ts                   # barrel
