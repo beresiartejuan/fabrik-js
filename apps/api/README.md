@@ -1,137 +1,140 @@
 # fabrik-api
 
-API HTTP (NestJS) del monorepo `fabrik-js`. Cada fase del plan
-(`docs/09-plan-de-api.md`) documenta sus decisiones en el README de su módulo:
-[`src/persistence/README.md`](./src/persistence/README.md),
-[`src/domain/README.md`](./src/domain/README.md) y
-[`src/auth/README.md`](./src/auth/README.md).
+API HTTP del monorepo `fabrik-js` (NestJS 12, ESM, Drizzle + Turso/SQLite, zod).
+Expone los casos de uso de `@fabrik/domain` sobre **42 rutas**; la autorización por
+rol (`admin`/`worker`/`auditor`) la decide el dominio (`403`).
 
-## Persistencia (Fase 1)
+- Plan y decisiones globales: [`docs/09-plan-de-api.md`](../../docs/09-plan-de-api.md).
+- READMEs por módulo: [`src/persistence`](./src/persistence/README.md),
+  [`src/domain`](./src/domain/README.md), [`src/auth`](./src/auth/README.md),
+  [`src/openapi`](./src/openapi/README.md).
 
-La capa de persistencia (Drizzle + Turso/SQLite) implementa los 9 puertos de
-repositorio de `@fabrik/domain` y `UnitOfWork`. Detalle de la **elección de
-cliente**, layout, decisiones de esquema y comandos en
-[`src/persistence/README.md`](./src/persistence/README.md).
+## Arranque rápido
 
-- Cliente elegido: **`@tursodatabase/database`** (SDK actual del motor Turso) con
-  el driver `drizzle-orm/tursodatabase/database` de **Drizzle v1.0 RC** (el
-  Drizzle estable solo soporta el SDK anterior `@libsql/client`).
-- Base local por env var `FABRIK_DB_FILE` (default `./data/fabrik.db`).
-- Migraciones: `pnpm --filter api db:generate` y `pnpm --filter api db:migrate`.
+```bash
+$ pnpm install                              # desde la raíz del monorepo
+$ pnpm --filter api db:migrate              # aplica las migraciones sobre FABRIK_DB_FILE
+$ pnpm --filter api db:seed                 # siembra la demo (idempotente)
+$ pnpm --filter api start:dev               # watch en http://localhost:3001
+```
 
-## Dominio (Fase 2)
+Con la API arriba: `GET /health` → `{ ok: true }` y la documentación interactiva en
+`http://localhost:3001/docs` (JSON en `/docs-json`).
 
-El `DomainModule` (`src/domain/`) cablea los 9 puertos a sus adaptadores Drizzle y
-registra los **37 casos de uso** del dominio como providers (un factory explícito
-por caso de uso, sin reflexión). Detalle del patrón, tokens de DI, filtro de
-errores y validación en [`src/domain/README.md`](./src/domain/README.md).
+La **auth** necesita secretos (siguiente tabla); el **seed** crea tres usuarios de
+demo: `admin`/`admin123`, `operario`/`operario123`, `auditor`/`auditor123`. El
+`BOOTSTRAP_ADMIN_*` crea/actualiza un admin al arrancar (útil para e2e/desarrollo).
 
-- `EventBus` in-process (`InMemoryEventBus`); en producción es no-op salvo por el
-  histórico que usan los tests.
-- `DomainExceptionFilter` global (`APP_FILTER`): `DomainError → HTTP` según la
-  tabla de `docs/09-plan-de-api.md`, fallback 500.
-- Validación con **zod** (`ZodValidationPipe`): schemas compartibles con
-  `apps/web` y tipos inferidos; decisión documentada frente a `class-validator`.
-- Health check: `GET /health` → `{ ok: true }`.
-
-## Auth (Fase 3)
-
-La autenticación vive **solo** en `apps/api/src/auth/` y se guarda por `workerId`
-(el `Worker` del dominio no tiene password). Detalle de decisiones en
-[`src/auth/README.md`](./src/auth/README.md).
-
-- Contraseñas con **scrypt** (`node:crypto`, sal por usuario, `timingSafeEqual`).
-- **JWT manual** HMAC-SHA256 (`header.payload.signature`, base64url), sin
-  `jsonwebtoken`: access ~15 min + refresh rotativo ~30 días. El refresh se
-  persiste **hasheado** (SHA-256) en `refresh_tokens`; al rotar se revoca el viejo.
-- `ActorGuard` global con `@Public()`: valida el access token y **recarga el
-  worker** (rol fresco, debe estar activo). `@Actor()` inyecta el `Actor`. El guard
-  autentica (401); la autorización por rol es del dominio (403).
-- Endpoints: `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`,
-  `GET /auth/me`.
-- Tablas `auth_credentials` y `refresh_tokens` (migración en `apps/api/drizzle/`).
-
-### Variables de entorno
+## Variables de entorno
 
 | Variable | Obligatoria | Default | Descripción |
 |---|---|---|---|
-| `JWT_ACCESS_SECRET` | fuera de tests | — | Secreto HMAC del access token. |
-| `JWT_REFRESH_SECRET` | fuera de tests | — | Secreto HMAC del refresh token. |
-| `JWT_ACCESS_TTL_SECONDS` | no | `900` | Vida del access token. |
-| `JWT_REFRESH_TTL_SECONDS` | no | `2592000` | Vida del refresh token. |
-| `BOOTSTRAP_ADMIN_NAME` | no | — | Crea un admin al arrancar si no existe. |
-| `BOOTSTRAP_ADMIN_PASSWORD` | no | — | Contraseña de ese admin (junto con la anterior). |
-| `FABRIK_DB_FILE` | no | `./data/fabrik.db` | Archivo SQLite. |
+| `JWT_ACCESS_SECRET` | sí (fuera de tests) | — | Secreto HMAC del access token. Si falta, el arranque falla en claro. |
+| `JWT_REFRESH_SECRET` | sí (fuera de tests) | — | Secreto HMAC del refresh token. |
+| `JWT_ACCESS_TTL_SECONDS` | no | `900` (15 min) | Vida del access token. |
+| `JWT_REFRESH_TTL_SECONDS` | no | `2592000` (30 días) | Vida del refresh token. |
+| `BOOTSTRAP_ADMIN_NAME` | no | — | Crea un admin al arrancar si no existe (junto con la contraseña). |
+| `BOOTSTRAP_ADMIN_PASSWORD` | no | — | Contraseña de ese admin. |
+| `FABRIK_DB_FILE` | no | `./data/fabrik.db` | Archivo SQLite local (relativo al cwd, normalmente `apps/api`). |
+| `PORT` | no | `3001` | Puerto HTTP. |
 
-## Catálogos y asignaciones (Fase 4)
+Detalle de auth en [`src/auth/README.md`](./src/auth/README.md); el resto de
+variables (tests) las inyecta Vitest automáticamente.
 
-Un módulo por recurso (`src/materials/`, `locations/`, `machines/`, `workers/`,
-`recipes/`, `assignments/`): `*.controller.ts` + `*.dto.ts` (schema zod y tipo
-`z.infer` + serializador explícito) + `*.module.ts`. Todos importan `DomainModule`
-y **no reimplementan RBAC**: inyectan el `Actor` y el caso de uso aplica
-`requireRole` (`admin` escribe; `admin`/`auditor` leen) → `UnauthorizedRoleError`
-→ 403 por el filtro global.
+## Endpoints
 
-- La baja de material/worker es lógica (`POST :id/deactivate`, idempotente); la
-  desasignación sí borra (`DELETE /assignments/:id` → 204).
-- `workers` solo expone `deactivate` (el dominio no tiene caso de uso de
-  reactivación).
-- `recipes` usa `PATCH`; enviar `steps` reemplaza la lista completa.
-- `TimeSlot` en el wire: `{ daysOfWeek: number[] (0=domingo…6=sábado), start, end }`
-  con horas `HH:mm`; `TimeSlot.create` normaliza días y valida el rango (422).
-- Filtros de listado: `?kind=`, `?physicalState=`, `?locationId=`, `?status=`,
-  `?type=`, `?role=`, `?active=true|false`, `?outputProductId=`.
+Todas las rutas salvo las **públicas** (`GET /health`, `POST /auth/login`,
+`POST /auth/refresh`) exigen `Authorization: Bearer <access token>`; sin token o con
+token inválido/vencido → `401`. La autorización por rol vive en el dominio
+(`UnauthorizedRoleError` → `403`), no en los controladores.
 
-| Método y ruta | Caso de uso |
-|---|---|
-| `POST /materials` · `GET /materials` · `GET /materials/:id` · `PATCH /materials/:id` · `POST /materials/:id/deactivate` | `CreateMaterial` · `ListMaterials` · `GetMaterial` · `UpdateMaterial` · `DeactivateMaterial` |
-| `POST /locations` · `GET /locations` · `GET /locations/:id` · `PATCH /locations/:id` | `CreateLocation` · `ListLocations` · `GetLocation` · `UpdateLocation` |
-| `POST /machines` · `GET /machines` · `GET /machines/:id` · `PATCH /machines/:id` · `POST /machines/:id/move` | `CreateMachine` · `ListMachines` · `GetMachine` · `UpdateMachine` · `MoveMachine` |
-| `POST /workers` · `GET /workers` · `GET /workers/:id` · `PATCH /workers/:id` · `POST /workers/:id/deactivate` | `CreateWorker` · `ListWorkers` · `GetWorker` · `UpdateWorker` · `DeactivateWorker` |
-| `POST /recipes` · `GET /recipes` · `GET /recipes/:id` · `PATCH /recipes/:id` | `CreateRecipe` · `ListRecipes` · `GetRecipe` · `UpdateRecipe` |
-| `POST /assignments` · `DELETE /assignments/:id` · `GET /workers/:id/schedule` · `GET /machines/:id/schedule` | `AssignWorkerToMachine` · `UnassignWorker` · `ListWorkerSchedule` · `ListMachineSchedule` |
+| Recurso | Método y ruta | Caso de uso |
+|---|---|---|
+| health | `GET /health` (público) | — |
+| auth | `POST /auth/login` (público) | `AuthService.login` |
+| auth | `POST /auth/refresh` (público) | `AuthService.refresh` |
+| auth | `POST /auth/logout` | `AuthService.logout` |
+| auth | `GET /auth/me` | — (smoke del guard) |
+| materials | `POST /materials` | `CreateMaterial` |
+| materials | `GET /materials` | `ListMaterials` |
+| materials | `GET /materials/:id` | `GetMaterial` |
+| materials | `PATCH /materials/:id` | `UpdateMaterial` |
+| materials | `POST /materials/:id/deactivate` | `DeactivateMaterial` |
+| locations | `POST /locations` | `CreateLocation` |
+| locations | `GET /locations` | `ListLocations` |
+| locations | `GET /locations/:id` | `GetLocation` |
+| locations | `PATCH /locations/:id` | `UpdateLocation` |
+| machines | `POST /machines` | `CreateMachine` |
+| machines | `GET /machines` | `ListMachines` |
+| machines | `GET /machines/:id` | `GetMachine` |
+| machines | `PATCH /machines/:id` | `UpdateMachine` |
+| machines | `POST /machines/:id/move` | `MoveMachine` |
+| workers | `POST /workers` | `CreateWorker` |
+| workers | `GET /workers` | `ListWorkers` |
+| workers | `GET /workers/:id` | `GetWorker` |
+| workers | `PATCH /workers/:id` | `UpdateWorker` |
+| workers | `POST /workers/:id/deactivate` | `DeactivateWorker` |
+| recipes | `POST /recipes` | `CreateRecipe` |
+| recipes | `GET /recipes` | `ListRecipes` |
+| recipes | `GET /recipes/:id` | `GetRecipe` |
+| recipes | `PATCH /recipes/:id` | `UpdateRecipe` |
+| assignments | `POST /assignments` | `AssignWorkerToMachine` |
+| assignments | `DELETE /assignments/:id` | `UnassignWorker` |
+| assignments | `GET /workers/:id/schedule` | `ListWorkerSchedule` |
+| assignments | `GET /machines/:id/schedule` | `ListMachineSchedule` |
+| supplies | `POST /supplies/arrivals` | `RegisterSupplyArrival` |
+| production | `POST /production/start` | `StartProduction` |
+| production | `POST /production/transform` | `RecordTransformation` |
+| production | `POST /production/store` | `StoreBatch` |
+| production | `POST /production/complete` | `CompleteProduction` |
+| stock | `GET /stock/:locationId` | `GetStockByLocation` |
+| stock | `GET /stock/:locationId/movements` | `GetStockMovements` |
+| trace | `GET /trace/:batchId` | `TraceBatch` |
+| trace | `GET /trace/:batchId/forward` | `TraceForward` |
+| batch-events | `GET /batch-events` | `ListBatchEvents` |
 
-E2E: `apps/api/test/{materials,locations,machines,workers,recipes,assignments}/*.e2e-spec.ts`
-sobre el helper compartido `test/support/e2e-app.ts` (base temporal, admin por env y
-siembra de `worker`/`auditor`).
+Semántica y decisiones de cada recurso (filtros, formatos, RBAC concreto, errores)
+están en `docs/09-plan-de-api.md`; el mapeo error de dominio → HTTP está en la Fase 2
+del mismo documento (resumen: `404`/`403`/`409`/`422`, fallback `500`).
 
-## Producción e inventario (Fase 5)
+## Estructura
 
-Tres módulos siguiendo el patrón de la Fase 4: `src/supplies/`, `src/production/` y
-`src/stock/`. El RBAC sigue en el dominio (`UnauthorizedRoleError` → 403):
-`StartProduction` es solo `admin`, `RecordTransformation` solo `worker`, y
-`StoreBatch`/`CompleteProduction`/`RegisterSupplyArrival` son `admin`/`worker`.
+```
+apps/api/
+├─ src/
+│  ├─ main.ts                 # bootstrap + SwaggerModule (/docs, /docs-json)
+│  ├─ app.module.ts           # importa los módulos + DomainExceptionFilter (APP_FILTER)
+│  ├─ health/                 # GET /health (público)
+│  ├─ auth/                   # login/refresh/logout/me, JWT manual, ActorGuard   → README
+│  ├─ domain/                 # tokens de DI, PersistenceModule/DomainModule, EventBus → README
+│  ├─ persistence/            # Drizzle + Turso, schema, migraciones, seed         → README
+│  ├─ openapi/                # documento OpenAPI generado desde zod              → README
+│  ├─ common/                 # ZodValidationPipe, serializadores, schemas compartidos
+│  └─ <recurso>/              # *.controller.ts + *.dto.ts + *.module.ts por recurso
+├─ drizzle/                   # migraciones SQL versionadas (drizzle-kit generate)
+└─ test/                      # unit colocados (src/**/*.spec.ts) + e2e (test/**/*.e2e-spec.ts)
+```
 
-- **`workerId` del `Actor`, nunca del cuerpo.** `POST /production/transform` no acepta
-  `workerId`; el controlador inyecta `actor.workerId` (el dominio exige que coincidan).
-- **`timestamp` opcional** (ISO 8601 → `Date`) en `transform`, para tests
-  deterministas de la ventana I3.
-- **`transform` devuelve el evento y los lotes de output** (el caso de uso solo
-  devuelve el `BatchEvent`; el controlador resuelve los outputs por
-  `originBatchEventId`). `start`/`transform` responden **201**; `store`/`complete`, **200**.
-- **Serializadores compartidos**: `Batch`, `BatchEvent` y `StockMovement` en
-  `src/common/entity-serializers.ts` (lista blanca; `Date` → ISO 8601).
-- **Stock**: `GET /stock/:locationId` es A/Au/**W** (el operario lee existencias);
-  `GET /stock/:locationId/movements` es A/Au. El lugar de la máquina puede mostrar
-  `amount` negativo tras un consumo.
-
-| Método y ruta | Caso de uso |
-|---|---|
-| `POST /supplies/arrivals` | `RegisterSupplyArrival` |
-| `POST /production/start` · `POST /production/transform` · `POST /production/store` · `POST /production/complete` | `StartProduction` · `RecordTransformation` · `StoreBatch` · `CompleteProduction` |
-| `GET /stock/:locationId` · `GET /stock/:locationId/movements` | `GetStockByLocation` · `GetStockMovements` |
-
-E2E: `apps/api/test/production/production.e2e-spec.ts` (flujo completo con merma +
-RBAC + errores del camino) y `apps/api/test/stock/stock.e2e-spec.ts`.
+Cada recurso del catálogo sigue el mismo patrón: el `*.dto.ts` define schema zod
+(única fuente del tipo) + serializador de respuesta, y el controlador inyecta el
+`Actor` y llama al caso de uso (sin reimplementar RBAC).
 
 ## Comandos
 
-```bash
-$ pnpm --filter api start:dev      # desarrollo (watch)
-$ pnpm --filter api build          # compilación (nest build)
-$ pnpm --filter api lint           # oxlint (src/ y test/)
-$ pnpm --filter api test           # unitarios (vitest)
-$ pnpm --filter api test:e2e       # e2e (supertest sobre SQLite temporal)
-$ pnpm --filter api db:generate    # drizzle-kit generate (migraciones)
-$ pnpm --filter api db:migrate     # aplicar migraciones
-```
+| Comando | Qué hace |
+|---|---|
+| `pnpm --filter api start:dev` | Desarrollo con watch. |
+| `pnpm --filter api build` | Compila (`nest build`, usa `tsconfig.build.json`). |
+| `pnpm --filter api lint` | Oxlint type-aware sobre `src/` y `test/`. |
+| `pnpm --filter api test` | Unitarios (vitest). |
+| `pnpm --filter api test:e2e` | E2E (supertest sobre SQLite temporal). |
+| `pnpm --filter api db:generate` | Genera una migración (`drizzle-kit generate`). |
+| `pnpm --filter api db:migrate` | Aplica migraciones sobre `FABRIK_DB_FILE`. |
+| `pnpm --filter api db:seed` | Siembra la demo (idempotente, `tsx`). |
+
+## OpenAPI
+
+`GET /docs` sirve la UI de Swagger y `GET /docs-json` el documento. Se genera desde
+los **propios schemas zod** con `@asteasolutions/zod-to-openapi` (no hay decoradores
+`@ApiProperty` que se desincronicen); `@nestjs/swagger` solo monta el `SwaggerModule`.
+Decisión completa en [`src/openapi/README.md`](./src/openapi/README.md).

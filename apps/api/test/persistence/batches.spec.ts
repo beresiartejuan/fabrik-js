@@ -17,7 +17,9 @@ describe('DrizzleBatchRepository', () => {
 
   it('findById devuelve null cuando no existe', async () => {
     const material = aMaterial();
-    await expect(ctx.repositories.batches.findById(aBatch(material.id).id)).resolves.toBeNull();
+    await expect(
+      ctx.repositories.batches.findById(aBatch(material.id).id),
+    ).resolves.toBeNull();
   });
 
   it('save + findById hacen round-trip (incluye recipeId/originBatchEventId)', async () => {
@@ -54,16 +56,20 @@ describe('DrizzleBatchRepository', () => {
   });
 
   it('findByMaterial filtra por material', async () => {
-    const pan = aMaterial({ name: 'Pan', kind: 'product', unitOfMeasure: 'unit' });
+    const pan = aMaterial({
+      name: 'Pan',
+      kind: 'product',
+      unitOfMeasure: 'unit',
+    });
     const harina = aMaterial();
     const batchPan = aBatch(pan.id, { quantity: quantity(3, 'unit') });
     const batchHarina = aBatch(harina.id);
     await ctx.repositories.batches.save(batchPan);
     await ctx.repositories.batches.save(batchHarina);
 
-    expect((await ctx.repositories.batches.findByMaterial(pan.id)).map((b) => b.id)).toEqual([
-      batchPan.id,
-    ]);
+    expect(
+      (await ctx.repositories.batches.findByMaterial!(pan.id)).map((b) => b.id),
+    ).toEqual([batchPan.id]);
   });
 
   it('list filtra por materialId, status, recipeId y originBatchEventId', async () => {
@@ -72,7 +78,10 @@ describe('DrizzleBatchRepository', () => {
     const recipeId = RecipeId.create();
     const originEventId = BatchEventId.create();
 
-    const storedFromRecipe = aBatch(material.id, { recipeId, originBatchEventId: originEventId }).store();
+    const storedFromRecipe = aBatch(material.id, {
+      recipeId,
+      originBatchEventId: originEventId,
+    }).store();
     const completed = aBatch(material.id).complete();
     const supply = aBatch(otherMaterial.id, { quantity: quantity(100, 'g') });
     await ctx.repositories.batches.save(storedFromRecipe);
@@ -80,25 +89,38 @@ describe('DrizzleBatchRepository', () => {
     await ctx.repositories.batches.save(supply);
 
     expect(await ctx.repositories.batches.list()).toHaveLength(3);
-    expect((await ctx.repositories.batches.list({ status: 'stored' })).map((b) => b.id)).toEqual([
-      storedFromRecipe.id,
-    ]);
-    expect((await ctx.repositories.batches.list({ status: 'completed' })).map((b) => b.id)).toEqual([
-      completed.id,
-    ]);
-    expect((await ctx.repositories.batches.list({ materialId: otherMaterial.id })).map((b) => b.id)).toEqual(
-      [supply.id],
-    );
-    expect((await ctx.repositories.batches.list({ recipeId })).map((b) => b.id)).toEqual([
-      storedFromRecipe.id,
-    ]);
     expect(
-      (await ctx.repositories.batches.list({ originBatchEventId: originEventId })).map((b) => b.id),
-    ).toEqual([storedFromRecipe.id]);
-    expect(
-      (await ctx.repositories.batches.list({ materialId: material.id, status: 'completed' })).map(
+      (await ctx.repositories.batches.list({ status: 'stored' })).map(
         (b) => b.id,
       ),
+    ).toEqual([storedFromRecipe.id]);
+    expect(
+      (await ctx.repositories.batches.list({ status: 'completed' })).map(
+        (b) => b.id,
+      ),
+    ).toEqual([completed.id]);
+    expect(
+      (
+        await ctx.repositories.batches.list({ materialId: otherMaterial.id })
+      ).map((b) => b.id),
+    ).toEqual([supply.id]);
+    expect(
+      (await ctx.repositories.batches.list({ recipeId })).map((b) => b.id),
+    ).toEqual([storedFromRecipe.id]);
+    expect(
+      (
+        await ctx.repositories.batches.list({
+          originBatchEventId: originEventId,
+        })
+      ).map((b) => b.id),
+    ).toEqual([storedFromRecipe.id]);
+    expect(
+      (
+        await ctx.repositories.batches.list({
+          materialId: material.id,
+          status: 'completed',
+        })
+      ).map((b) => b.id),
     ).toEqual([completed.id]);
   });
 });

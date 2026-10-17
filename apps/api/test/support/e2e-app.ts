@@ -11,7 +11,10 @@ import { CREDENTIAL_REPOSITORY } from '../../src/auth/auth.tokens.js';
 import type { CredentialRepository } from '../../src/auth/credentials.repository.js';
 import { hashPassword } from '../../src/auth/password.js';
 import { DB, WORKER_REPOSITORY } from '../../src/domain/tokens.js';
-import { createTestDatabase, type TestDatabase } from '../persistence/test-db.js';
+import {
+  createTestDatabase,
+  type TestDatabase,
+} from '../persistence/test-db.js';
 
 /**
  * Bootstrap compartido de los e2e de la Fase 4.
@@ -25,9 +28,15 @@ import { createTestDatabase, type TestDatabase } from '../persistence/test-db.js
  * de la Fase 4 esto se hacía a mano en cada spec; ahora vive aquí.
  */
 
-export const ADMIN = { name: 'bootstrap-admin', password: 'admin-password' } as const;
+export const ADMIN = {
+  name: 'bootstrap-admin',
+  password: 'admin-password',
+} as const;
 export const WORKER = { name: 'worker', password: 'worker-password' } as const;
-export const AUDITOR = { name: 'auditor', password: 'auditor-password' } as const;
+export const AUDITOR = {
+  name: 'auditor',
+  password: 'auditor-password',
+} as const;
 
 export interface Tokens {
   readonly accessToken: string;
@@ -39,14 +48,29 @@ export interface E2EContext {
   readonly testDb: TestDatabase;
   readonly module: TestingModule;
   /** Access tokens listos para usar, por rol sembrado. */
-  readonly tokens: { readonly admin: string; readonly worker: string; readonly auditor: string };
+  readonly tokens: {
+    readonly admin: string;
+    readonly worker: string;
+    readonly auditor: string;
+  };
   login(name: string, password: string): Promise<Tokens>;
   /** Cabecera `Authorization` para un rol sembrado. */
   auth(role: keyof E2EContext['tokens']): string;
   close(): Promise<void>;
 }
 
-export async function createE2EApp(): Promise<E2EContext> {
+export interface E2EOptions {
+  /**
+   * Hook de la app **antes** de `init()`. Necesario para lo que registra rutas en
+   * el adaptador HTTP (p. ej. `SwaggerModule.setup`, que debe correr antes de que
+   * el servidor quede montado).
+   */
+  beforeInit?(app: INestApplication<App>): void;
+}
+
+export async function createE2EApp(
+  options: E2EOptions = {},
+): Promise<E2EContext> {
   process.env.JWT_ACCESS_SECRET = 'e2e-access-secret';
   process.env.JWT_REFRESH_SECRET = 'e2e-refresh-secret';
   process.env.BOOTSTRAP_ADMIN_NAME = ADMIN.name;
@@ -59,6 +83,7 @@ export async function createE2EApp(): Promise<E2EContext> {
     .compile();
 
   const app = module.createNestApplication();
+  options.beforeInit?.(app);
   await app.init();
 
   const workers = module.get<WorkerRepository>(WORKER_REPOSITORY);

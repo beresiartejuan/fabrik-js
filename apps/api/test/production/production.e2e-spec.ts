@@ -3,12 +3,17 @@ import {
   Machine,
   LocationId,
   type BatchRepository,
+  type BatchTransformed,
   type MachineRepository,
 } from '@fabrik/domain';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { BATCH_REPOSITORY, EVENT_BUS, MACHINE_REPOSITORY } from '../../src/domain/tokens.js';
+import {
+  BATCH_REPOSITORY,
+  EVENT_BUS,
+  MACHINE_REPOSITORY,
+} from '../../src/domain/tokens.js';
 import { InMemoryEventBus } from '../../src/domain/in-memory-event-bus.js';
 import { createE2EApp, type E2EContext } from '../support/e2e-app.js';
 
@@ -37,8 +42,16 @@ interface EventBody {
   workerId: string;
   locationId: string;
   recipeStepId?: string;
-  inputs: { batchId?: string; materialId: string; quantity: { amount: number; unit: string } }[];
-  outputs: { batchId?: string; materialId: string; quantity: { amount: number; unit: string } }[];
+  inputs: {
+    batchId?: string;
+    materialId: string;
+    quantity: { amount: number; unit: string };
+  }[];
+  outputs: {
+    batchId?: string;
+    materialId: string;
+    quantity: { amount: number; unit: string };
+  }[];
   observation?: string;
   timestamp: string;
 }
@@ -95,7 +108,10 @@ describe('Production (e2e)', () => {
     const server = ctx.app.getHttpServer();
     const admin = ctx.auth('admin');
 
-    const create = async (path: string, body: Record<string, unknown>): Promise<string> => {
+    const create = async (
+      path: string,
+      body: Record<string, unknown>,
+    ): Promise<string> => {
       const response = await request(server)
         .post(path)
         .set('Authorization', admin)
@@ -104,8 +120,14 @@ describe('Production (e2e)', () => {
       return (response.body as { id: string }).id;
     };
 
-    storageLocationId = await create('/locations', { name: 'Almacén', kind: 'storage' });
-    productionLocationId = await create('/locations', { name: 'Planta', kind: 'production' });
+    storageLocationId = await create('/locations', {
+      name: 'Almacén',
+      kind: 'storage',
+    });
+    productionLocationId = await create('/locations', {
+      name: 'Planta',
+      kind: 'production',
+    });
 
     flourId = await create('/materials', {
       name: 'Harina',
@@ -153,14 +175,18 @@ describe('Production (e2e)', () => {
           {
             position: 1,
             machineType: 'mixer',
-            inputs: [{ materialId: flourId, quantity: { amount: 2, unit: 'kg' } }],
+            inputs: [
+              { materialId: flourId, quantity: { amount: 2, unit: 'kg' } },
+            ],
             outputProductId: doughId,
             outputQuantity: { amount: 2, unit: 'kg' },
           },
           {
             position: 2,
             machineType: 'mixer',
-            inputs: [{ materialId: doughId, quantity: { amount: 2, unit: 'kg' } }],
+            inputs: [
+              { materialId: doughId, quantity: { amount: 2, unit: 'kg' } },
+            ],
             outputProductId: breadId,
             outputQuantity: { amount: 1, unit: 'unit' },
           },
@@ -193,7 +219,11 @@ describe('Production (e2e)', () => {
     const first = await request(ctx.app.getHttpServer())
       .post('/supplies/arrivals')
       .set('Authorization', ctx.auth('worker'))
-      .send({ materialId: flourId, quantity: { amount: 2, unit: 'kg' }, locationId: storageLocationId })
+      .send({
+        materialId: flourId,
+        quantity: { amount: 2, unit: 'kg' },
+        locationId: storageLocationId,
+      })
       .expect(201);
     expect(first.body).toMatchObject({
       materialId: flourId,
@@ -205,15 +235,24 @@ describe('Production (e2e)', () => {
     const second = await request(ctx.app.getHttpServer())
       .post('/supplies/arrivals')
       .set('Authorization', ctx.auth('worker'))
-      .send({ materialId: flourId, quantity: { amount: 3, unit: 'kg' }, locationId: storageLocationId })
+      .send({
+        materialId: flourId,
+        quantity: { amount: 3, unit: 'kg' },
+        locationId: storageLocationId,
+      })
       .expect(201);
-    expect(second.body).toMatchObject({ quantity: { amount: 3, unit: 'kg' }, status: 'stored' });
+    expect(second.body).toMatchObject({
+      quantity: { amount: 3, unit: 'kg' },
+      status: 'stored',
+    });
 
     const stock = await request(ctx.app.getHttpServer())
       .get(`/stock/${storageLocationId}`)
       .set('Authorization', ctx.auth('worker'))
       .expect(200);
-    expect(stock.body).toEqual([{ materialId: flourId, amount: 5, unit: 'kg' }]);
+    expect(stock.body).toEqual([
+      { materialId: flourId, amount: 5, unit: 'kg' },
+    ]);
   });
 
   it('POST /production/start: el admin crea el lote raíz in_progress con la cantidad planificada', async () => {
@@ -238,7 +277,9 @@ describe('Production (e2e)', () => {
       .send({
         machineId,
         recipeStepId: step1Id,
-        inputs: [{ batchId: flourBatch1Id, quantity: { amount: 2, unit: 'kg' } }],
+        inputs: [
+          { batchId: flourBatch1Id, quantity: { amount: 2, unit: 'kg' } },
+        ],
         outputs: [{ materialId: doughId, quantity: { amount: 2, unit: 'kg' } }],
         observation: '  mezclado  ',
         timestamp: T1.toISOString(),
@@ -292,14 +333,24 @@ describe('Production (e2e)', () => {
       .send({
         machineId,
         recipeStepId: step2Id,
-        inputs: [{ batchId: doughBatchId, quantity: { amount: 2, unit: 'kg' } }],
-        outputs: [{ materialId: breadId, quantity: { amount: 1, unit: 'unit' } }],
+        inputs: [
+          { batchId: doughBatchId, quantity: { amount: 2, unit: 'kg' } },
+        ],
+        outputs: [
+          { materialId: breadId, quantity: { amount: 1, unit: 'unit' } },
+        ],
         timestamp: T2.toISOString(),
       })
       .expect(201);
 
     const { event, outputBatches } = response.body as TransformationBody;
-    expect(event.inputs).toEqual([{ batchId: doughBatchId, materialId: doughId, quantity: { amount: 2, unit: 'kg' } }]);
+    expect(event.inputs).toEqual([
+      {
+        batchId: doughBatchId,
+        materialId: doughId,
+        quantity: { amount: 2, unit: 'kg' },
+      },
+    ]);
     expect(outputBatches[0]).toMatchObject({
       materialId: breadId,
       quantity: { amount: 1, unit: 'unit' },
@@ -313,7 +364,10 @@ describe('Production (e2e)', () => {
       .set('Authorization', ctx.auth('worker'))
       .send({ batchId: rootBatchId })
       .expect(200);
-    expect(response.body).toMatchObject({ id: rootBatchId, status: 'completed' });
+    expect(response.body).toMatchObject({
+      id: rootBatchId,
+      status: 'completed',
+    });
   });
 
   it('el stock del lugar de producción refleja los consumos (deltas negativos)', async () => {
@@ -347,22 +401,35 @@ describe('Production (e2e)', () => {
       .set('Authorization', ctx.auth('admin'))
       .expect(200);
     expect(machineMovements.body).toMatchObject([
-      { materialId: flourId, delta: { amount: -2, unit: 'kg' }, reason: 'consumed', timestamp: T1.toISOString() },
-      { materialId: doughId, delta: { amount: -2, unit: 'kg' }, reason: 'consumed', timestamp: T2.toISOString() },
+      {
+        materialId: flourId,
+        delta: { amount: -2, unit: 'kg' },
+        reason: 'consumed',
+        timestamp: T1.toISOString(),
+      },
+      {
+        materialId: doughId,
+        delta: { amount: -2, unit: 'kg' },
+        reason: 'consumed',
+        timestamp: T2.toISOString(),
+      },
     ]);
   });
 
   it('emite supply.arrived ×2, batch.created, batch.transformed ×2, batch.stored y production.completed', () => {
     const names = bus.published.map((event) => event.name);
-    const count = (name: string): number => names.filter((n) => n === name).length;
+    const count = (name: string): number =>
+      names.filter((n) => n === name).length;
     expect(count('supply.arrived')).toBe(2);
     expect(count('batch.created')).toBe(1);
     expect(count('batch.transformed')).toBe(2);
     expect(count('batch.stored')).toBe(1);
     expect(count('production.completed')).toBe(1);
 
-    const transformed = bus.published.filter((event) => event.name === 'batch.transformed');
-    const outputs = (transformed[1].payload as { outputs: { batchId: string }[] }).outputs;
+    const transformed = bus.published.filter(
+      (event): event is BatchTransformed => event.name === 'batch.transformed',
+    );
+    const outputs = transformed[1].payload.outputs;
     expect(outputs[0].batchId).toBeTypeOf('string');
   });
 
@@ -374,7 +441,10 @@ describe('Production (e2e)', () => {
       .set('Authorization', ctx.auth('worker'))
       .send({ recipeId })
       .expect(403);
-    expect(response.body).toMatchObject({ statusCode: 403, error: 'UnauthorizedRoleError' });
+    expect(response.body).toMatchObject({
+      statusCode: 403,
+      error: 'UnauthorizedRoleError',
+    });
   });
 
   it('un auditor no puede transformar → 403', async () => {
@@ -388,7 +458,10 @@ describe('Production (e2e)', () => {
         timestamp: T1.toISOString(),
       })
       .expect(403);
-    expect(response.body).toMatchObject({ statusCode: 403, error: 'UnauthorizedRoleError' });
+    expect(response.body).toMatchObject({
+      statusCode: 403,
+      error: 'UnauthorizedRoleError',
+    });
   });
 
   it('un worker puede leer el stock por lugar → 200', async () => {
@@ -406,12 +479,17 @@ describe('Production (e2e)', () => {
       .set('Authorization', ctx.auth('worker'))
       .send({
         machineId: maintenanceMachineId,
-        inputs: [{ batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } }],
+        inputs: [
+          { batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } },
+        ],
         outputs: [],
         timestamp: T1.toISOString(),
       })
       .expect(409);
-    expect(response.body).toMatchObject({ statusCode: 409, error: 'InactiveMachineError' });
+    expect(response.body).toMatchObject({
+      statusCode: 409,
+      error: 'InactiveMachineError',
+    });
   });
 
   it('transformar fuera de la franja asignada (I3, ventana horaria) → 409', async () => {
@@ -420,12 +498,17 @@ describe('Production (e2e)', () => {
       .set('Authorization', ctx.auth('worker'))
       .send({
         machineId,
-        inputs: [{ batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } }],
+        inputs: [
+          { batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } },
+        ],
         outputs: [],
         timestamp: T_OUTSIDE.toISOString(),
       })
       .expect(409);
-    expect(response.body).toMatchObject({ statusCode: 409, error: 'WorkerNotAssignedError' });
+    expect(response.body).toMatchObject({
+      statusCode: 409,
+      error: 'WorkerNotAssignedError',
+    });
   });
 
   it('transformar con un lote de input inexistente → 404', async () => {
@@ -439,7 +522,10 @@ describe('Production (e2e)', () => {
         timestamp: T1.toISOString(),
       })
       .expect(404);
-    expect(response.body).toMatchObject({ statusCode: 404, error: 'NotFoundError' });
+    expect(response.body).toMatchObject({
+      statusCode: 404,
+      error: 'NotFoundError',
+    });
   });
 
   it('transformar con un output en unidad incompatible → 422 (I6)', async () => {
@@ -453,7 +539,10 @@ describe('Production (e2e)', () => {
         timestamp: T1.toISOString(),
       })
       .expect(422);
-    expect(response.body).toMatchObject({ statusCode: 422, error: 'IncompatibleUnitError' });
+    expect(response.body).toMatchObject({
+      statusCode: 422,
+      error: 'IncompatibleUnitError',
+    });
   });
 
   it('sin asignación a la máquina tras desasignar → 409', async () => {
@@ -467,12 +556,17 @@ describe('Production (e2e)', () => {
       .set('Authorization', ctx.auth('worker'))
       .send({
         machineId,
-        inputs: [{ batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } }],
+        inputs: [
+          { batchId: flourBatch1Id, quantity: { amount: 1, unit: 'kg' } },
+        ],
         outputs: [],
         timestamp: T1.toISOString(),
       })
       .expect(409);
-    expect(response.body).toMatchObject({ statusCode: 409, error: 'WorkerNotAssignedError' });
+    expect(response.body).toMatchObject({
+      statusCode: 409,
+      error: 'WorkerNotAssignedError',
+    });
   });
 
   it('el lote raíz completado persiste como completed (vía repositorio)', async () => {

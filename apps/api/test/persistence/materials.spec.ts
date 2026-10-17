@@ -16,7 +16,9 @@ describe('DrizzleMaterialRepository', () => {
 
   it('findById devuelve null cuando no existe', async () => {
     const material = aMaterial();
-    await expect(ctx.repositories.materials.findById(material.id)).resolves.toBeNull();
+    await expect(
+      ctx.repositories.materials.findById(material.id),
+    ).resolves.toBeNull();
   });
 
   it('save + findById hacen round-trip del material', async () => {
@@ -48,7 +50,11 @@ describe('DrizzleMaterialRepository', () => {
 
   it('list filtra por kind y physicalState', async () => {
     const supply = aMaterial();
-    const liquid = aMaterial({ name: 'Leche', physicalState: 'liquid', unitOfMeasure: 'l' });
+    const liquid = aMaterial({
+      name: 'Leche',
+      physicalState: 'liquid',
+      unitOfMeasure: 'l',
+    });
     const product = aProduct();
     await ctx.repositories.materials.save(supply);
     await ctx.repositories.materials.save(liquid);
@@ -57,12 +63,16 @@ describe('DrizzleMaterialRepository', () => {
     expect(await ctx.repositories.materials.list()).toHaveLength(3);
 
     const supplies = await ctx.repositories.materials.list({ kind: 'supply' });
-    expect(supplies.map((m) => m.id).sort()).toEqual([supply.id, liquid.id].sort());
+    expect(supplies.map((m) => m.id).sort()).toEqual(
+      [supply.id, liquid.id].sort(),
+    );
 
     const products = await ctx.repositories.materials.list({ kind: 'product' });
     expect(products.map((m) => m.id)).toEqual([product.id]);
 
-    const liquids = await ctx.repositories.materials.list({ physicalState: 'liquid' });
+    const liquids = await ctx.repositories.materials.list({
+      physicalState: 'liquid',
+    });
     expect(liquids.map((m) => m.id)).toEqual([liquid.id]);
 
     const solidSupplies = await ctx.repositories.materials.list({
@@ -75,7 +85,11 @@ describe('DrizzleMaterialRepository', () => {
   it('existsByName detecta nombres existentes', async () => {
     await ctx.repositories.materials.save(aMaterial({ name: 'Azúcar' }));
 
-    await expect(ctx.repositories.materials.existsByName('Azúcar')).resolves.toBe(true);
-    await expect(ctx.repositories.materials.existsByName('Sal')).resolves.toBe(false);
+    await expect(
+      ctx.repositories.materials.existsByName!('Azúcar'),
+    ).resolves.toBe(true);
+    await expect(ctx.repositories.materials.existsByName!('Sal')).resolves.toBe(
+      false,
+    );
   });
 });
