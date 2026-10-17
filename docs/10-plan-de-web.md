@@ -376,19 +376,51 @@ dashboard; el sidebar muestra secciones según rol; sin token, cualquier ruta pr
 redirige a `/login`. Vitest verde para el interceptor (single-flight, reintento, logout),
 `errorToMessage` y el store de sesión. `build` + `lint` (biome) verdes.
 
-## Fase 1 — Catálogos base
+## Fase 1 — Catálogos base ✅ (completada)
 
-- [ ] Componentes reutilizables: `DataTable` (búsqueda/orden/estado vacío), `ConfirmDialog`,
+- [x] Componentes reutilizables: `DataTable` (búsqueda/orden/estado vacío), `ConfirmDialog`,
       `FormDialog`, `StatusBadge`, `EmptyState`.
-- [ ] `/materiales`, `/ubicaciones`, `/maquinas`, `/trabajadores` con list + diálogo de
+- [x] `/materiales`, `/ubicaciones`, `/maquinas`, `/trabajadores` con list + diálogo de
       alta/edición, baja lógica y "Mover" (máquinas).
-- [ ] Módulos `materialsApi`, `locationsApi`, `machinesApi`, `workersApi`.
-- [ ] Unidades filtradas por estado físico; solo lugares de producción para máquinas.
-- [ ] Gating de escritura con `RequireRole`/`canWrite`.
+- [x] Módulos `materialsApi`, `locationsApi`, `machinesApi`, `workersApi`.
+- [x] Unidades filtradas por estado físico; solo lugares de producción para máquinas.
+- [x] Gating de escritura con `RequireRole`/`canWrite`.
 
-**Criterio de salida:** como admin se crean/editan/desactivan registros en los cuatro
-catálogos y como auditor se ven sin acciones. Tests de componente de los formularios
-(material, máquina) y de la tabla vacía; `build` + `lint` verdes.
+**✅ Completada:** los cuatro catálogos quedan operativos:
+
+- **Componentes reutilizables** (`src/components/shared/`): `DataTable` (genérica y
+  tipada; búsqueda y orden locales, estado vacío y estado de "sin resultados" en
+  español), `ConfirmDialog` (maneja `busy`, cierra solo si la promesa resuelve),
+  `FormDialog` (título/descripción/children/footer), `StatusBadge` (tonos sobre
+  `Badge`), `EmptyState`, más `SelectField` (Select de shadcn + label), `RowActions`
+  (menú por fila), `QueryError` (bloque de error con "Reintentar") y `PageHeader`
+  (movido desde `dashboard-common`, que lo reexporta). Las etiquetas/tonos en español
+  de las *unions* del dominio viven en `src/lib/format/labels.ts`; el toast de error
+  se centraliza en `useErrorToast`.
+- **Módulos de API completados** contra los controladores reales:
+  `materialsApi` (`list` con `kind`/`physicalState`, `get`, `create`, `update`,
+  `deactivate`), `locationsApi` (nuevo: `list` con `kind`, `get`, `create`, `update`
+  —`PATCH` solo renombra—), `machinesApi` (`list` con `locationId`/`status`/`type`,
+  `get`, `create`, `update`, `move` por `POST /machines/:id/move`) y `workersApi`
+  (`list` con `role`/`active`, `get`, `create`, `update`, `deactivate`). Los tipos de
+  entrada reproducen los schemas zod de la API.
+- **Pantallas** (lógica en `src/components/catalogs/*`, rutas finas en `src/app/(app)/`):
+  `/materiales` (tabla nombre/descripción/tipo/estado físico/unidad/activo + alta/edición
+  con **unidades filtradas por `unitsForPhysicalState`** + baja con confirmación),
+  `/ubicaciones` (tabla nombre/tipo + alta/renombrar), `/maquinas` (tabla
+  nombre/tipo/lugar resuelto/estado + alta/edición + diálogo **Mover** con destinos
+  solo de producción) y `/trabajadores` (tabla nombre/rol/activo + alta/edición +
+  baja; **Reactivar** deshabilitado con nota de deuda de API).
+- **Decisiones:** un mismo formulario se reutiliza para alta y edición con la prop
+  `mode`; la edición respeta los `PATCH` reales (material: no cambia tipo ni estado
+  físico; ubicación: solo renombra; máquina: no cambia de lugar —se usa `move`—;
+  trabajador: nombre y rol). Cada ruta se envuelve en `RequireRole(['admin','auditor'])`
+  y un `CatalogGate` decide `canWrite` (admin escribe; auditor ve la tabla **sin**
+  acciones ni "Nuevo").
+- **Verificación:** `pnpm --filter web test` (**88 tests**; neto +18: 5 de contrato de
+  API de catálogos, 5 del formulario de material, 3 del de máquina, 3 de `DataTable` y 2
+  de la tabla de trabajadores auditor/admin), `pnpm --filter web build` y
+  `pnpm --filter web lint` (biome) verdes.
 
 ## Fase 2 — Recetas y builder de pasos
 

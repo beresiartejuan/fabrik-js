@@ -1,15 +1,8 @@
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-/** Encabezado de página del dashboard. */
-export function PageHeader({ title, description }: { title: string; description?: string }) {
-  return (
-    <header className="flex flex-col gap-1">
-      <h1 className="font-heading text-2xl font-semibold tracking-tight">{title}</h1>
-      {description && <p className="text-sm text-muted-foreground">{description}</p>}
-    </header>
-  );
-}
+// Reexportado desde `shared` para conservar los imports del dashboard.
+export { PageHeader } from '@/components/shared/page-header';
 
 export interface StatCardProps {
   readonly label: string;
