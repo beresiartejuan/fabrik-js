@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   AssignmentId,
+  BatchId,
   DomainError,
   InactiveMachineError,
   InactiveWorkerError,
@@ -9,8 +10,11 @@ import {
   InsufficientStockError,
   InvalidQuantityError,
   InvalidTimeSlotError,
+  InvalidTransformationError,
   MachineId,
   MaterialId,
+  MaterialKindMismatchError,
+  NotAProductionOrderError,
   OverlappingScheduleError,
   Quantity,
   RecipeId,
@@ -25,6 +29,7 @@ const MACHINE_ID = MachineId.from('machine-1');
 const MATERIAL_ID = MaterialId.from('material-1');
 const ASSIGNMENT_ID = AssignmentId.from('assignment-1');
 const RECIPE_ID = RecipeId.from('recipe-1');
+const BATCH_ID = BatchId.from('batch-1');
 
 describe('DomainError (base)', () => {
   it('fija su nombre y hereda de Error', () => {
@@ -129,6 +134,44 @@ describe('IncompatibleUnitError', () => {
   });
 });
 
+describe('MaterialKindMismatchError', () => {
+  it('transporta material, tipo esperado y recibido', () => {
+    const error = new MaterialKindMismatchError(MATERIAL_ID, 'supply', 'product');
+    expect(error).toBeInstanceOf(DomainError);
+    expect(error.name).toBe('MaterialKindMismatchError');
+    expect(error.materialId).toBe(MATERIAL_ID);
+    expect(error.expected).toBe('supply');
+    expect(error.received).toBe('product');
+    expect(error.message).toContain('supply');
+    expect(error.message).toContain('product');
+  });
+});
+
+describe('InvalidTransformationError', () => {
+  it('transporta el motivo y, si aplica, el lote duplicado', () => {
+    const empty = new InvalidTransformationError('empty', 'sin inputs ni outputs');
+    expect(empty).toBeInstanceOf(DomainError);
+    expect(empty.name).toBe('InvalidTransformationError');
+    expect(empty.reason).toBe('empty');
+    expect(empty.batchId).toBeUndefined();
+
+    const duplicate = new InvalidTransformationError('duplicate-input', 'repetido', BATCH_ID);
+    expect(duplicate.reason).toBe('duplicate-input');
+    expect(duplicate.batchId).toBe(BATCH_ID);
+    expect(duplicate.message).toContain(BATCH_ID);
+  });
+});
+
+describe('NotAProductionOrderError', () => {
+  it('transporta el lote que no es orden de producción', () => {
+    const error = new NotAProductionOrderError(BATCH_ID);
+    expect(error).toBeInstanceOf(DomainError);
+    expect(error.name).toBe('NotAProductionOrderError');
+    expect(error.batchId).toBe(BATCH_ID);
+    expect(error.message).toContain(BATCH_ID);
+  });
+});
+
 describe('Errores de value objects (Fase 1)', () => {
   it('InvalidQuantityError hereda de DomainError', () => {
     const error = new InvalidQuantityError('cantidad inválida');
@@ -159,6 +202,9 @@ describe('Catálogo completo de errores', () => {
     ['RecipeIntegrityError', new RecipeIntegrityError(RECIPE_ID, 'x')],
     ['UnauthorizedRoleError', new UnauthorizedRoleError('worker', 'x')],
     ['IncompatibleUnitError', new IncompatibleUnitError('g', 'kg')],
+    ['MaterialKindMismatchError', new MaterialKindMismatchError(MATERIAL_ID, 'supply', 'product')],
+    ['InvalidTransformationError', new InvalidTransformationError('empty', 'x')],
+    ['NotAProductionOrderError', new NotAProductionOrderError(BATCH_ID)],
   ];
 
   it.each(CASES)('%s hereda de DomainError con su nombre', (name, error) => {
