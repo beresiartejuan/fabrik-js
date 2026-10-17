@@ -3,7 +3,9 @@
 // Son lecturas puras: no escriben ni emiten eventos. La autorización sigue el
 // catálogo de docs/04 (A = admin, Au = auditor, W = worker):
 //  - `TraceBatch` / `TraceForward` / `GetStockMovements` / `ListBatchEvents`: A, Au.
-//  - `GetStockByLocation`: A, Au, W.
+//  - `GetStockByLocation` / `GetBatch` / `ListBatches`: A, Au, W. La consulta de
+//    lotes se abre al worker porque la pantalla `/produccion` (plan de web) la
+//    consume el operario.
 
 import type { Batch } from '../entities/batch.js';
 import type { BatchEvent } from '../entities/batch-event.js';
@@ -11,7 +13,7 @@ import type { StockMovement } from '../entities/stock-movement.js';
 import type { WorkerRole } from '../entities/worker.js';
 import { NotFoundError } from '../errors/index.js';
 import type { BatchEventFilter, BatchEventRepository } from '../ports/batch-event-repository.js';
-import type { BatchRepository } from '../ports/batch-repository.js';
+import type { BatchFilter, BatchRepository } from '../ports/batch-repository.js';
 import type { LocationRepository } from '../ports/location-repository.js';
 import type { MaterialRepository } from '../ports/material-repository.js';
 import type { StockMovementRepository } from '../ports/stock-movement-repository.js';
@@ -51,6 +53,11 @@ export interface BatchEventQueryDeps {
   readonly batchEvents: BatchEventRepository;
 }
 
+/** Consulta de lotes (sin eventos): solo repositorio de lotes. */
+export interface BatchQueryDeps {
+  readonly batches: BatchRepository;
+}
+
 // --- Comandos ---
 
 export interface TraceBatchCommand {
@@ -71,6 +78,14 @@ export interface GetStockMovementsCommand {
 }
 
 export interface ListBatchEventsCommand extends BatchEventFilter {}
+
+export interface GetBatchCommand {
+  readonly batchId: BatchId;
+}
+
+export interface ListBatchesCommand {
+  readonly filter?: BatchFilter;
+}
 
 // --- DTOs ---
 
@@ -308,5 +323,39 @@ export class ListBatchEvents {
 
     const events = await this.deps.batchEvents.listBy(command);
     return [...events].sort(byTimestamp);
+  }
+}
+
+/**
+ * `GetBatch` (roles A, Au, W): devuelve un lote por id. Un `batchId` desconocido
+ * lanza `NotFoundError`. Se abre al worker porque la pantalla `/produccion` del
+ * plan de web muestra los lotes activos al operario.
+ */
+export class GetBatch {
+  constructor(private readonly deps: BatchQueryDeps) {}
+
+  async execute(actor: Actor, command: GetBatchCommand): Promise<Batch> {
+    requireRole(actor, ALL_ROLES, 'GetBatch');
+
+    const batch = await this.deps.batches.findById(command.batchId);
+    if (!batch) {
+      throw new NotFoundError('Batch', command.batchId);
+    }
+    return batch;
+  }
+}
+
+/**
+ * `ListBatches` (roles A, Au, W): lista lotes con el filtro explícito y pequeño de
+ * `BatchFilter` (`materialId`, `status`, `recipeId`, `originBatchEventId`), todos
+ * opcionales. Sin filtro devuelve todos los lotes. El orden lo decide el
+ * repositorio; este caso de uso no reordena (es un listado, no una traza).
+ */
+export class ListBatches {
+  constructor(private readonly deps: BatchQueryDeps) {}
+
+  async execute(actor: Actor, command: ListBatchesCommand): Promise<readonly Batch[]> {
+    requireRole(actor, ALL_ROLES, 'ListBatches');
+    return this.deps.batches.list(command.filter);
   }
 }

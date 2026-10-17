@@ -6,15 +6,18 @@ import {
   BatchEvent,
   BatchEventId,
   BatchId,
+  GetBatch,
   GetStockByLocation,
   GetStockMovements,
   ListBatchEvents,
+  ListBatches,
   Location,
   LocationId,
   MachineId,
   Material,
   NotFoundError,
   Quantity,
+  RecipeId,
   StockMovement,
   TraceBatch,
   TraceForward,
@@ -52,6 +55,8 @@ function traceFixture() {
       stockMovements: repos.stockMovements,
     }),
     listBatchEvents: new ListBatchEvents({ batchEvents: repos.batchEvents }),
+    getBatch: new GetBatch({ batches: repos.batches }),
+    listBatches: new ListBatches({ batches: repos.batches }),
   };
 }
 
@@ -685,5 +690,108 @@ describe('ListBatchEvents (búsqueda)', () => {
       name: 'UnauthorizedRoleError',
       useCase: 'ListBatchEvents',
     });
+  });
+});
+
+describe('GetBatch / ListBatches (consulta de lotes)', () => {
+  async function seedBatches(fixture: Fixture) {
+    const flour = supply('Harina', 'kg');
+    const dough = product('Masa', 'kg');
+    const bread = product('Pan', 'kg');
+    for (const material of [flour, dough, bread]) {
+      await fixture.repos.materials.save(material);
+    }
+
+    const recipeId = RecipeId.from('recipe-bread');
+    const originBatchEventId = BatchEventId.from('event-origin');
+
+    const inProgress = Batch.create({
+      materialId: dough.id,
+      quantity: Quantity.create(2, 'kg'),
+      recipeId,
+      status: 'in_progress',
+    });
+    const stored = Batch.create({
+      materialId: flour.id,
+      quantity: Quantity.create(5, 'kg'),
+      status: 'stored',
+    });
+    const completed = Batch.fromPersistence({
+      id: BatchId.create(),
+      materialId: bread.id,
+      quantity: Quantity.create(1, 'kg'),
+      recipeId,
+      originBatchEventId,
+      status: 'completed',
+    });
+    for (const batch of [inProgress, stored, completed]) {
+      await fixture.repos.batches.save(batch);
+    }
+    return { flour, recipeId, originBatchEventId, inProgress, stored, completed };
+  }
+
+  it('GetBatch devuelve el lote por id', async () => {
+    const fixture = traceFixture();
+    const { stored } = await seedBatches(fixture);
+
+    await expect(fixture.getBatch.execute(AUDITOR, { batchId: stored.id })).resolves.toMatchObject({
+      id: stored.id,
+      materialId: stored.materialId,
+      status: 'stored',
+    });
+  });
+
+  it('GetBatch lanza NotFoundError si el lote no existe', async () => {
+    const fixture = traceFixture();
+    await expect(
+      fixture.getBatch.execute(ADMIN, { batchId: BatchId.create() }),
+    ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it('ListBatches sin filtro devuelve todos y respeta cada campo de BatchFilter', async () => {
+    const fixture = traceFixture();
+    const { flour, recipeId, originBatchEventId, inProgress, stored, completed } =
+      await seedBatches(fixture);
+
+    const all = await fixture.listBatches.execute(AUDITOR, {});
+    expect(all.map((batch) => batch.id)).toEqual([inProgress.id, stored.id, completed.id]);
+
+    const byMaterial = await fixture.listBatches.execute(AUDITOR, {
+      filter: { materialId: flour.id },
+    });
+    expect(byMaterial.map((batch) => batch.id)).toEqual([stored.id]);
+
+    const byStatus = await fixture.listBatches.execute(AUDITOR, {
+      filter: { status: 'completed' },
+    });
+    expect(byStatus.map((batch) => batch.id)).toEqual([completed.id]);
+
+    const byRecipe = await fixture.listBatches.execute(AUDITOR, { filter: { recipeId } });
+    expect(byRecipe.map((batch) => batch.id)).toEqual([inProgress.id, completed.id]);
+
+    const byOrigin = await fixture.listBatches.execute(AUDITOR, {
+      filter: { originBatchEventId },
+    });
+    expect(byOrigin.map((batch) => batch.id)).toEqual([completed.id]);
+  });
+
+  it('permite al worker consultar lotes (pantalla /produccion)', async () => {
+    const fixture = traceFixture();
+    const { stored } = await seedBatches(fixture);
+
+    await expect(fixture.getBatch.execute(WORKER, { batchId: stored.id })).resolves.toMatchObject({
+      id: stored.id,
+    });
+    await expect(fixture.listBatches.execute(WORKER, {})).resolves.toHaveLength(3);
+  });
+
+  it('permite al admin y al auditor', async () => {
+    const fixture = traceFixture();
+    const { stored } = await seedBatches(fixture);
+
+    for (const actor of [ADMIN, AUDITOR]) {
+      await expect(fixture.getBatch.execute(actor, { batchId: stored.id })).resolves.toBeDefined();
+      await expect(fixture.listBatches.execute(actor, {})).resolves.toHaveLength(3);
+    }
   });
 });
