@@ -14,6 +14,12 @@ function matches(batch: Batch, filter?: BatchFilter): boolean {
   if (filter?.recipeId !== undefined && batch.recipeId !== filter.recipeId) {
     return false;
   }
+  if (
+    filter?.originBatchEventId !== undefined &&
+    batch.originBatchEventId !== filter.originBatchEventId
+  ) {
+    return false;
+  }
   return true;
 }
 

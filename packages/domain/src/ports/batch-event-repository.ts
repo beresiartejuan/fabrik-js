@@ -25,6 +25,6 @@ export interface BatchEventRepository {
   add(event: BatchEvent): Promise<void>;
   findById(id: BatchEventId): Promise<BatchEvent | null>;
   listBy(filters?: BatchEventFilter): Promise<readonly BatchEvent[]>;
-  /** Eventos cuyos `inputs` referencian ese batch (trazabilidad hacia atrás). */
+  /** Eventos cuyos `inputs` referencian ese batch (trazabilidad hacia adelante / recall). */
   listByInputBatchId(batchId: BatchId): Promise<readonly BatchEvent[]>;
 }

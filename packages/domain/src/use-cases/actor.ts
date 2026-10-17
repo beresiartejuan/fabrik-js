@@ -19,6 +19,12 @@ export const CATALOG_WRITE_ROLES: readonly WorkerRole[] = ['admin'];
 export const CATALOG_READ_ROLES: readonly WorkerRole[] = ['admin', 'auditor'];
 
 /**
+ * Todos los roles del sistema (docs/04, `GetStockByLocation`: A, Au, W). Pensado
+ * para lecturas de stock abiertas al operario que consume el material.
+ */
+export const ALL_ROLES: readonly WorkerRole[] = ['admin', 'worker', 'auditor'];
+
+/**
  * Guard de autorización compartido. Lanza `UnauthorizedRoleError` si el rol del
  * actor no está en `allowed`. Se ejecuta antes de cualquier validación o efecto
  * para que un rol indebido nunca llegue a tocar el dominio.

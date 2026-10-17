@@ -245,6 +245,33 @@ describe('InMemoryBatchRepository', () => {
     expect(await repo.list({ status: 'completed' })).toHaveLength(1);
   });
 
+  it('list filtra por originBatchEventId (trazabilidad hacia adelante)', async () => {
+    const repo = new InMemoryBatchRepository();
+    const otherEventId = BatchEventId.from('batch-event-2');
+    await repo.save(
+      Batch.create({
+        materialId: PRODUCT_ID,
+        quantity: Quantity.create(1, 'kg'),
+        originBatchEventId: BATCH_EVENT_ID,
+      }),
+    );
+    await repo.save(
+      Batch.create({
+        materialId: PRODUCT_ID,
+        quantity: Quantity.create(2, 'kg'),
+        originBatchEventId: otherEventId,
+      }),
+    );
+    await repo.save(Batch.create({ materialId: SUPPLY_ID, quantity: Quantity.create(5, 'kg') }));
+
+    expect(await repo.list()).toHaveLength(3);
+    const fromFirstEvent = await repo.list({ originBatchEventId: BATCH_EVENT_ID });
+    expect(fromFirstEvent).toHaveLength(1);
+    expect(fromFirstEvent[0]?.quantity.amount).toBe(1);
+    expect(await repo.list({ originBatchEventId: otherEventId })).toHaveLength(1);
+    expect(await repo.list({ originBatchEventId: BatchEventId.create() })).toHaveLength(0);
+  });
+
   it('findById ausente devuelve null', async () => {
     const repo = new InMemoryBatchRepository();
     await expect(repo.findById(BatchId.create())).resolves.toBeNull();

@@ -1,11 +1,13 @@
 import type { Batch, BatchStatus } from '../entities/batch';
-import type { BatchId, MaterialId, RecipeId } from '../value-objects/ids';
+import type { BatchEventId, BatchId, MaterialId, RecipeId } from '../value-objects/ids';
 
 // Filtro explícito y pequeño para `list`.
 export interface BatchFilter {
   readonly materialId?: MaterialId;
   readonly status?: BatchStatus;
   readonly recipeId?: RecipeId;
+  /** Lotes originados por un evento; trazabilidad hacia adelante / recall. */
+  readonly originBatchEventId?: BatchEventId;
 }
 
 /**
