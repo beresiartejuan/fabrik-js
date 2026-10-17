@@ -477,17 +477,57 @@ una receta con I7 violada muestra error inline y el 422 mapeado. Tests del build
   `/recetas`, `/recetas/nueva`, `/recetas/[id]` prerenderizadas/parciales) y
   `pnpm --filter web lint` (biome) verdes.
 
-## Fase 3 — Asignaciones
+## Fase 3 — Asignaciones ✅ (completada)
 
-- [ ] `/asignaciones` con selectores de máquina/worker y grilla semanal.
-- [ ] Editor de `TimeSlot` + pre-validación con `TimeSlot.overlaps`.
-- [ ] Asignar (`POST /assignments`) y desasignar (`DELETE /assignments/:id`) con feedback de
+- [x] `/asignaciones` con tabs "Por máquina | Por trabajador" y grilla semanal.
+- [x] Editor de `TimeSlot` reutilizable + pre-validación con `TimeSlot.overlaps`.
+- [x] Asignar (`POST /assignments`) y desasignar (`DELETE /assignments/:id`) con feedback de
       solapamiento (409) mapeado.
-- [ ] `assignmentsApi` + `scheduleApi` (o métodos en `assignmentsApi`).
+- [x] `assignmentsApi` extendido (`assign`, `unassign`, `workerSchedule`, `machineSchedule`).
 
 **Criterio de salida:** asignar un worker y verlo en la grilla; un segundo rango solapado
 muestra el aviso tanto por pre-validación como por el 409 del servidor. Test del editor de
 `TimeSlot` y del mapeo de error.
+
+**✅ Completada:** la gestión de agendas trabaja de punta a punta:
+
+- **`assignmentsApi`** contra el contrato real de `apps/api/src/assignments/*.ts`: `assign`
+  (`POST /assignments` con body `{ workerId, machineId, slot: { daysOfWeek, start, end } }`),
+  `unassign` (`DELETE /assignments/:id`, 204), `workerSchedule` (`GET /workers/:id/schedule`)
+  y `machineSchedule` (`GET /machines/:id/schedule`), todos `AssignmentWire[]`.
+- **Pantalla `/asignaciones`** (lógica en `src/components/assignments/*`, ruta fina): tabs
+  **Por máquina | Por trabajador** con selector por vista; cada selección carga su agenda y
+  la **grilla semanal** (`schedule-grid.tsx`) muestra las columnas lun-dom con tarjetas de
+  franja `HH:mm–HH:mm` + **contraparte resuelta** (worker al ver una máquina, máquina al ver
+  un worker —la API anida solo ids—). Estados: sin selección, carga con skeletons, error con
+  `QueryError`, vacío ("Sin asignaciones para esta máquina / este trabajador").
+- **Asignar (admin):** diálogo presentacional (`assign-dialog.tsx`) con worker activo, máquina
+  y `TimeSlotEditor` (toggles de día lun-dom + horas `HH:mm`, el `end` admite `24:00`). Al
+  abrir y al cambiar de worker pide la agenda **fresca** (`GET /workers/:id/schedule`) y
+  **pre-valida I1 en cliente** con `TimeSlot.overlaps` del dominio: aviso inline "Se solapa
+  con … (detalle de franjas y máquina)" y submit deshabilitado; franjas **adyacentes**
+  (`end === start`) o de otros días no cuentan. La petición y los toasts (éxito y 409
+  `OverlappingScheduleError` → "El trabajador ya tiene una asignación en ese horario.")
+  viven en la pantalla, que además refresca ambas agendas; el diálogo queda abierto para
+  corregir la franja.
+- **Desasignar (admin):** `ConfirmDialog` destructivo con descripción de la franja afectada →
+  `DELETE` → toast + refetch; si falla, el diálogo queda abierto con el error mapeado.
+- **Estado puro** (`time-slot-draft.ts`, sin React, mismo patrón que `recipe-builder-state`):
+  borrador de franja (`days` como `0=dom…6=sáb` + horas crudas), `toggleDay` (dedupe/orden),
+  `validateSlotDraft` (≥ 1 día, formato `HH:mm` — `end` también `24:00` —, `start < end`),
+  `toTimeSlot` (instancia de dominio o `null`), `findOverlappingSlots` /
+  `findOverlappingAssignments` (solapes contra el wire, tolerantes a franjas inválidas) y
+  `draftDuplicates` (aviso de asignación idéntica). La lógica crítica se testea sin montar
+  React.
+- **Navegación:** `/asignaciones` pasa a `enabled: true` (admin/auditor; el worker no entra en
+  esta pantalla — su agenda propia es el dashboard con `GET /me/schedule`). El dashboard admin
+  ya muestra la tarjeta por `isNavHrefEnabled`. Tests de nav/dashboard ajustados.
+- shadcn: se añadieron `toggle-group`, `toggle` y `checkbox` (el editor usa toggles múltiples;
+  `checkbox` queda disponible para fases futuras).
+- **Verificación:** `pnpm --filter web test` (**170 tests**; +40: 21 del state puro, 4 del
+  editor, 11 de flujos de pantalla —grilla, pre-aviso, adyacentes, 409, desasignación, auditor
+  solo lectura— y 4 del contrato de API), `pnpm --filter web build` (ruta `/asignaciones`
+  prerenderizada) y `pnpm --filter web lint` (biome) verdes.
 
 ## Fase 4 — Producción y suministros
 

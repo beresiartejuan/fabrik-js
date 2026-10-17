@@ -57,8 +57,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: '/maquinas', label: 'Máquinas', roles: ['admin', 'auditor'], enabled: true },
   { href: '/trabajadores', label: 'Trabajadores', roles: ['admin', 'auditor'], enabled: true },
   { href: '/recetas', label: 'Recetas', roles: ['admin', 'auditor'], enabled: true },
+  { href: '/asignaciones', label: 'Asignaciones', roles: ['admin', 'auditor'], enabled: true },
   // Fases futuras: pantallas todavía inexistentes.
-  { href: '/asignaciones', label: 'Asignaciones', roles: ['admin', 'auditor'], enabled: false },
   { href: '/produccion', label: 'Producción', roles: ALL_ROLES, enabled: false },
   { href: '/produccion/nueva', label: 'Nueva producción', roles: ['admin'], enabled: false },
   {

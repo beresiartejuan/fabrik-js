@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { isActiveHref, isNavHrefEnabled, NAV_ITEMS, navItemsForRole, ROLE_LABELS } from '@/lib/nav';
 
 const FUTURE_HREFS = [
-  '/asignaciones',
   '/produccion',
   '/produccion/nueva',
   '/produccion/registrar',
@@ -14,7 +13,7 @@ const FUTURE_HREFS = [
 ];
 
 describe('navItemsForRole', () => {
-  it('el admin ve los catálogos existentes y recetas', () => {
+  it('el admin ve los catálogos existentes, recetas y asignaciones', () => {
     const hrefs = navItemsForRole('admin').map((item) => item.href);
     expect(hrefs).toEqual([
       '/',
@@ -23,6 +22,7 @@ describe('navItemsForRole', () => {
       '/maquinas',
       '/trabajadores',
       '/recetas',
+      '/asignaciones',
     ]);
   });
 
@@ -31,7 +31,7 @@ describe('navItemsForRole', () => {
     expect(hrefs).toEqual(['/']);
   });
 
-  it('el auditor ve los catálogos existentes, recetas e Inicio', () => {
+  it('el auditor ve los catálogos existentes, recetas, asignaciones e Inicio', () => {
     const hrefs = navItemsForRole('auditor').map((item) => item.href);
     expect(hrefs).toEqual([
       '/',
@@ -40,6 +40,7 @@ describe('navItemsForRole', () => {
       '/maquinas',
       '/trabajadores',
       '/recetas',
+      '/asignaciones',
     ]);
   });
 
@@ -63,12 +64,14 @@ describe('NAV_ITEMS enabled', () => {
       '/maquinas',
       '/trabajadores',
       '/recetas',
+      '/asignaciones',
     ]);
   });
 
   it('isNavHrefEnabled respeta el flag y las rutas desconocidas quedan ocultas', () => {
     expect(isNavHrefEnabled('/materiales')).toBe(true);
     expect(isNavHrefEnabled('/recetas')).toBe(true);
+    expect(isNavHrefEnabled('/asignaciones')).toBe(true);
     expect(isNavHrefEnabled('/stock')).toBe(false);
     expect(isNavHrefEnabled('/ruta-inexistente')).toBe(false);
   });

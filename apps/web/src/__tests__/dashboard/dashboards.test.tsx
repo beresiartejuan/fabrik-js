@@ -31,15 +31,15 @@ beforeEach(() => {
 });
 
 describe('dashboards: secciones habilitadas', () => {
-  it('el admin muestra recetas y oculta las fases futuras', async () => {
+  it('el admin muestra recetas, asignaciones y oculta las fases futuras', async () => {
     render(<AdminDashboard />);
 
     expect(await screen.findByRole('link', { name: 'Materiales' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Trabajadores' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Recetas' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Asignaciones' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Nueva producción' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Registrar arribo' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Asignaciones' })).not.toBeInTheDocument();
   });
 
   it('el auditor no muestra accesos a stock/trazabilidad todavía', async () => {
