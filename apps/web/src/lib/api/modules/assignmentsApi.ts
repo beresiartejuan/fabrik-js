@@ -8,9 +8,10 @@ import type { AssignmentWire } from '../types';
  * Endpoints de asignaciones y agendas
  * (`apps/api/src/assignments/{assignments,schedule}.controller.ts`).
  *
- * Fase 0b solo necesita las **agendas** para calcular "mis máquinas de ahora" en
- * el dashboard del operario. La Fase 3 añade `assign`/`remove` y la grilla semanal
- * sobre este mismo módulo.
+ * El dashboard del operario usa `GET /me/schedule` (`meApi`) porque resuelve la
+ * agenda propia y calcula `activeNow` en el servidor. Estas rutas quedan para la
+ * Fase 3 (grilla semanal / gestión de asignaciones), que además añade
+ * `assign`/`remove` sobre este mismo módulo.
  */
 
 export interface AssignmentsApi {

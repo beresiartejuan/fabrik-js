@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   clearSession,
+  notifyTokensRotate,
   readSession,
   readTokens,
   SESSION_STORAGE_KEY,
@@ -145,5 +146,29 @@ describe('SessionProvider / useSession', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => renderHook(() => useSession())).toThrow(/SessionProvider/);
     consoleError.mockRestore();
+  });
+
+  it('actualiza el contexto cuando el interceptor rota los tokens', async () => {
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await waitFor(() => expect(result.current.hydrated).toBe(true));
+    act(() => {
+      result.current.signIn({ accessToken: 'a1', refreshToken: 'r1' }, WORKER, 'Ada');
+    });
+
+    act(() => {
+      notifyTokensRotate({ accessToken: 'a2', refreshToken: 'r2' });
+    });
+
+    expect(result.current.session).toMatchObject({
+      accessToken: 'a2',
+      refreshToken: 'r2',
+      worker: WORKER,
+      name: 'Ada',
+    });
+    expect(readSession(window.sessionStorage)).toMatchObject({
+      accessToken: 'a2',
+      refreshToken: 'r2',
+    });
   });
 });

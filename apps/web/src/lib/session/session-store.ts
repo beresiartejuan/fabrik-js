@@ -140,6 +140,36 @@ export function writeTokens(tokens: SessionTokens, storage?: Storage | null): vo
 }
 
 // ---------------------------------------------------------------------------
+// Rotación de tokens (interceptor HTTP → React)
+// ---------------------------------------------------------------------------
+
+export type TokensRotateListener = (tokens: SessionTokens) => void;
+
+const tokensRotateListeners = new Set<TokensRotateListener>();
+
+/**
+ * Suscribe al evento "el interceptor refrescó los tokens". Lo usa
+ * `SessionProvider` para actualizar el contexto de React (el `sessionStorage`
+ * por sí solo no re-renderiza). Devuelve la función de baja.
+ */
+export function subscribeTokensRotate(listener: TokensRotateListener): () => void {
+  tokensRotateListeners.add(listener);
+  return () => {
+    tokensRotateListeners.delete(listener);
+  };
+}
+
+/**
+ * Notifica tokens rotados. `client.ts` la usa como `onTokensRotate` por defecto
+ * del singleton; los clientes inyectados en tests pueden pasar su propio callback.
+ */
+export function notifyTokensRotate(tokens: SessionTokens): void {
+  for (const listener of tokensRotateListeners) {
+    listener(tokens);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // React: SessionProvider + useSession
 // ---------------------------------------------------------------------------
 
@@ -170,6 +200,25 @@ export function SessionProvider({ children }: SessionProviderProps) {
     setSession(readSession());
     setHydrated(true);
   }, []);
+
+  // El interceptor de axios refresca tokens por fuera de React; este puente
+  // mantiene el contexto sincronizado (p. ej. el `accessToken` que muestra el
+  // shell o cualquier consumidor de `useSession`). El storage ya fue actualizado
+  // por el interceptor antes de notificar.
+  useEffect(
+    () =>
+      subscribeTokensRotate((tokens) => {
+        setSession((current) => {
+          if (!current) {
+            return current;
+          }
+          const next: SessionData = { ...current, ...tokens };
+          writeSession(next);
+          return next;
+        });
+      }),
+    [],
+  );
 
   const persist = useCallback((next: SessionData | null) => {
     if (next) {

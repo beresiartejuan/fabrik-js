@@ -82,4 +82,33 @@ describe('MaterialForm', () => {
     expect(screen.getByLabelText('Estado físico')).toBeDisabled();
     expect(screen.getByLabelText('Unidad de medida')).toBeEnabled();
   });
+
+  it('en edición envía description vacía al borrarla (para limpiar el valor)', () => {
+    const onSubmit = vi.fn();
+    render(
+      <MaterialForm
+        mode="edit"
+        defaultValues={{
+          name: 'Agua',
+          description: 'Potable',
+          kind: 'supply',
+          physicalState: 'liquid',
+          unitOfMeasure: 'l',
+        }}
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText('Descripción'), { target: { value: '   ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      name: 'Agua',
+      description: '',
+      kind: 'supply',
+      physicalState: 'liquid',
+      unitOfMeasure: 'l',
+    });
+  });
 });

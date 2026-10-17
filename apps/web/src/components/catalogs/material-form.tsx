@@ -98,7 +98,10 @@ export function MaterialForm({
     const trimmedDescription = description.trim();
     onSubmit({
       name: trimmedName,
-      ...(trimmedDescription.length > 0 ? { description: trimmedDescription } : {}),
+      // En edición se envía **siempre** (incluso `''`) para poder borrar la
+      // descripción: la API interpreta la ausencia como "sin cambio", así que
+      // omitirla al vaciar el campo dejaría el valor anterior.
+      ...(editing || trimmedDescription.length > 0 ? { description: trimmedDescription } : {}),
       kind,
       physicalState,
       unitOfMeasure,

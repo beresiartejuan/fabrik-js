@@ -10,13 +10,14 @@ import { machinesApi } from '@/lib/api/modules/machinesApi';
 import { workersApi } from '@/lib/api/modules/workersApi';
 import { formatDateTime } from '@/lib/format/date';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
+import { isNavHrefEnabled } from '@/lib/nav';
 
 import { PageHeader } from './dashboard-common';
 
 /**
  * Dashboard del **auditor** (docs/10-plan-de-web.md §2): últimos eventos
  * (`GET /batch-events`, recorte en cliente — no hay paginación, gap documentado)
- * + accesos a `/stock` y `/trazabilidad`.
+ * + accesos a `/stock` y `/trazabilidad` cuando esas pantallas existan.
  */
 
 const LATEST_LIMIT = 8;
@@ -25,6 +26,9 @@ export function AuditorDashboard() {
   const events = useApiQuery(() => batchEventsApi.list());
   const machines = useApiQuery(() => machinesApi.list());
   const workers = useApiQuery(() => workersApi.list());
+
+  const canSeeStock = isNavHrefEnabled('/stock');
+  const canSeeTrace = isNavHrefEnabled('/trazabilidad');
 
   const machineById = new Map((machines.data ?? []).map((machine) => [machine.id, machine]));
   const workerById = new Map((workers.data ?? []).map((worker) => [worker.id, worker]));
@@ -77,14 +81,20 @@ export function AuditorDashboard() {
         )}
       </section>
 
-      <div className="flex flex-wrap gap-2">
-        <Link href="/stock" className={buttonVariants({ variant: 'outline' })}>
-          Ver stock
-        </Link>
-        <Link href="/trazabilidad" className={buttonVariants({ variant: 'outline' })}>
-          Trazabilidad
-        </Link>
-      </div>
+      {(canSeeStock || canSeeTrace) && (
+        <div className="flex flex-wrap gap-2">
+          {canSeeStock && (
+            <Link href="/stock" className={buttonVariants({ variant: 'outline' })}>
+              Ver stock
+            </Link>
+          )}
+          {canSeeTrace && (
+            <Link href="/trazabilidad" className={buttonVariants({ variant: 'outline' })}>
+              Trazabilidad
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }

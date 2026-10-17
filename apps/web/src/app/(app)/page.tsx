@@ -25,7 +25,7 @@ export default function DashboardPage() {
     case 'admin':
       return <AdminDashboard />;
     case 'worker':
-      return <WorkerDashboard workerId={worker.workerId} />;
+      return <WorkerDashboard />;
     case 'auditor':
       return <AuditorDashboard />;
     default:

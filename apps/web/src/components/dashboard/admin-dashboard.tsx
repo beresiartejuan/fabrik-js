@@ -8,6 +8,7 @@ import { machinesApi } from '@/lib/api/modules/machinesApi';
 import { materialsApi } from '@/lib/api/modules/materialsApi';
 import { workersApi } from '@/lib/api/modules/workersApi';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
+import { isNavHrefEnabled } from '@/lib/nav';
 
 import { PageHeader, StatCard } from './dashboard-common';
 
@@ -15,6 +16,9 @@ import { PageHeader, StatCard } from './dashboard-common';
  * Dashboard del **admin** (docs/10-plan-de-web.md §2): contadores de catálogo
  * (`materials`/`machines`/`workers` activos), acciones rápidas y accesos a los
  * catálogos. Un admin **no** registra transformaciones (worker-only).
+ *
+ * Los accesos y CTAs se filtran con el registro de `lib/nav`: las secciones de
+ * fases futuras (`enabled: false`) no se muestran hasta que exista su pantalla.
  */
 
 const CATALOG_LINKS = [
@@ -24,7 +28,7 @@ const CATALOG_LINKS = [
   { href: '/trabajadores', label: 'Trabajadores' },
   { href: '/recetas', label: 'Recetas' },
   { href: '/asignaciones', label: 'Asignaciones' },
-];
+].filter((catalog) => isNavHrefEnabled(catalog.href));
 
 export function AdminDashboard() {
   const materials = useApiQuery(() => materialsApi.list());
@@ -33,6 +37,8 @@ export function AdminDashboard() {
 
   const activeMaterials = materials.data?.filter((material) => material.active).length;
   const activeWorkers = workers.data?.filter((worker) => worker.active).length;
+  const canCreateProduction = isNavHrefEnabled('/produccion/nueva');
+  const canRegisterArrival = isNavHrefEnabled('/suministros/arribo');
 
   return (
     <div className="flex flex-col gap-6">
@@ -59,32 +65,40 @@ export function AdminDashboard() {
         />
       </div>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="font-heading text-lg font-medium">Acciones rápidas</h2>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/produccion/nueva" className={buttonVariants()}>
-            Nueva producción
-          </Link>
-          <Link href="/suministros/arribo" className={buttonVariants({ variant: 'outline' })}>
-            Registrar arribo
-          </Link>
-        </div>
-      </section>
+      {(canCreateProduction || canRegisterArrival) && (
+        <section className="flex flex-col gap-3">
+          <h2 className="font-heading text-lg font-medium">Acciones rápidas</h2>
+          <div className="flex flex-wrap gap-2">
+            {canCreateProduction && (
+              <Link href="/produccion/nueva" className={buttonVariants()}>
+                Nueva producción
+              </Link>
+            )}
+            {canRegisterArrival && (
+              <Link href="/suministros/arribo" className={buttonVariants({ variant: 'outline' })}>
+                Registrar arribo
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
-      <section className="flex flex-col gap-3">
-        <h2 className="font-heading text-lg font-medium">Catálogos</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {CATALOG_LINKS.map((catalog) => (
-            <Link key={catalog.href} href={catalog.href}>
-              <Card className="h-full transition-colors hover:bg-muted/50">
-                <CardHeader>
-                  <CardTitle className="text-base">{catalog.label}</CardTitle>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {CATALOG_LINKS.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="font-heading text-lg font-medium">Catálogos</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {CATALOG_LINKS.map((catalog) => (
+              <Link key={catalog.href} href={catalog.href}>
+                <Card className="h-full transition-colors hover:bg-muted/50">
+                  <CardHeader>
+                    <CardTitle className="text-base">{catalog.label}</CardTitle>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

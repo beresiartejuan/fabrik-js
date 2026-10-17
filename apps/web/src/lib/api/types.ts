@@ -135,6 +135,16 @@ export interface AssignmentWire {
   readonly slot: TimeSlotWire;
 }
 
+/**
+ * `MeScheduleItemResponse` (`GET /me/schedule`): asignación + máquina resuelta
+ * (`null` si el dato estuviera huérfano) + vigencia calculada **en el servidor**
+ * con su reloj (`TimeSlot.contains`).
+ */
+export interface MeScheduleItemWire extends AssignmentWire {
+  readonly machine: MachineWire | null;
+  readonly activeNow: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Lotes y eventos
 // ---------------------------------------------------------------------------

@@ -9,7 +9,14 @@ import { type ApiError, toApiError } from '@/lib/api/errors';
  * error, refetch }`. Los errores se normalizan a `ApiError`.
  *
  * El fetcher se guarda en un `ref`, así que no hace falta memoizarlo; el efecto
- * se re-ejecuta cuando cambian `deps` (o tras `refetch()`).
+ * se re-ejecuta cuando cambian `deps` (o tras `refetch()`). Recibe un
+ * `AbortSignal` que se aborta al desmontar o al iniciar otra corrida: los
+ * fetchers que lo soporten pueden cancelar la petición (los que lo ignoren
+ * siguen funcionando igual).
+ *
+ * Cada corrida tiene un **generation id**: una respuesta vieja que llega tarde
+ * (p. ej. un refetch lento seguido de otro rápido) no pisa `data`/`error` de la
+ * corrida vigente. El `mounted` ref sigue evitando actualizar tras el desmontaje.
  */
 export interface UseApiQueryResult<T> {
   readonly data: T | null;
@@ -19,7 +26,7 @@ export interface UseApiQueryResult<T> {
 }
 
 export function useApiQuery<T>(
-  fetcher: () => Promise<T>,
+  fetcher: (signal: AbortSignal) => Promise<T>,
   deps: readonly unknown[] = [],
 ): UseApiQueryResult<T> {
   const [data, setData] = useState<T | null>(null);
@@ -31,6 +38,8 @@ export function useApiQuery<T>(
   fetcherRef.current = fetcher;
 
   const mountedRef = useRef(true);
+  const runIdRef = useRef(0);
+
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -42,23 +51,32 @@ export function useApiQuery<T>(
   // biome-ignore lint/correctness/useExhaustiveDependencies: deps es dinámico por diseño.
   useEffect(() => {
     mountedRef.current = true;
+    const runId = ++runIdRef.current;
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
 
-    fetcherRef.current().then(
+    fetcherRef.current(controller.signal).then(
       (value) => {
-        if (mountedRef.current) {
-          setData(value);
-          setLoading(false);
+        if (!mountedRef.current || runId !== runIdRef.current) {
+          return;
         }
+        setData(value);
+        setLoading(false);
       },
       (cause: unknown) => {
-        if (mountedRef.current) {
-          setError(toApiError(cause));
-          setLoading(false);
+        // Una corrida abortada o superada por otra no debe pisar el estado.
+        if (!mountedRef.current || runId !== runIdRef.current || controller.signal.aborted) {
+          return;
         }
+        setError(toApiError(cause));
+        setLoading(false);
       },
     );
+
+    return () => {
+      controller.abort();
+    };
   }, [reloadKey, ...deps]);
 
   const refetch = useCallback(() => {

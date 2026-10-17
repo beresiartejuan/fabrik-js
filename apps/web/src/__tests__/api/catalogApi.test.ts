@@ -83,6 +83,19 @@ describe('catálogos: contratos de API', () => {
     ]);
   });
 
+  it('materials: update envía description vacía explícita para limpiarla', async () => {
+    const { calls, client } = setup();
+    await createMaterialsApi(client).update('m1', { description: '' });
+    expect(calls).toEqual([
+      {
+        method: 'patch',
+        url: '/materials/m1',
+        params: undefined,
+        body: { description: '' },
+      },
+    ]);
+  });
+
   it('locations: create y patch solo renombra', async () => {
     const { calls, client } = setup();
     const api = createLocationsApi(client);

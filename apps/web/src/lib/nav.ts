@@ -12,6 +12,12 @@ export interface NavItem {
   readonly href: string;
   readonly label: string;
   readonly roles: readonly WorkerRole[];
+  /**
+   * La ruta existe y puede mostrarse. Por defecto `false`: las secciones de
+   * fases futuras quedan ocultas hasta que su pantalla aterrice (ver
+   * `NAV_ITEMS`). Re-habilitar acá a medida que avancen las fases.
+   */
+  readonly enabled?: boolean;
 }
 
 export const ALL_ROLES: readonly WorkerRole[] = ['admin', 'worker', 'auditor'];
@@ -38,22 +44,38 @@ export const ALL_ROLES: readonly WorkerRole[] = ['admin', 'worker', 'auditor'];
  *
  * Nota de dominio: un `admin` **no** registra transformaciones (worker-only), por
  * eso "Registrar transformación" nunca aparece para admin/auditor.
+ *
+ * Las secciones de fases futuras están en `NAV_ITEMS` con `enabled: false` y no
+ * se renderizan (sidebar ni CTAs de dashboard) hasta que exista su pantalla.
+ * `enabled` refleja si la ruta **existe** hoy; se reactiva acá a medida que
+ * aterricen las fases (y se ajustan los tests de navegación).
  */
 export const NAV_ITEMS: readonly NavItem[] = [
-  { href: '/', label: 'Inicio', roles: ALL_ROLES },
-  { href: '/materiales', label: 'Materiales', roles: ['admin', 'auditor'] },
-  { href: '/ubicaciones', label: 'Ubicaciones', roles: ['admin', 'auditor'] },
-  { href: '/maquinas', label: 'Máquinas', roles: ['admin', 'auditor'] },
-  { href: '/trabajadores', label: 'Trabajadores', roles: ['admin', 'auditor'] },
-  { href: '/recetas', label: 'Recetas', roles: ['admin', 'auditor'] },
-  { href: '/asignaciones', label: 'Asignaciones', roles: ['admin', 'auditor'] },
-  { href: '/produccion', label: 'Producción', roles: ALL_ROLES },
-  { href: '/produccion/nueva', label: 'Nueva producción', roles: ['admin'] },
-  { href: '/produccion/registrar', label: 'Registrar transformación', roles: ['worker'] },
-  { href: '/suministros/arribo', label: 'Arribo de suministros', roles: ['admin', 'worker'] },
-  { href: '/stock', label: 'Stock', roles: ALL_ROLES },
-  { href: '/trazabilidad', label: 'Trazabilidad', roles: ['admin', 'auditor'] },
-  { href: '/eventos', label: 'Eventos', roles: ['admin', 'auditor'] },
+  { href: '/', label: 'Inicio', roles: ALL_ROLES, enabled: true },
+  { href: '/materiales', label: 'Materiales', roles: ['admin', 'auditor'], enabled: true },
+  { href: '/ubicaciones', label: 'Ubicaciones', roles: ['admin', 'auditor'], enabled: true },
+  { href: '/maquinas', label: 'Máquinas', roles: ['admin', 'auditor'], enabled: true },
+  { href: '/trabajadores', label: 'Trabajadores', roles: ['admin', 'auditor'], enabled: true },
+  // Fases futuras: pantallas todavía inexistentes.
+  { href: '/recetas', label: 'Recetas', roles: ['admin', 'auditor'], enabled: false },
+  { href: '/asignaciones', label: 'Asignaciones', roles: ['admin', 'auditor'], enabled: false },
+  { href: '/produccion', label: 'Producción', roles: ALL_ROLES, enabled: false },
+  { href: '/produccion/nueva', label: 'Nueva producción', roles: ['admin'], enabled: false },
+  {
+    href: '/produccion/registrar',
+    label: 'Registrar transformación',
+    roles: ['worker'],
+    enabled: false,
+  },
+  {
+    href: '/suministros/arribo',
+    label: 'Arribo de suministros',
+    roles: ['admin', 'worker'],
+    enabled: false,
+  },
+  { href: '/stock', label: 'Stock', roles: ALL_ROLES, enabled: false },
+  { href: '/trazabilidad', label: 'Trazabilidad', roles: ['admin', 'auditor'], enabled: false },
+  { href: '/eventos', label: 'Eventos', roles: ['admin', 'auditor'], enabled: false },
 ];
 
 /** Etiquetas en español de los roles del dominio. */
@@ -63,9 +85,22 @@ export const ROLE_LABELS: Record<WorkerRole, string> = {
   auditor: 'Auditor',
 };
 
-/** Secciones visibles para un rol, en el orden de `NAV_ITEMS`. */
+/** `true` si el ítem apunta a una ruta habilitada (`enabled` por defecto `false`). */
+export function isNavItemEnabled(item: NavItem): boolean {
+  return item.enabled ?? false;
+}
+
+/**
+ * `true` si `href` está registrado y habilitado. Lo usan los dashboards para no
+ * duplicar la lista de rutas disponibles y ocultar sus CTAs de fases futuras.
+ */
+export function isNavHrefEnabled(href: string): boolean {
+  return NAV_ITEMS.some((item) => item.href === href && isNavItemEnabled(item));
+}
+
+/** Secciones **habilitadas** visibles para un rol, en el orden de `NAV_ITEMS`. */
 export function navItemsForRole(role: WorkerRole): readonly NavItem[] {
-  return NAV_ITEMS.filter((item) => item.roles.includes(role));
+  return NAV_ITEMS.filter((item) => item.roles.includes(role) && isNavItemEnabled(item));
 }
 
 /**

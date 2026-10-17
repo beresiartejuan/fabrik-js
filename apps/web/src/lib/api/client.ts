@@ -4,7 +4,12 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 
-import { clearSession, readTokens, writeTokens } from '@/lib/session/session-store';
+import {
+  clearSession,
+  notifyTokensRotate,
+  readTokens,
+  writeTokens,
+} from '@/lib/session/session-store';
 
 import { ApiError, toApiError } from './errors';
 import type { AuthTokensWire } from './types';
@@ -13,13 +18,21 @@ import type { AuthTokensWire } from './types';
  * Cliente HTTP compartido (docs/10-plan-de-web.md §Capa HTTP).
  *
  * - Instancia axios con `baseURL` desde `NEXT_PUBLIC_API_URL` (fallback seguro).
+ *   **Next inlinea las variables `NEXT_PUBLIC_*` en tiempo de build**: cambiar
+ *   `NEXT_PUBLIC_API_URL` requiere reconstruir la app (`pnpm build`), no basta
+ *   con reiniciar el proceso en runtime.
  * - Interceptor de request: añade `Authorization: Bearer <access>` si hay sesión.
  * - Interceptor de response: `401` → refresh **single-flight** → reintenta la
- *   petición original; si el refresh falla → limpia la sesión y redirige a
- *   `/login`. Cualquier otro error se normaliza a `ApiError`.
+ *   petición original. Si el refresh devuelve **auth fallida** (401/403) se
+ *   limpia la sesión y se redirige a `/login`; si falla por red/5xx (transitorio)
+ *   se propaga el error **sin borrar tokens** (la sesión sigue viva y el usuario
+ *   puede reintentar manualmente). Cualquier otro error se normaliza a
+ *   `ApiError`.
+ * - `onTokensRotate` permite avisar a React de los tokens nuevos tras un refresh
+ *   iniciado por el interceptor (lo cablea `SessionProvider`).
  *
  * Todo es inyectable para poder testear sin navegador (`storage`, `refresh`,
- * `onRefreshFailure`, `adapter`).
+ * `onRefreshFailure`, `onTokensRotate`, `adapter`).
  */
 
 export const DEFAULT_API_BASE_URL = 'http://localhost:3001';
@@ -46,8 +59,10 @@ export interface ApiClientOptions {
   readonly storage?: TokenStorage;
   /** Llamada de refresh (por defecto `POST /auth/refresh` con axios "pelado"). */
   readonly refresh?: (refreshToken: string) => Promise<AuthTokensWire>;
-  /** Acción al fallar el refresh (por defecto limpiar + `/login`). */
+  /** Acción al fallar el refresh **por auth** (por defecto limpiar + `/login`). */
   readonly onRefreshFailure?: () => void;
+  /** Aviso de tokens nuevos tras un refresh del interceptor (React). */
+  readonly onTokensRotate?: (tokens: { accessToken: string; refreshToken: string }) => void;
   /** Adaptador axios (tests: evita la red). */
   readonly adapter?: AxiosAdapter;
 }
@@ -100,6 +115,22 @@ function shouldRefresh(
   return axios.isAxiosError(error) && error.response?.status === 401;
 }
 
+/**
+ * `true` si el refresh fue rechazado por **auth** (401/403), es decir, la sesión
+ * ya no sirve. Un error de red (sin response) o un 5xx es transitorio: los tokens
+ * pueden seguir siendo válidos y no corresponde desloguear.
+ */
+function isAuthFailure(error: unknown): boolean {
+  if (error instanceof ApiError) {
+    return error.statusCode === 401 || error.statusCode === 403;
+  }
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    return status === 401 || status === 403;
+  }
+  return false;
+}
+
 export function createApiClient(options: ApiClientOptions = {}): AxiosInstance {
   const storage = options.storage ?? defaultStorage;
   const refresh = options.refresh ?? defaultRefresh;
@@ -109,6 +140,7 @@ export function createApiClient(options: ApiClientOptions = {}): AxiosInstance {
       storage.clear();
       redirectToLogin();
     });
+  const onTokensRotate = options.onTokensRotate ?? notifyTokensRotate;
 
   const client = axios.create({
     baseURL: options.baseURL ?? resolveApiBaseUrl(),
@@ -136,7 +168,9 @@ export function createApiClient(options: ApiClientOptions = {}): AxiosInstance {
     }
     refreshPromise = refresh(refreshToken)
       .then((tokens) => {
-        storage.save({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
+        const rotated = { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+        storage.save(rotated);
+        onTokensRotate(rotated);
         return tokens;
       })
       .finally(() => {
@@ -165,7 +199,11 @@ export function createApiClient(options: ApiClientOptions = {}): AxiosInstance {
           retryConfig.headers.set('Authorization', `Bearer ${tokens.accessToken}`);
           return await client.request(retryConfig);
         } catch (refreshError) {
-          onRefreshFailure();
+          // Solo se invalida la sesión ante un rechazo de auth. Red caída o 5xx
+          // son transitorios: se propaga el error y se conservan los tokens.
+          if (isAuthFailure(refreshError)) {
+            onRefreshFailure();
+          }
           throw toApiError(refreshError);
         }
       }

@@ -1,50 +1,36 @@
 'use client';
 
-import { TimeSlot } from '@fabrik/domain';
 import Link from 'next/link';
 
 import { buttonVariants } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { errorToMessage } from '@/lib/api/errors';
-import { assignmentsApi } from '@/lib/api/modules/assignmentsApi';
-import { machinesApi } from '@/lib/api/modules/machinesApi';
-import type { TimeSlotWire } from '@/lib/api/types';
+import { meApi } from '@/lib/api/modules/meApi';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
+import { isNavHrefEnabled } from '@/lib/nav';
 
 import { PageHeader } from './dashboard-common';
 
 /**
  * Dashboard del **worker** (docs/10-plan-de-web.md §2): "Mis máquinas de ahora".
  *
- * La API no expone un endpoint de máquinas activas; se calcula en cliente con
- * `GET /workers/:id/schedule` + `GET /machines` + `TimeSlot.contains(now)` del
- * dominio (gap documentado en el plan).
+ * Consume `GET /me/schedule`, que resuelve la agenda del propio actor y calcula
+ * `activeNow` en el servidor. Es la fuente de verdad de I3 (el reloj/zona del
+ * navegador puede no coincidir con el proceso API y mostraría un estado distinto
+ * al que aplicará `RecordTransformation`), así que aquí **no** se recalcula el
+ * `TimeSlot`. La máquina viene enriquecida en el mismo ítem (nombre/tipo), sin
+ * pedir `GET /machines` (que un worker no puede leer).
  */
+export function WorkerDashboard() {
+  const schedule = useApiQuery(() => meApi.schedule());
 
-function slotContains(slot: TimeSlotWire, date: Date): boolean {
-  try {
-    return TimeSlot.create(slot.daysOfWeek, slot.start, slot.end).contains(date);
-  } catch {
-    // Franja inválida en el wire: se ignora en vez de romper el dashboard.
-    return false;
-  }
-}
+  const currentMachines = (schedule.data ?? []).flatMap((item) =>
+    item.activeNow && item.machine ? [item.machine] : [],
+  );
 
-export function WorkerDashboard({ workerId }: { workerId: string }) {
-  const schedule = useApiQuery(() => assignmentsApi.workerSchedule(workerId), [workerId]);
-  const machines = useApiQuery(() => machinesApi.list());
-
-  // Instante de referencia para "ahora"; se recalcula en cada render.
-  const now = new Date();
-
-  const machineById = new Map((machines.data ?? []).map((machine) => [machine.id, machine]));
-  const currentMachines = (schedule.data ?? [])
-    .filter((assignment) => slotContains(assignment.slot, now))
-    .map((assignment) => machineById.get(assignment.machineId))
-    .filter((machine): machine is NonNullable<typeof machine> => machine !== undefined);
-
-  const loading = schedule.loading || machines.loading;
+  const canRegister = isNavHrefEnabled('/produccion/registrar');
+  const canRegisterArrival = isNavHrefEnabled('/suministros/arribo');
 
   return (
     <div className="flex flex-col gap-6">
@@ -54,7 +40,7 @@ export function WorkerDashboard({ workerId }: { workerId: string }) {
         <p className="text-sm text-destructive">{errorToMessage(schedule.error)}</p>
       )}
 
-      {loading ? (
+      {schedule.loading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-24 w-full" />
@@ -70,21 +56,27 @@ export function WorkerDashboard({ workerId }: { workerId: string }) {
             <Card key={machine.id}>
               <CardHeader className="gap-1">
                 <CardTitle className="text-base">{machine.name}</CardTitle>
-                <CardDescription>{machine.type}</CardDescription>
+                <CardDescription className="capitalize">{machine.type}</CardDescription>
               </CardHeader>
             </Card>
           ))}
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <Link href="/produccion/registrar" className={buttonVariants()}>
-          Registrar transformación
-        </Link>
-        <Link href="/suministros/arribo" className={buttonVariants({ variant: 'outline' })}>
-          Arribo de suministros
-        </Link>
-      </div>
+      {(canRegister || canRegisterArrival) && (
+        <div className="flex flex-wrap gap-2">
+          {canRegister && (
+            <Link href="/produccion/registrar" className={buttonVariants()}>
+              Registrar transformación
+            </Link>
+          )}
+          {canRegisterArrival && (
+            <Link href="/suministros/arribo" className={buttonVariants({ variant: 'outline' })}>
+              Arribo de suministros
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }

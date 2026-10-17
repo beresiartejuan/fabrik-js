@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApiClient, type TokenStorage } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
 import type { AuthTokensWire } from '@/lib/api/types';
+import { subscribeTokensRotate } from '@/lib/session/session-store';
 
 function memoryStorage(
   initial: { accessToken: string; refreshToken: string } | null = null,
@@ -35,6 +36,16 @@ function unauthorized(config: InternalAxiosRequestConfig): never {
     statusText: 'Unauthorized',
     headers: {},
     config,
+  });
+}
+
+function refreshFailure(status: number): AxiosError {
+  return new AxiosError('refresh rechazado', 'ERR_BAD_REQUEST', undefined, undefined, {
+    data: { statusCode: status, error: 'HttpError', message: `status ${status}` },
+    status,
+    statusText: 'Error',
+    headers: {},
+    config: {} as InternalAxiosRequestConfig,
   });
 }
 
@@ -115,6 +126,54 @@ describe('response interceptor: refresh single-flight', () => {
     });
   });
 
+  it('notifica los tokens rotados por onTokensRotate', async () => {
+    const storage = memoryStorage({ accessToken: 'old-access', refreshToken: 'old-refresh' });
+    const refresh = vi.fn(async () => NEW_TOKENS);
+    const onTokensRotate = vi.fn();
+    let retried = false;
+    const adapter: AxiosAdapter = async (config) => {
+      if (header(config, 'Authorization') === 'Bearer new-access') {
+        retried = true;
+        return ok({ ok: true }, config);
+      }
+      return unauthorized(config);
+    };
+
+    const client = createApiClient({ storage, refresh, adapter, onTokensRotate });
+    await client.get('/materials');
+
+    expect(retried).toBe(true);
+    expect(onTokensRotate).toHaveBeenCalledWith({
+      accessToken: 'new-access',
+      refreshToken: 'new-refresh',
+    });
+  });
+
+  it('sin callback explícito usa el notificador global (puente con SessionProvider)', async () => {
+    const listener = vi.fn();
+    const unsubscribe = subscribeTokensRotate(listener);
+    try {
+      const storage = memoryStorage({ accessToken: 'old-access', refreshToken: 'old-refresh' });
+      const refresh = vi.fn(async () => NEW_TOKENS);
+      const adapter: AxiosAdapter = async (config) => {
+        if (header(config, 'Authorization') === 'Bearer new-access') {
+          return ok({ ok: true }, config);
+        }
+        return unauthorized(config);
+      };
+
+      const client = createApiClient({ storage, refresh, adapter });
+      await client.get('/materials');
+
+      expect(listener).toHaveBeenCalledWith({
+        accessToken: 'new-access',
+        refreshToken: 'new-refresh',
+      });
+    } finally {
+      unsubscribe();
+    }
+  });
+
   it('un 401 posterior al refresh vuelve a refrescar (el single-flight se libera)', async () => {
     const storage = memoryStorage({ accessToken: 'old-access', refreshToken: 'old-refresh' });
     const refresh = vi.fn(async () => NEW_TOKENS);
@@ -129,13 +188,13 @@ describe('response interceptor: refresh single-flight', () => {
     expect(refresh).toHaveBeenCalledTimes(2);
   });
 
-  it('si el refresh falla limpia la sesión y redirige a /login', async () => {
+  it('si el refresh falla por auth (401) limpia la sesión y redirige a /login', async () => {
     const assign = vi.fn();
     vi.stubGlobal('window', { location: { assign } });
 
     const storage = memoryStorage({ accessToken: 'old-access', refreshToken: 'old-refresh' });
     const refresh = vi.fn(async () => {
-      throw new AxiosError('refresh expirado', 'ERR_BAD_REQUEST');
+      throw refreshFailure(401);
     });
     const adapter: AxiosAdapter = async (config) => unauthorized(config);
 
@@ -146,6 +205,63 @@ describe('response interceptor: refresh single-flight', () => {
 
     expect(storage.clear).toHaveBeenCalledTimes(2);
     expect(assign).toHaveBeenCalledWith('/login');
+  });
+
+  it('un 403 del refresh también invalida la sesión y redirige', async () => {
+    const assign = vi.fn();
+    vi.stubGlobal('window', { location: { assign } });
+
+    const storage = memoryStorage({ accessToken: 'old-access', refreshToken: 'old-refresh' });
+    const refresh = vi.fn(async () => {
+      throw refreshFailure(403);
+    });
+    const adapter: AxiosAdapter = async (config) => unauthorized(config);
+
+    const client = createApiClient({ storage, refresh, adapter });
+    await expect(client.get('/materials')).rejects.toMatchObject({ statusCode: 403 });
+
+    expect(storage.clear).toHaveBeenCalledTimes(1);
+    expect(assign).toHaveBeenCalledWith('/login');
+  });
+
+  it('si el refresh falla por red conserva la sesión y propaga NetworkError', async () => {
+    const assign = vi.fn();
+    vi.stubGlobal('window', { location: { assign } });
+
+    const storage = memoryStorage({ accessToken: 'old-access', refreshToken: 'old-refresh' });
+    const refresh = vi.fn(async () => {
+      throw new AxiosError('Network Error', 'ERR_NETWORK');
+    });
+    const adapter: AxiosAdapter = async (config) => unauthorized(config);
+
+    const client = createApiClient({ storage, refresh, adapter });
+    const error = await client.get('/materials').catch((cause: unknown) => cause);
+
+    expect(error).toMatchObject({ statusCode: 0, error: 'NetworkError', isNetworkError: true });
+    expect(storage.clear).not.toHaveBeenCalled();
+    expect(storage.read()).not.toBeNull();
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('si el refresh falla con 5xx conserva la sesión (error transitorio)', async () => {
+    const assign = vi.fn();
+    vi.stubGlobal('window', { location: { assign } });
+
+    const storage = memoryStorage({ accessToken: 'old-access', refreshToken: 'old-refresh' });
+    const refresh = vi.fn(async () => {
+      throw refreshFailure(503);
+    });
+    const adapter: AxiosAdapter = async (config) => unauthorized(config);
+    const onRefreshFailure = vi.fn();
+
+    const client = createApiClient({ storage, refresh, adapter, onRefreshFailure });
+    const error = await client.get('/materials').catch((cause: unknown) => cause);
+
+    expect(error).toMatchObject({ statusCode: 503 });
+    expect(onRefreshFailure).not.toHaveBeenCalled();
+    expect(storage.clear).not.toHaveBeenCalled();
+    expect(storage.read()).not.toBeNull();
+    expect(assign).not.toHaveBeenCalled();
   });
 
   it('si no hay refresh token no intenta refrescar y falla la sesión', async () => {
