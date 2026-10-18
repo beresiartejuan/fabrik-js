@@ -157,3 +157,31 @@ describe('ProductionsScreen: buscador por ID', () => {
     expect(await screen.findByText('No tenés permisos para esta acción.')).toBeInTheDocument();
   });
 });
+
+describe('ProductionsScreen: enlace a trazabilidad (Fase 6)', () => {
+  it('el resultado del buscador enlaza a /trazabilidad?batch= para roles A/Au', async () => {
+    renderWithSession(<ProductionsScreen />);
+
+    fireEvent.change(screen.getByLabelText('Buscar lote por ID'), {
+      target: { value: ROOT.id },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
+
+    const link = await screen.findByRole('link', { name: 'Ver trazabilidad' });
+    expect(link.getAttribute('href')).toBe(`/trazabilidad?batch=${ROOT.id}`);
+  });
+
+  it('el worker no recibe el enlace (la trazabilidad es A/Au)', async () => {
+    resetMocks('worker');
+    renderWithSession(<ProductionsScreen />);
+
+    fireEvent.change(screen.getByLabelText('Buscar lote por ID'), {
+      target: { value: ROOT.id },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
+
+    // Sin catálogos el resultado usa el id del wire.
+    expect(await screen.findByText('m-pan · 8 u')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Ver trazabilidad' })).not.toBeInTheDocument();
+  });
+});

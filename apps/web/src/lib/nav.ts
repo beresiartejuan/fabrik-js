@@ -45,9 +45,8 @@ export const ALL_ROLES: readonly WorkerRole[] = ['admin', 'worker', 'auditor'];
  * Nota de dominio: un `admin` **no** registra transformaciones (worker-only), por
  * eso "Registrar transformación" nunca aparece para admin/auditor.
  *
- * Las secciones de fases futuras (`/trazabilidad`, `/eventos`, Fase
- * 6) están en `NAV_ITEMS` con `enabled: false` y no se renderizan (sidebar ni
- * CTAs de dashboard) hasta que exista su pantalla.
+ * Las secciones `enabled: false` no se renderizan (sidebar ni CTAs de dashboard)
+ * hasta que exista su pantalla.
  * `enabled` refleja si la ruta **existe** hoy; se reactiva acá a medida que
  * aterricen las fases (y se ajustan los tests de navegación).
  */
@@ -80,8 +79,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     roles: ALL_ROLES,
     enabled: true,
   },
-  { href: '/trazabilidad', label: 'Trazabilidad', roles: ['admin', 'auditor'], enabled: false },
-  { href: '/eventos', label: 'Eventos', roles: ['admin', 'auditor'], enabled: false },
+  // Trazabilidad y eventos (Fase 6, A/Au).
+  {
+    href: '/trazabilidad',
+    label: 'Trazabilidad',
+    roles: ['admin', 'auditor'],
+    enabled: true,
+  },
+  { href: '/eventos', label: 'Eventos', roles: ['admin', 'auditor'], enabled: true },
 ];
 
 /** Etiquetas en español de los roles del dominio. */

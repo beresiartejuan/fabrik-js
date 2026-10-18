@@ -655,13 +655,73 @@ de tabla vacía.
 
 ## Fase 6 — Trazabilidad y eventos
 
-- [ ] `/trazabilidad`: búsqueda por ID + árbol hacia atrás y pestaña recall.
-- [ ] `/eventos`: filtros + tabla cronológica.
-- [ ] `traceApi` y `batchEventsApi`.
+- [x] `/trazabilidad`: búsqueda por ID + árbol hacia atrás y pestaña recall.
+- [x] `/eventos`: filtros + tabla cronológica.
+- [x] `traceApi` y `batchEventsApi`.
 
 **Criterio de salida:** el lote final reconstruye su genealogía (hojas = suministros) y el
 recall desde un suministro alcanza los productos; `/eventos` filtra por máquina y rango.
 Tests del componente de árbol (nodos y `cycleDetected`).
+
+**✅ Completada:** trazabilidad y eventos quedan operativos para admin/auditor:
+
+- **Módulos de API contra los controladores reales** (`apps/api/src/trace/trace.controller.ts`
+  y `apps/api/src/batch-events/batch-events.controller.ts`): `traceApi` nuevo (`backward` →
+  `GET /trace/:batchId`, `forward` → `GET /trace/:batchId/forward`; A/Au, 404 en lote
+  desconocido) y `batchEventsApi.list` con los filtros opcionales
+  `?machineId=&workerId=&materialId=&from=&to=` (ISO con offset; la query solo viaja con
+  algún filtro). Los wire DTOs (`BatchTraceNodeWire`/`BatchForwardNodeWire`) ya espejaban a
+  los serializadores — verificados: atrás lleva **lote siempre + evento opcional** (las hojas
+  no lo tienen); adelante alterna **lote XOR evento** y `cycleDetected` viaja **solo** en la
+  rama cortada.
+- **`/trazabilidad`** (lógica en `src/components/trace/*`, ruta fina con
+  `RequireRole(['admin','auditor'])`): buscador por ID de lote + **«lotes recientes»**
+  derivados **en cliente** desde `GET /batch-events` (últimos eventos de más nuevo a más
+  viejo: primero los lotes producidos por `outputs`, luego los consumidos por `inputs`,
+  dedup, tope a 6 — A/Au, ambos orígenes válidos). Cargado un lote: **Tabs
+  «Genealogía | Recall»** (ambos árboles se piden a la vez; el cambio de pestaña no
+  refetchea). **Componente recursivo `TraceTree`** sobre una forma normalizada
+  (`trace-view.ts`: `normalizeTraceNode`/`normalizeForwardNode`/`countTraceNodes`
+  —`cycleDetected` pasa a `boolean`): cada nodo muestra tarjeta de **lote** (material
+  resuelto vía `GET /materials`, `#id corto`, cantidad, badge de estado) y tarjeta de
+  **evento** (máquina/operario resueltos vía `GET /machines|workers`, timestamp formateado,
+  observación si existe); badge destructivo **«ciclo detectado»**; recall vacío con nota
+  explicativa. Indentación con `<ul>` anidados + línea (`border-l`), sin librería de grafos.
+  **Deep-link `?batch=<id>`** (el `useSearchParams` va dentro de `Suspense` en la ruta, por
+  `cacheComponents`) y **enlace «Ver trazabilidad» en el resultado del buscador de
+  `/produccion`** (A/Au; el worker no lo recibe — 403). 404 → «No se encontró ningún lote con
+  ese ID.»
+- **`/eventos`** (lógica en `src/components/events/*`, ruta fina con el mismo guard):
+  filtros en **borrador + «Aplicar filtros»** (evita peticiones por tecla contra la API) con
+  selects de máquina/operario/material (opción «Todas…» = sin filtro, value `''`) y
+  `datetime-local` → **ISO con offset** (`toIsoOrNull`, invitálido → se omite) →
+  `GET /batch-events`. Tabla cronológica ascendente (fecha y hora, máquina, operario,
+  entradas, salidas, observación — resúmenes `N · materiales` con `batchQuantitiesSummary`)
+  con búsqueda local y orden por columnas. **Gap de paginación:** se muestra la **cola** de
+  200 eventos (`capEventsToDisplay`) con nota «Mostrando los últimos 200 de N (la API no
+  pagina todavía)». Estado vacío: «Sin eventos para estos filtros».
+- **Navegación:** `/trazabilidad` y `/eventos` pasan a `enabled: true` (admin/auditor; el
+  worker no las ve ni entra — `RequireRole` redirige al dashboard). El CTA **«Trazabilidad»
+  del dashboard del auditor se activó solo** (ya estaba gated con `isNavHrefEnabled`).
+  Tests de nav/dashboard actualizados.
+- **Degradación**: no aplica — ambas pantallas son A/Au y leen catálogos (mismo gating de
+  rol).
+- **Timeout de suite:** `vitest.config.mts` sube `testTimeout` a 15 s (el default de 5 s
+  queda corto cuando la máquina tiene carga de otros procesos; los asserts son sincrónicos
+  salvo `findBy*`).
+- **Verificación:** `pnpm --filter web test` (**293 tests**; +49: 6 de normalización/lotes
+  recientes, 5 del contrato de API —2 de `traceApi`, 3 de `batch-events`—, 5 del árbol
+  recursivo —nodos, evento con observación, ciclo, recall XOR—, 7 de la pantalla de
+  trazabilidad —búsqueda, 404, error de red, tabs/recall, deep-link, chip—, 10 de
+  `/eventos` —mapeo de filtros a ISO/query, recorte con nota, resúmenes, vacío, error—,
+  3 de guardas de ruta —worker prohibido en ambas, auditor entra— y 2 nuevas del enlace
+  desde `/produccion`; +1 ajustado en nav), `pnpm --filter web build` (rutas
+  `/trazabilidad` y `/eventos` prerenderizadas) y `pnpm --filter web lint` (biome) verdes.
+
+**Criterio de salida (verificado):** el lote final reconstruye su genealogía con hojas =
+suministros; el recall lista los productos derivados nodo a nodo (eventos/lotes alternos);
+`/eventos` filtra por máquina/operario/material y rango ISO; los tests del árbol cubren
+nodos, `cycleDetected` y la observación.
 
 ## Fase 7 — Pulido y documentación
 

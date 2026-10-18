@@ -43,7 +43,7 @@ describe('dashboards: secciones habilitadas', () => {
     expect(screen.getByRole('link', { name: 'Registrar arribo' })).toBeInTheDocument();
   });
 
-  it('el auditor ve «Ver stock» (Fase 5) pero no trazabilidad todavía', async () => {
+  it('el auditor ve «Ver stock» y «Trazabilidad» (Fases 5 y 6)', async () => {
     render(<AuditorDashboard />);
 
     await waitFor(() =>
@@ -51,6 +51,9 @@ describe('dashboards: secciones habilitadas', () => {
     );
     expect(screen.getByRole('link', { name: 'Ver stock' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Ver stock' }).getAttribute('href')).toBe('/stock');
-    expect(screen.queryByRole('link', { name: 'Trazabilidad' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Trazabilidad' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Trazabilidad' }).getAttribute('href')).toBe(
+      '/trazabilidad',
+    );
   });
 });

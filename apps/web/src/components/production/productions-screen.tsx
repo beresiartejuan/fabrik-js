@@ -27,7 +27,7 @@ import { useSession } from '@/lib/session/session-store';
  * Pantalla 9 — `/produccion` (A/W/Au). Lista las **producciones activas** (lotes
  * `in_progress`) con `GET /batches?status=in_progress` (gap del plan ya
  * resuelto en la API) y ofrece un buscador por ID (`GET /batches/:id`; 404 →
- * mensaje amigable). El enlace a trazabilidad llega con la Fase 6.
+ * mensaje amigable). El resultado enlaza a `/trazabilidad?batch=` (Fase 6, A/Au).
  *
  * Los nombres de material y de receta se resuelven con los catálogos cuando el
  * rol puede leerlos (`admin`/`auditor`); un operario ve los ids del wire, igual
@@ -87,6 +87,8 @@ function ProductionsBody({ canReadCatalogs }: ProductionsBodyProps) {
 
   const canStartProduction = role === 'admin' && isNavHrefEnabled('/produccion/nueva');
   const canRegister = role === 'worker' && isNavHrefEnabled('/produccion/registrar');
+  // Trazabilidad (Fase 6) es A/Au: el worker no recibe el enlace (403).
+  const canTrace = (role === 'admin' || role === 'auditor') && isNavHrefEnabled('/trazabilidad');
 
   const search = useBatchSearch();
 
@@ -150,6 +152,7 @@ function ProductionsBody({ canReadCatalogs }: ProductionsBodyProps) {
       <BatchSearch
         searchState={search}
         resultLabel={(batch) => `${materialName(batch)} · ${formatQuantity(batch.quantity)}`}
+        showTraceLink={canTrace}
       />
 
       {batches.error ? (
@@ -221,9 +224,11 @@ interface BatchSearchProps {
   readonly searchState: BatchSearchState;
   /** Resumen legible del lote encontrado (nombre de material + cantidad). */
   readonly resultLabel: (batch: BatchWire) => string;
+  /** A/Au: el resultado enlaza a su trazabilidad (`/trazabilidad?batch=`). */
+  readonly showTraceLink?: boolean;
 }
 
-function BatchSearch({ searchState, resultLabel }: BatchSearchProps) {
+function BatchSearch({ searchState, resultLabel, showTraceLink = false }: BatchSearchProps) {
   const [query, setQuery] = useState('');
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
@@ -264,6 +269,14 @@ function BatchSearch({ searchState, resultLabel }: BatchSearchProps) {
           </StatusBadge>
           <strong>{batchLabel(searchState.result.id)}</strong>
           <span>{resultLabel(searchState.result)}</span>
+          {showTraceLink && (
+            <Link
+              href={`/trazabilidad?batch=${searchState.result.id}`}
+              className={buttonVariants({ variant: 'outline', size: 'sm' })}
+            >
+              Ver trazabilidad
+            </Link>
+          )}
           <Button variant="ghost" size="sm" onClick={searchState.clear}>
             Cerrar
           </Button>

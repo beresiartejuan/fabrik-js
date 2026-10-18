@@ -2,10 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { isActiveHref, isNavHrefEnabled, NAV_ITEMS, navItemsForRole, ROLE_LABELS } from '@/lib/nav';
 
-const FUTURE_HREFS = ['/trazabilidad', '/eventos'];
-
 describe('navItemsForRole', () => {
-  it('el admin ve catálogos, producción, arribo y stock — pero no registra transformaciones', () => {
+  it('el admin ve catálogos, producción, arribo, stock y las lecturas A/Au', () => {
     const hrefs = navItemsForRole('admin').map((item) => item.href);
     expect(hrefs).toEqual([
       '/',
@@ -19,6 +17,8 @@ describe('navItemsForRole', () => {
       '/produccion/nueva',
       '/suministros/arribo',
       '/stock',
+      '/trazabilidad',
+      '/eventos',
     ]);
   });
 
@@ -33,7 +33,7 @@ describe('navItemsForRole', () => {
     ]);
   });
 
-  it('el auditor ve los catálogos, recetas, asignaciones, producción, stock e Inicio', () => {
+  it('el auditor ve catálogos, producción, stock y las lecturas de auditoría (Fase 6)', () => {
     const hrefs = navItemsForRole('auditor').map((item) => item.href);
     expect(hrefs).toEqual([
       '/',
@@ -45,16 +45,15 @@ describe('navItemsForRole', () => {
       '/asignaciones',
       '/produccion',
       '/stock',
+      '/trazabilidad',
+      '/eventos',
     ]);
   });
 
-  it('oculta las rutas de fases futuras para todos los roles', () => {
-    for (const role of ['admin', 'worker', 'auditor'] as const) {
-      const hrefs = navItemsForRole(role).map((item) => item.href);
-      for (const href of FUTURE_HREFS) {
-        expect(hrefs).not.toContain(href);
-      }
-    }
+  it('el worker no ve trazabilidad ni eventos (A/Au)', () => {
+    const hrefs = navItemsForRole('worker').map((item) => item.href);
+    expect(hrefs).not.toContain('/trazabilidad');
+    expect(hrefs).not.toContain('/eventos');
   });
 });
 
@@ -74,6 +73,8 @@ describe('NAV_ITEMS enabled', () => {
       '/produccion/registrar',
       '/suministros/arribo',
       '/stock',
+      '/trazabilidad',
+      '/eventos',
     ]);
   });
 
@@ -84,7 +85,8 @@ describe('NAV_ITEMS enabled', () => {
     expect(isNavHrefEnabled('/produccion/registrar')).toBe(true);
     expect(isNavHrefEnabled('/suministros/arribo')).toBe(true);
     expect(isNavHrefEnabled('/stock')).toBe(true);
-    expect(isNavHrefEnabled('/trazabilidad')).toBe(false);
+    expect(isNavHrefEnabled('/trazabilidad')).toBe(true);
+    expect(isNavHrefEnabled('/eventos')).toBe(true);
     expect(isNavHrefEnabled('/ruta-inexistente')).toBe(false);
   });
 });
