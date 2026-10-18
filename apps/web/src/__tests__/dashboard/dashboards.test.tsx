@@ -31,24 +31,26 @@ beforeEach(() => {
 });
 
 describe('dashboards: secciones habilitadas', () => {
-  it('el admin muestra recetas, asignaciones y oculta las fases futuras', async () => {
+  it('el admin muestra recetas, asignaciones, producción y sus acciones rápidas', async () => {
     render(<AdminDashboard />);
 
     expect(await screen.findByRole('link', { name: 'Materiales' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Trabajadores' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Recetas' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Asignaciones' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Nueva producción' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Registrar arribo' })).not.toBeInTheDocument();
+    // Fase 4: los CTAs de producción/se suministros ya están habilitados.
+    expect(screen.getByRole('link', { name: 'Nueva producción' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Registrar arribo' })).toBeInTheDocument();
   });
 
-  it('el auditor no muestra accesos a stock/trazabilidad todavía', async () => {
+  it('el auditor ve «Ver stock» (Fase 5) pero no trazabilidad todavía', async () => {
     render(<AuditorDashboard />);
 
     await waitFor(() =>
       expect(screen.getByText('Todavía no hay eventos registrados.')).toBeInTheDocument(),
     );
-    expect(screen.queryByRole('link', { name: 'Ver stock' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ver stock' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ver stock' }).getAttribute('href')).toBe('/stock');
     expect(screen.queryByRole('link', { name: 'Trazabilidad' })).not.toBeInTheDocument();
   });
 });

@@ -17,7 +17,7 @@ import { PageHeader } from './dashboard-common';
 /**
  * Dashboard del **auditor** (docs/10-plan-de-web.md §2): últimos eventos
  * (`GET /batch-events`, recorte en cliente — no hay paginación, gap documentado)
- * + accesos a `/stock` y `/trazabilidad` cuando esas pantallas existan.
+ * + accesos a `/stock` (Fase 5) y a `/trazabilidad` cuando la pantalla exista.
  */
 
 const LATEST_LIMIT = 8;

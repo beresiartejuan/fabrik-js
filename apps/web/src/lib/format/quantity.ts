@@ -1,6 +1,6 @@
 import { Quantity, type UnitOfMeasure } from '@fabrik/domain';
 
-import type { QuantityWire } from '@/lib/api/types';
+import type { QuantityWire, StockDeltaWire } from '@/lib/api/types';
 
 import { unitLabel } from './units';
 
@@ -12,6 +12,16 @@ export function formatQty(amount: number, unit: UnitOfMeasure): string {
 /** Formatea una cantidad del wire (`{ amount, unit }`). */
 export function formatQuantity(quantity: QuantityWire): string {
   return formatQty(quantity.amount, quantity.unit);
+}
+
+/**
+ * Formatea un **delta** de stock con el signo explícito (`+2 kg`, `-3 kg`,
+ * Fase 5). El signo negativo lo trae el número; el positivo se añade para que
+ * las entradas no queden como neutras.
+ */
+export function formatDelta(delta: StockDeltaWire): string {
+  const sign = delta.amount > 0 ? '+' : '';
+  return `${sign}${delta.amount} ${unitLabel(delta.unit)}`;
 }
 
 /**

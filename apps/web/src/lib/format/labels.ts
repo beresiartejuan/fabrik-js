@@ -1,8 +1,10 @@
 import type {
+  BatchStatus,
   LocationKind,
   MachineStatus,
   MaterialKind,
   PhysicalState,
+  StockMovementReason,
   WorkerRole,
 } from '@fabrik/domain';
 
@@ -70,6 +72,37 @@ export const MACHINE_STATUS_META: Record<MachineStatus, BadgeMeta> = {
   idle: { label: MACHINE_STATUS_LABELS.idle, tone: 'neutral' },
   running: { label: MACHINE_STATUS_LABELS.running, tone: 'success' },
   maintenance: { label: MACHINE_STATUS_LABELS.maintenance, tone: 'warning' },
+};
+
+export const BATCH_STATUS_LABELS: Record<BatchStatus, string> = {
+  in_progress: 'En curso',
+  stored: 'Almacenado',
+  completed: 'Completada',
+};
+
+export const BATCH_STATUS_META: Record<BatchStatus, BadgeMeta> = {
+  in_progress: { label: BATCH_STATUS_LABELS.in_progress, tone: 'info' },
+  stored: { label: BATCH_STATUS_LABELS.stored, tone: 'success' },
+  completed: { label: BATCH_STATUS_LABELS.completed, tone: 'neutral' },
+};
+
+/** Motivo de un movimiento de stock (Fase 5). */
+export const STOCK_REASON_LABELS: Record<StockMovementReason, string> = {
+  supply_in: 'Ingreso de suministro',
+  produced: 'Producción',
+  consumed: 'Consumo',
+  transfer_in: 'Transferencia entrada',
+  transfer_out: 'Transferencia salida',
+  manual_adjustment: 'Ajuste manual',
+};
+
+export const STOCK_REASON_META: Record<StockMovementReason, BadgeMeta> = {
+  supply_in: { label: STOCK_REASON_LABELS.supply_in, tone: 'info' },
+  produced: { label: STOCK_REASON_LABELS.produced, tone: 'success' },
+  consumed: { label: STOCK_REASON_LABELS.consumed, tone: 'warning' },
+  transfer_in: { label: STOCK_REASON_LABELS.transfer_in, tone: 'info' },
+  transfer_out: { label: STOCK_REASON_LABELS.transfer_out, tone: 'warning' },
+  manual_adjustment: { label: STOCK_REASON_LABELS.manual_adjustment, tone: 'neutral' },
 };
 
 /** Estado lógico (`active`) del material/trabajador. */

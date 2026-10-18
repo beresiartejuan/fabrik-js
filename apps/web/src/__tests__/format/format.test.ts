@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { formatDate, formatDateTime } from '@/lib/format/date';
 import { DAY_LABELS, dayLabel, formatDays, formatTimeSlot } from '@/lib/format/days';
-import { formatQty, formatQuantity, validateQuantity } from '@/lib/format/quantity';
+import { STOCK_REASON_LABELS } from '@/lib/format/labels';
+import { formatDelta, formatQty, formatQuantity, validateQuantity } from '@/lib/format/quantity';
 import { unitLabel } from '@/lib/format/units';
 
 describe('units', () => {
@@ -44,11 +45,30 @@ describe('quantity', () => {
     expect(formatQuantity({ amount: 250, unit: 'g' })).toBe('250 g');
   });
 
+  it('formatDelta marca el signo de un movimiento (Fase 5)', () => {
+    expect(formatDelta({ amount: 50, unit: 'kg' })).toBe('+50 kg');
+    expect(formatDelta({ amount: -25, unit: 'kg' })).toBe('-25 kg');
+    expect(formatDelta({ amount: 8, unit: 'unit' })).toBe('+8 u');
+  });
+
   it('validateQuantity usa el invariante del dominio', () => {
     expect(validateQuantity(2, 'kg')?.amount).toBe(2);
     expect(validateQuantity(0, 'kg')).toBeNull();
     expect(validateQuantity(-1, 'l')).toBeNull();
     expect(validateQuantity(Number.NaN, 'g')).toBeNull();
+  });
+});
+
+describe('labels de stock (Fase 5)', () => {
+  it('traduce los seis motivos del dominio al español', () => {
+    expect(STOCK_REASON_LABELS).toEqual({
+      supply_in: 'Ingreso de suministro',
+      produced: 'Producción',
+      consumed: 'Consumo',
+      transfer_in: 'Transferencia entrada',
+      transfer_out: 'Transferencia salida',
+      manual_adjustment: 'Ajuste manual',
+    });
   });
 });
 

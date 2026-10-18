@@ -176,10 +176,10 @@ El `DomainExceptionFilter` responde `{ statusCode, error, message, context? }` d
 | 6 | `/trabajadores` | Catálogo de trabajadores | A / Au | `GET/POST /workers`, `PATCH /workers/:id`, `POST /workers/:id/deactivate` |
 | 7 | `/recetas` (+ `/recetas/nueva`, `/recetas/[id]`) | Recetas + builder de pasos | A / Au | `GET /recipes`, `POST /recipes`, `PATCH /recipes/:id`, `GET /materials` |
 | 8 | `/asignaciones` | Grilla horaria máquina/worker | A / Au | `GET /machines`, `GET /workers`, `GET /machines/:id/schedule`, `GET /workers/:id/schedule`, `POST /assignments`, `DELETE /assignments/:id` |
-| 9 | `/produccion` | Producciones activas (lotes en curso) | A/W/Au | `GET /batch-events` (helper), `GET /trace/:batchId` — **gap de listado de lotes** |
+| 9 | `/produccion` | Producciones activas (lotes en curso) | A/W/Au | `GET /batches?status=in_progress` (gap resuelto), `GET /batches/:id` (buscador) |
 | 10 | `/produccion/nueva` | Iniciar producción desde receta | A | `GET /recipes`, `POST /production/start` |
-| 11 | `/produccion/registrar` | Registrar transformación | W | `GET /auth/me`, `GET /me/schedule`, `GET /machines`, `GET /materials`, `POST /production/transform`, `POST /production/store`, `POST /production/complete` |
-| 12 | `/suministros/arribo` | Arribo de suministros | A/W | `GET /materials?kind=supply`, `GET /locations?kind=storage`, `POST /supplies/arrivals` |
+| 11 | `/produccion/registrar` | Registrar transformación | W | `GET /auth/me`, `GET /me/schedule`, `GET /batches` (picker de inputs; `/batch-events` es A/Au), `POST /production/transform`, `POST /production/store`, `POST /production/complete` |
+| 12 | `/suministros/arribo` | Arribo de suministros | A/W | `GET /materials?kind=supply`, `GET /locations?kind=storage` (A/Au: worker → entrada manual), `POST /supplies/arrivals` |
 | 13 | `/stock` | Stock por lugar + movimientos | A/Au/W | `GET /locations`, `GET /stock/:locationId`, `GET /stock/:locationId/movements`, `GET /materials` |
 | 14 | `/trazabilidad` | Genealogía atrás + recall adelante | A/Au | `GET /trace/:batchId`, `GET /trace/:batchId/forward`, `GET /batch-events` |
 | 15 | `/eventos` | Listado de eventos filtrado | A/Au | `GET /batch-events`, `GET /machines`, `GET /workers`, `GET /materials` |
@@ -281,15 +281,16 @@ receta inexistente (404).
   de I3 **no se recalcula en el cliente**.
 - **Paso de receta (opcional):** `recipeStepId` derivado de la receta del lote, filtrado por
   tipo de máquina.
-- **Inputs:** filas `{ batchId, quantity }`. Sin endpoint de listado/búsqueda de lotes, v1
-  pide el `batchId` a mano y ofrece un *popover* "lotes recientes" armado con los outputs de
-  `GET /batch-events` (ver gaps); la unidad la valida la API (I6).
-- **Outputs:** filas `{ materialId, quantity }`; material desde `GET /materials`, unidad por
-  defecto `material.unitOfMeasure`.
+- **Inputs:** filas `{ batchId, quantity }` desde el `GET /batches` (A/Au/W), que
+  trae material, cantidad y estado por lote; se excluyen los `completed`. La
+  unidad sale del lote (el dominio no revalida la unidad de los inputs).
+- **Outputs:** filas `{ materialId, quantity }`; material desde `GET /materials`,
+  unidad por defecto `material.unitOfMeasure`. **Para un worker** (sin lectura de
+  catálogo) la fila va manual: id + unidad elegida, que la API revalida (I6).
 - **Observación:** textarea con contador, máximo 500 (`MAX_OBSERVATION_LENGTH` del dominio).
 - **Enviar:** `POST /production/transform` → respuesta `{ event, outputBatches }`; muestra
   los lotes creados y ofrece "Almacenar lote" (`POST /production/store`) y "Completar"
-  (`POST /production/complete`). Errores 409/422 mapeados.
+  (`POST /production/complete`, sobre la orden raíz que trae `recipeId`). Errores 409/422 mapeados.
 
 ### 12. `/suministros/arribo`
 
@@ -529,28 +530,128 @@ muestra el aviso tanto por pre-validación como por el 409 del servidor. Test de
   solo lectura— y 4 del contrato de API), `pnpm --filter web build` (ruta `/asignaciones`
   prerenderizada) y `pnpm --filter web lint` (biome) verdes.
 
-## Fase 4 — Producción y suministros
+## Fase 4 — Producción y suministros ✅ (completada)
 
-- [ ] `/suministros/arribo` (`POST /supplies/arrivals`) con unidad por material.
-- [ ] `/produccion/nueva` (admin) → `POST /production/start`.
-- [ ] `/produccion/registrar` (worker): máquinas asignadas ahora, inputs/outputs,
+- [x] `/suministros/arribo` (`POST /supplies/arrivals`) con unidad por material.
+- [x] `/produccion/nueva` (admin) → `POST /production/start`.
+- [x] `/produccion/registrar` (worker): máquinas asignadas ahora, inputs/outputs,
       observación (≤500), `transform` → ofrecer `store` y `complete`.
-- [ ] `/produccion`: lotes activos de la sesión + buscador por ID; `productionsApi`.
-- [ ] Helper de "lotes recientes" desde `/batch-events` para inputs.
+- [x] `/produccion`: lotes activos de la sesión + buscador por ID; `productionsApi`.
+- [x] Helper de "lotes recientes" para inputs: **vía `GET /batches`** (A/Au/W); el
+      plan original usaba `/batch-events` (A/Au) que un operario no puede leer.
 
 **Criterio de salida:** recorrido suministro → nueva producción → transformar paso 1 →
 almacenar → transformar paso 2 → completar, todo desde la UI, con errores 409/422
 visibles. Tests de los formularios de arribo y transformación.
 
-## Fase 5 — Stock
+**✅ Completada:** producción y suministros de punta a punta:
 
-- [ ] `/stock`: selector de lugar, tabla de stock con signos y drawer de movimientos.
-- [ ] `stockApi` (`GET /stock/:locationId`, `.../movements`).
-- [ ] Resolución de nombres de material y labels de `reason`.
+- **Módulos de API** contra los controladores reales (`apps/api/src/{supplies,
+  production,batches}/*.ts`): `suppliesApi.arrive` (`POST /supplies/arrivals`,
+  body `{ materialId, quantity: { amount, unit }, locationId }`, respuesta el
+  lote `stored` creado), `productionApi` (`start` solo `{ recipeId }`;
+  `transform` **sin `workerId` ni `timestamp` en el body** — el actor lo toma la
+  API y el reloj es del servidor (MEDIA #3); opcional `recipeStepId`/`observation`;
+  `store` (`{ batchId, locationId }`) y `complete` (`{ batchId }`)) y
+  `batchesApi` (`list` con filtros `status`/`materialId`/`recipeId`/
+  `originBatchEventId` + `get(id)`, ambos A/Au/W).
+- **Errores nuevos en `errorToMessage`:** `MaterialKindMismatchError`,
+  `InvalidLocationKindError`, `MachineTypeMismatchError`,
+  `NotAProductionOrderError`, `InvalidObservationError` e
+  `InactiveWorkerError` (409/422 de los flujos de esta fase).
+- **`/suministros/arribo` (A/W):** material `kind=supply` + cantidad con unidad
+  **derivada del material** (readonly, I6) + lugar `kind=storage`; éxito con
+  toast + banner del lote creado («Registrar otro» limpia). Validación inline y
+  422 mapeado.
+- **`/produccion/nueva` (admin):** select de recetas con **vista previa de
+  pasos** (producto final resuelto + `Paso N · tipo · insumos → producto`) →
+  `start` → toast con el lote raíz + redirect a `/produccion`. Estado vacío si
+  aún no hay recetas.
+- **`/produccion` (A/W/Au):** DataTable de lotes `in_progress`
+  (`GET /batches?status=in_progress`) con nombres de material/receta resueltos
+  cuando el rol puede leer los catálogos (admin/auditor) o ids del wire para el
+  operario; buscador por ID vía `GET /batches/:id` (404 → «No se encontró ningún
+  lote con ese ID.»); CTAs por rol (admin «Nueva producción», worker «Registrar
+  transformación»). El enlace a trazabilidad llega con la Fase 6.
+- **`/produccion/registrar` (worker):** máquinas desde `GET /me/schedule`
+  filtrando `activeNow` (server-side) + `status !== 'maintenance'` y avisando
+  cuando no hay ninguna; insumos con **picker desde `GET /batches`** (excluye
+  `completed`; el helper por `/batch-events` es A/Au → descartado en el brief),
+  unidad derivada del lote; paso de receta opcional derivado de la receta del
+  primer input con `recipeId` y filtrado por tipo de máquina (si la receta no es
+  legible → transformación ad-hoc, permitida por el dominio); salidas con unidad
+  derivada del material **en modo catálogo** o **manual** (worker, ver gap);
+  observación ≤ `MAX_OBSERVATION_LENGTH` (500) con contador. Tras el 201 se
+  muestra el panel resultado (evento + output batches) con «Almacenar lote»
+  (lugar de almacén; select para rol lector, id manual para worker) y «Completar
+  producción» (solo sobre la **orden raíz**, el lote que trae `recipeId`).
+  Estado puro en `registrar-state.ts` (mismo patrón que `recipe-builder-state`).
+- **`ui/textarea`** (nueva primitiva, misma maqueta que `Input`) y
+  `format/ids.ts` (`shortId`/`batchLabel`).
+- **Navegación:** `/produccion`, `/produccion/nueva`, `/produccion/registrar` y
+  `/suministros/arribo` pasan a `enabled: true`; el dashboard (admin y worker ya
+  armados) muestra sus CTAs vía `isNavHrefEnabled`. Guardas por página:
+  `RequireRole(['admin','worker'])` en arribo, `['admin']` en nueva, `['worker']`
+  en registrar y `ALL_ROLES` en produccion. Puerta nueva
+  `CatalogsReadGate` (`CATALOG_READ_ROLES` del dominio) para degradar catálogos.
+- **Verificación:** `pnpm --filter web test` (**232 tests**; +62: 40 de estado
+  puro del registrar y 22 de flujos de pantallas —arribo 8, registrar 15,
+  produccion 7, nueva 4, guardas de rutas 2— menos los 6 modificados de
+  nav/dashboard), `pnpm --filter web build` (4 rutas nuevas prerenderizadas) y
+  `pnpm --filter web lint` (biome) verdes.
+
+> **Gap nuevo detectado (sin inventar rutas):** `GET /materials|/locations|/recipes`
+> son A/Au; un `worker` recibe 403 aunque el dominio le permita ARRIBAR/ALMACENAR.
+> La web degrada a **entrada manual de ids/unidad** en arribo, transformación y
+> `store`, con nota visible y validación completa del servidor (I6/422). Si la
+> API incorpora lecturas de catálogo para worker (o catálogos públicos), los
+> modo catálogo se activan solos (la puerta compara el rol, no el error).
+
+## Fase 5 — Stock ✅ (completada)
+
+- [x] `/stock`: selector de lugar, tabla de stock con signos y drawer de movimientos.
+- [x] `stockApi` (`GET /stock/:locationId`, `.../movements`).
+- [x] Resolución de nombres de material y labels de `reason`.
 
 **Criterio de salida:** tras la Fase 4, el almacén muestra el producto final y la planta los
 consumos; el drawer lista los movimientos con su evento. Tests de formato de delta/motivo y
 de tabla vacía.
+
+**✅ Completada:** el inventario queda operativo para los tres roles:
+
+- **`stockApi`** contra el contrato real de `apps/api/src/stock/{stock.controller.ts,
+  stock.dto.ts}`: `byLocation` (`GET /stock/:locationId` — A/Au/W, sin query) y `movements`
+  (`GET /stock/:locationId/movements` — A/Au) con `?materialId=` **opcional** (la query solo
+  viaja si hay filtro, igual que en `batchesApi`). Solo lectura; los tipos de wire
+  (`StockByLocationEntryWire`, `StockMovementWire`) ya existían en `types.ts`.
+- **`/stock` (A/W/Au)** (lógica en `src/components/stock/*`, ruta fina con
+  `RequireRole(ALL_ROLES)`): selector de **lugar** con `GET /locations` (producción y
+  almacén, etiqueta `«nombre — tipo»`) → tabla con material **resuelto por nombre**
+  (`GET /materials`, id completo en `title`), cantidad con **signo y color** (verde el
+  saldo, `text-destructive` el negativo — en plantas los consumos dejan agregado negativo)
+  y unidad etiquetada (`unitLabel`). Encabezado con el lugar consultado.
+- **Drawer de movimientos (`MovementsSheet`, `Sheet` controlado):** por fila «Ver
+  movimientos» (solo admin/auditor) → `GET /stock/:locationId/movements?materialId=`,
+  listado del **más reciente primero** con delta firmado (`formatDelta`: `+50 kg` /
+  `-25 kg`), motivo en español con badge (`STOCK_REASON_LABELS`/`_META`: Ingreso de
+  suministro, Producción, Consumo, Transferencia entrada/salida, Ajuste manual),
+  `batchEventId` abreviado (`shortId`; el enlace al evento llega con la Fase 6) y fecha
+  Estados: skeletons, `QueryError` con reintentar y vacío («No hay movimientos…»).
+- **Degradación del worker** (reutiliza `CatalogsReadGate`): no dispara
+  `GET /locations|/materials` (recibiría 403) — ingresa el **ID del lugar a mano**
+  (input + «Consultar», no dispara por tecla) y consulta el stock igual (A/Au/W); ve
+  los **ids de material** del wire y **no tiene** botón ni drawer de movimientos (el
+  endpoint es A/Au → 403). Nota visible, mismo patrón que arribo/transformación.
+- **Navegación:** `/stock` pasa a `enabled: true` (los tres roles) y el dashboard del
+  auditor muestra «Ver stock» por `isNavHrefEnabled` (sin cambios de código). Tests de
+  nav/dashboard/auditor actualizados.
+- **Formato:** `formatDelta` en `lib/format/quantity.ts` y los labels de motivo en
+  `lib/format/labels.ts` (único punto de traducción de *unions*). No hicieron falta
+  errores nuevos en `errorToMessage` (403/404 ya cubiertos).
+- **Verificación:** `pnpm --filter web test` (**244 tests**; +12: 2 de contrato de API,
+  8 de pantalla —tabla firmada, drawer con motivos, estado vacío, 404 en QueryError,
+  degradación worker 2— y 2 de formato delta/motivos), `pnpm --filter web build` (ruta
+  `/stock` prerenderizada) y `pnpm --filter web lint` (biome) verdes.
 
 ## Fase 6 — Trazabilidad y eventos
 
@@ -610,6 +711,12 @@ render completo de cada página más allá de un smoke. No se testea shadcn (ter
     (lotes activos), el picker de inputs de la transformación y la búsqueda por material, así
     que v1 ya no necesita el estado local + `GET /batch-events` + `GET /trace/:batchId` para
     listar lotes. Ver el post-plan en `docs/09-plan-de-api.md`.
+  - **Catálogos para el worker: ABIERTO (Fase 4).** `GET /materials|/locations|/recipes` son
+    A/Au (`CATALOG_READ_ROLES`) y el dominio permite arribos/`store`/`complete` con rol
+    `worker`: sus pantallas degradan a entrada manual de ids/unidad (nota visible + 404/422
+    del servidor como red de seguridad). En `/produccion` y `/produccion/registrar` el
+    operario ve los ids del wire en vez de nombres; si la API abre esos reads, los modos
+    catálogo se activan solos (la puerta `CatalogsReadGate` compara el rol).
   - **"Mis máquinas activas": RESUELTO.** `GET /me/schedule` devuelve las asignaciones
     del propio actor con la máquina enriquecida y `activeNow` calculado en el servidor
     (mismo reloj/zona que I3). Se elimina el cálculo en cliente con

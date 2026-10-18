@@ -88,15 +88,13 @@ describe('WorkerDashboard', () => {
     );
   });
 
-  it('no muestra CTAs de pantallas que todavía no existen', async () => {
+  it('muestra los CTAs de producción e insumos ahora que existan sus pantallas', async () => {
     meApiMock.schedule.mockResolvedValue(ITEMS);
 
     render(<WorkerDashboard />);
 
     await screen.findByText('Horno 1');
-    expect(
-      screen.queryByRole('link', { name: 'Registrar transformación' }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Arribo de suministros' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Registrar transformación' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Arribo de suministros' })).toBeInTheDocument();
   });
 });

@@ -83,10 +83,16 @@ const ERROR_NAME_MESSAGES: Record<string, string> = {
   InsufficientStockError: 'Stock insuficiente para esa salida.',
   WorkerNotAssignedError: 'No estás asignado a esa máquina en este horario.',
   InactiveMachineError: 'La máquina no está operativa (mantenimiento).',
+  InactiveWorkerError: 'Tu usuario no está activo.',
   InvalidStateTransitionError: 'El lote no admite esa transición de estado.',
   IncompatibleUnitError: 'Unidad o receta incompatible.',
   RecipeIntegrityError: 'Unidad o receta incompatible.',
   InvalidTransformationError: 'La transformación no es válida (vacía o con inputs repetidos).',
+  InvalidObservationError: 'La observación supera el máximo de 500 caracteres.',
+  NotAProductionOrderError: 'El lote no pertenece a una orden de producción (sin receta).',
+  MaterialKindMismatchError: 'El material es de la clase equivocada (suministro/producto).',
+  InvalidLocationKindError: 'El lugar es de la clase equivocada (producción/almacén).',
+  MachineTypeMismatchError: 'El paso de receta no corresponde al tipo de esa máquina.',
 };
 
 /** Errores cuyo mensaje canónico es genérico: se enriquece con `message`. */

@@ -2,18 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { isActiveHref, isNavHrefEnabled, NAV_ITEMS, navItemsForRole, ROLE_LABELS } from '@/lib/nav';
 
-const FUTURE_HREFS = [
-  '/produccion',
-  '/produccion/nueva',
-  '/produccion/registrar',
-  '/suministros/arribo',
-  '/stock',
-  '/trazabilidad',
-  '/eventos',
-];
+const FUTURE_HREFS = ['/trazabilidad', '/eventos'];
 
 describe('navItemsForRole', () => {
-  it('el admin ve los catálogos existentes, recetas y asignaciones', () => {
+  it('el admin ve catálogos, producción, arribo y stock — pero no registra transformaciones', () => {
     const hrefs = navItemsForRole('admin').map((item) => item.href);
     expect(hrefs).toEqual([
       '/',
@@ -23,15 +15,25 @@ describe('navItemsForRole', () => {
       '/trabajadores',
       '/recetas',
       '/asignaciones',
+      '/produccion',
+      '/produccion/nueva',
+      '/suministros/arribo',
+      '/stock',
     ]);
   });
 
-  it('el worker solo ve Inicio mientras las fases futuras no aterricen', () => {
+  it('el worker ve Inicio, producción, registrar transformación, arribo y stock', () => {
     const hrefs = navItemsForRole('worker').map((item) => item.href);
-    expect(hrefs).toEqual(['/']);
+    expect(hrefs).toEqual([
+      '/',
+      '/produccion',
+      '/produccion/registrar',
+      '/suministros/arribo',
+      '/stock',
+    ]);
   });
 
-  it('el auditor ve los catálogos existentes, recetas, asignaciones e Inicio', () => {
+  it('el auditor ve los catálogos, recetas, asignaciones, producción, stock e Inicio', () => {
     const hrefs = navItemsForRole('auditor').map((item) => item.href);
     expect(hrefs).toEqual([
       '/',
@@ -41,6 +43,8 @@ describe('navItemsForRole', () => {
       '/trabajadores',
       '/recetas',
       '/asignaciones',
+      '/produccion',
+      '/stock',
     ]);
   });
 
@@ -65,6 +69,11 @@ describe('NAV_ITEMS enabled', () => {
       '/trabajadores',
       '/recetas',
       '/asignaciones',
+      '/produccion',
+      '/produccion/nueva',
+      '/produccion/registrar',
+      '/suministros/arribo',
+      '/stock',
     ]);
   });
 
@@ -72,7 +81,10 @@ describe('NAV_ITEMS enabled', () => {
     expect(isNavHrefEnabled('/materiales')).toBe(true);
     expect(isNavHrefEnabled('/recetas')).toBe(true);
     expect(isNavHrefEnabled('/asignaciones')).toBe(true);
-    expect(isNavHrefEnabled('/stock')).toBe(false);
+    expect(isNavHrefEnabled('/produccion/registrar')).toBe(true);
+    expect(isNavHrefEnabled('/suministros/arribo')).toBe(true);
+    expect(isNavHrefEnabled('/stock')).toBe(true);
+    expect(isNavHrefEnabled('/trazabilidad')).toBe(false);
     expect(isNavHrefEnabled('/ruta-inexistente')).toBe(false);
   });
 });
