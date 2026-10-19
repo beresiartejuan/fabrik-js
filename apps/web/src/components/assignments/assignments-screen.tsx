@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { AssignDialog } from '@/components/assignments/assign-dialog';
 import { ScheduleGrid } from '@/components/assignments/schedule-grid';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { EmptyState } from '@/components/shared/empty-state';
 import { PageHeader } from '@/components/shared/page-header';
 import { QueryError } from '@/components/shared/query-error';
 import { SelectField } from '@/components/shared/select-field';
@@ -178,15 +179,18 @@ export function AssignmentsScreen({ canWrite }: { readonly canWrite: boolean }) 
       )}
 
       {selectedId === '' ? (
-        <p className="rounded-xl border border-dashed bg-background px-6 py-10 text-center text-sm text-muted-foreground">
-          {view === 'machine'
-            ? 'Elegí una máquina para ver su agenda semanal.'
-            : 'Elegí un trabajador para ver su agenda semanal.'}
-        </p>
+        <EmptyState
+          title={
+            view === 'machine'
+              ? 'Elegí una máquina para ver su agenda semanal.'
+              : 'Elegí un trabajador para ver su agenda semanal.'
+          }
+          description="Las franjas se cargan desde la agenda semanal de la selección."
+        />
       ) : activeSchedule.error ? (
         <QueryError error={activeSchedule.error} onRetry={activeSchedule.refetch} />
       ) : activeSchedule.loading ? (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" aria-hidden="true">
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />

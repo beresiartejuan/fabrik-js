@@ -73,8 +73,7 @@ export function RecipesScreen({ canWrite }: { readonly canWrite: boolean }) {
     },
     {
       id: 'actions',
-      header: '',
-      headerClassName: 'w-0',
+      header: 'Acciones',
       cellClassName: 'text-right',
       cell: (recipe) => (
         <RowActions

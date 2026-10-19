@@ -653,7 +653,7 @@ de tabla vacía.
   degradación worker 2— y 2 de formato delta/motivos), `pnpm --filter web build` (ruta
   `/stock` prerenderizada) y `pnpm --filter web lint` (biome) verdes.
 
-## Fase 6 — Trazabilidad y eventos
+## Fase 6 — Trazabilidad y eventos ✅ (completada)
 
 - [x] `/trazabilidad`: búsqueda por ID + árbol hacia atrás y pestaña recall.
 - [x] `/eventos`: filtros + tabla cronológica.
@@ -723,17 +723,99 @@ suministros; el recall lista los productos derivados nodo a nodo (eventos/lotes 
 `/eventos` filtra por máquina/operario/material y rango ISO; los tests del árbol cubren
 nodos, `cycleDetected` y la observación.
 
-## Fase 7 — Pulido y documentación
+## Fase 7 — Pulido y documentación ✅ (completada)
 
-- [ ] Estados vacíos/loading/error consistentes en todas las pantallas; toasts de éxito.
-- [ ] Guardas de rol auditadas pantalla por pantalla; navegación accesible (teclado, focus).
-- [ ] Fixtures/helpers de test; `msw` o mock del adaptador axios para tests de API.
-- [ ] `apps/web/README.md` (arranque, `NEXT_PUBLIC_API_URL`, comandos, credenciales de demo).
-- [ ] Repaso de Next 16 (deprecaciones) y commit del bloque `AGENTS.md`.
+- [x] Estados vacíos/loading/error consistentes en todas las pantallas; toasts de éxito.
+- [x] Guardas de rol auditadas pantalla por pantalla; navegación accesible (teclado, focus).
+- [x] Fixtures/helpers de test — fábricas de DTOs de wire con overrides; mock de la capa API
+      por **módulo** (seam del proyecto) y **adaptador axios custom** para el interceptor; sin
+      `msw` (decisión documentada en `src/__tests__/helpers/README.md`).
+- [x] `apps/web/README.md` (arranque, `NEXT_PUBLIC_API_URL`, comandos, credenciales de demo).
+- [x] Repaso de Next 16 (deprecaciones) y commit del bloque `AGENTS.md`.
 
-**Criterio de salida:** recorrido completo admin/worker/auditor sin callejones sin salida;
-`pnpm --filter web test`, `build` y `lint` verdes; README operativo. Estado global del plan
-web: **Fases 0–7 completadas**.
+**✅ Completada:** el pulido y la documentación cierran el plan, aterrizado en tres partes
+(lo que sigue resume todo lo que quedó hecho en Fase 7):
+
+- **`apps/web/README.md` reescrito de cero (Parte A):** qué es la app (Next 16 App Router
+  + React 19, shadcn/ui + Tailwind v4, axios client-rendered en español); arranque paso a
+  paso con **prerequisito API + seed** (`db:migrate` + `db:seed`
+  → http://localhost:3001), `cp .env.example .env.local` y `pnpm --filter web
+  dev` (puerto 3000, el origen del CORS default de la API); tabla de env con
+  `NEXT_PUBLIC_API_URL` y el **caveat de build-time** (cambiarla exige rebuild);
+  comandos (`dev`/`build`/`test`/`lint`/`start` — lint es Biome, `next lint` ya
+  no existe en Next 16); credenciales demo (`admin`/`admin123`,
+  `operario`/`operario123`, `auditor`/`auditor123`); matriz de roles por
+  sección (espeja `lib/nav.ts`, A = escribe / Au = lee); árbol de carpetas
+  (`app/` rutas finas, `components/` + `shared/` + `ui/`, `lib/` con
+  `api/`-`session/`-`format/`-`hooks/`, `__tests__/`) y punteros a docs/09,
+  docs/10 y los READMEs de `apps/api` y `packages/domain`.
+- **Repaso Next 16 solo-lectura (Parte A)** contra los docs embebidos
+  (`node_modules/next/dist/docs`, guía `upgrading/version-16`): **sin
+  hallazgos que corregir**, el codebase ya usa las convenciones actuales —
+  `params` promesa resuelta con `use()` dentro de `Suspense`
+  (`recetas/[id]/page.tsx`), `useSearchParams` dentro de `Suspense`
+  (`trazabilidad/page.tsx`), `next.config.ts` con los flags actuales
+  (`cacheComponents`, `partialPrefetching`, `turbopack` top-level — nada de
+  `experimental.ppr`/`experimental.turbopack`), lint por Biome (sin `next
+  lint`), sin `middleware/` (debe ser `proxy.ts` en 16 y no hay ninguno), sin
+  APIs eliminadas/deprecadas (`publicRuntimeConfig`, `next/legacy/image`,
+  `legacyBehavior`, `unstable_*`, `revalidateTag` sin segundo argumento,
+  segment configs removidos) y hooks del App Router en toda la navegación.
+- **Bloque `AGENTS.md`:** el `BEGIN/END:nextjs-agent-rules` está **presente y
+  actual** en `apps/web/AGENTS.md` (lo escribe/re-agrega `next dev`,
+  `generate-agent-files.js`); debe **seguir commiteado** — no retirarlo del
+  diff. El commit físico lo hace el orquestador (esta parte no ejecuta git).
+- **Estados y accesibilidad (Parte B):** estados vacíos/loading/error y toasts
+  de éxito revisados pantalla por pantalla (catálogos, dashboards, producción,
+  stock, trazabilidad y eventos; el bloque de error con «Reintentar» del panel
+  de auditoría quedó testeado), guardas de rol reauditadas pantalla por
+  pantalla y navegación accesible (foco/roles en diálogos y selects).
+- **Fixtures de test y recorrido por rol (Parte C):**
+  - **`src/__tests__/helpers/fixtures.ts`** — fábricas tipadas de los DTOs de
+    wire (`makeMaterial`/`Location`/`Machine`/`Worker`, `makeRecipe`/
+    `Step`/`MaterialQuantity`, `makeAssignment`/`makeMeScheduleItem`,
+    `makeBatch`/`BatchQuantity`/`BatchEvent`/`makeTransformation`,
+    `makeStockEntry`/`makeStockMovement` y los constructores anidados
+    `quantity`/`slot`), con **defaults deterministas** (ids auto-generados por
+    secuencia, campos opcionales omitidos como en la API) y overrides a un
+    nivel. `helpers/README.md` documenta la convención y la decisión de
+    **no usar `msw`**: todo mockea el **módulo tipado** de `lib/api/modules/*`
+    (el seam entre componentes y HTTP, regla 3 del plan) y solo el test del
+    interceptor usa el **adaptador axios custom** de `createApiClient` — el
+    nuevo helper evita duplicar el stub a nivel HTTP y las 12 suites que
+    repetían DTOs inline quedaron refactorizadas a las fábricas (stock,
+    eventos, trazabilidad ×2, producciones, nueva producción, registrar,
+    builder de recetas, worker-dashboard, asignaciones y los formularios de
+    máquina/trabajadores).
+  - **`src/__tests__/journeys/` (9 tests — recorrido por rol, «sin callejones
+    sin salida»):** el **sidebar real** del grupo `(app)` renderiza exactamente
+    los ítems habilitados esperados por rol (admin/worker/auditor, en orden y
+    sin hrefs muertos); **smoke matrix** — cada ruta habilitada de
+    `navItemsForRole` monta con su encabezado esperado y sin redirect indevido
+    (capa de API mockeada con listados vacíos/fixtures mínimos — estado vacío
+    incluido — y `/recetas/[id]` monta su pantalla de edición, admin); y las
+    rutas **prohibidas** reenvían al dashboard (auditor desde las pantallas
+    admin/worker, worker desde catálogos/asignaciones) complementando — sin
+    duplicar — los tests de guardas de las Fases 0/4/6.
+
+Verificación: `pnpm --filter web test` (**304 tests** en 45 archivos; +9 en la
+Parte C: 3 de navegación por rol, 4 del smoke matrix —incluida la edición de
+recetas— y 2 de redirects de pantallas prohibidas; la Parte B dejó la suite en
+295 y la Parte A no movió tests), `pnpm --filter web build` (20 rutas,
+prerenderizadas/parciales) y `pnpm --filter web lint` (biome) verdes.
+
+**Criterio de salida (verificado):** recorrido completo admin/worker/auditor sin
+callejones sin salida — la navegación por rol renderiza exactamente las rutas
+vivas, cada una aterriza con su pantalla (o reenvía al dashboard si el rol no
+entra) y ninguna muestra un estado bloqueante sin salida; README operativo
+(arranque contra la API de verdad) y `pnpm --filter web test`, `build` y `lint`
+verdes.
+
+**Estado global del plan web: Fases 0–7 completadas.** (El RBAC real sigue
+siendo del dominio — 403 —; los gaps de API que quedan abiertos —lecturas de
+catálogo para `worker`, paginación de eventos, endpoints de estado de máquina,
+stock global, reactivar worker y `factory`— están anotados en la sección de
+riesgos y no bloquean la web.)
 
 ---
 

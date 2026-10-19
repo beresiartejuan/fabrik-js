@@ -2,7 +2,7 @@
 
 import { type UnitOfMeasure, unitsForPhysicalState } from '@fabrik/domain';
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon, Trash2Icon } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useId, useState } from 'react';
 
 import { QueryError } from '@/components/shared/query-error';
 import { SelectField } from '@/components/shared/select-field';
@@ -125,11 +125,13 @@ function QuantityFields({
   readonly onAmountChange: (amount: string) => void;
   readonly onUnitChange: (unit: UnitOfMeasure) => void;
 }) {
+  const amountId = useId();
   return (
     <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <Field data-invalid={amountError !== undefined}>
-        <FieldLabel>{amountLabel}</FieldLabel>
+        <FieldLabel htmlFor={amountId}>{amountLabel}</FieldLabel>
         <Input
+          id={amountId}
           type="number"
           min="0"
           step="any"
@@ -137,7 +139,6 @@ function QuantityFields({
           value={quantity.amount}
           onChange={(event) => onAmountChange(event.target.value)}
           disabled={disabled}
-          aria-label={amountLabel}
           aria-invalid={amountError !== undefined}
         />
         <FieldError>{amountError}</FieldError>
@@ -288,6 +289,8 @@ function StepCard({
   readonly onRemove: () => void;
 }) {
   const stepOutput = findMaterial(materials, step.outputProductId);
+  const machineTypeId = useId();
+  const machineTypeErrorId = useId();
   const machineTypeError = issueForPath(validationIssues, `steps.${step.position}.machineType`);
   const outputProductError = issueForPath(
     validationIssues,
@@ -338,8 +341,9 @@ function StepCard({
       </header>
 
       <Field data-invalid={machineTypeError !== undefined}>
-        <FieldLabel>{`Paso ${step.position} · Tipo de máquina`}</FieldLabel>
+        <FieldLabel htmlFor={machineTypeId}>{`Paso ${step.position} · Tipo de máquina`}</FieldLabel>
         <Input
+          id={machineTypeId}
           value={step.machineType}
           onChange={(event) =>
             onChangeStep((current) => ({ ...current, machineType: event.target.value }))
@@ -347,10 +351,10 @@ function StepCard({
           list="recipe-machine-types"
           placeholder="mixer"
           disabled={disabled}
-          aria-label={`Paso ${step.position} · Tipo de máquina`}
           aria-invalid={machineTypeError !== undefined}
+          aria-describedby={machineTypeError !== undefined ? machineTypeErrorId : undefined}
         />
-        <FieldError>{machineTypeError}</FieldError>
+        <FieldError id={machineTypeErrorId}>{machineTypeError}</FieldError>
       </Field>
 
       <div className="flex flex-col gap-3">
@@ -472,6 +476,8 @@ export function RecipeBuilder({
 }: RecipeBuilderProps) {
   const [state, setState] = useState(initialState);
   const [validation, setValidation] = useState<ReturnType<typeof validateRecipe> | null>(null);
+  const nameId = useId();
+  const nameErrorId = useId();
 
   function mutate(updater: (current: RecipeBuilderState) => RecipeBuilderState): void {
     setState((current) => updater(current));
@@ -527,18 +533,19 @@ export function RecipeBuilder({
       <section className="flex flex-col gap-3 rounded-xl border bg-background p-4">
         <h2 className="font-heading text-base font-medium">Receta</h2>
         <Field data-invalid={issueForPath(issues, 'name') !== undefined}>
-          <FieldLabel>Nombre de la receta</FieldLabel>
+          <FieldLabel htmlFor={nameId}>Nombre de la receta</FieldLabel>
           <Input
+            id={nameId}
             value={state.name}
             onChange={(event) =>
               mutate((current) => updateRecipe(current, { name: event.target.value }))
             }
             placeholder="Pan artesanal"
             disabled={readOnly}
-            aria-label="Nombre de la receta"
             aria-invalid={issueForPath(issues, 'name') !== undefined}
+            aria-describedby={issueForPath(issues, 'name') !== undefined ? nameErrorId : undefined}
           />
-          <FieldError>{issueForPath(issues, 'name')}</FieldError>
+          <FieldError id={nameErrorId}>{issueForPath(issues, 'name')}</FieldError>
         </Field>
 
         <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] sm:items-start">

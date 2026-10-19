@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useId, useMemo, useState } from 'react';
 
 import { CatalogsReadGate } from '@/components/shared/catalogs-read-gate';
 import { DataTable, type DataTableColumn } from '@/components/shared/data-table';
@@ -9,7 +9,7 @@ import { PageHeader } from '@/components/shared/page-header';
 import { QueryError } from '@/components/shared/query-error';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { ApiError, errorToMessage } from '@/lib/api/errors';
 import { batchesApi } from '@/lib/api/modules/batchesApi';
@@ -229,6 +229,7 @@ interface BatchSearchProps {
 }
 
 function BatchSearch({ searchState, resultLabel, showTraceLink = false }: BatchSearchProps) {
+  const queryId = useId();
   const [query, setQuery] = useState('');
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
@@ -240,12 +241,12 @@ function BatchSearch({ searchState, resultLabel, showTraceLink = false }: BatchS
     <section className="flex flex-col gap-2 rounded-xl border bg-background p-4">
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2" noValidate>
         <Field className="min-w-60 flex-1">
-          <FieldLabel>Buscar lote por ID</FieldLabel>
+          <FieldLabel htmlFor={queryId}>Buscar lote por ID</FieldLabel>
           <Input
+            id={queryId}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Id del lote (UUID)"
-            aria-label="Buscar lote por ID"
             disabled={searchState.loading}
           />
         </Field>
@@ -255,11 +256,11 @@ function BatchSearch({ searchState, resultLabel, showTraceLink = false }: BatchS
       </form>
 
       {searchState.error !== null && (
-        <p role="alert" className="text-sm text-destructive">
+        <FieldError>
           {searchState.errorIsNotFound
             ? 'No se encontró ningún lote con ese ID.'
             : errorToMessage(searchState.error)}
-        </p>
+        </FieldError>
       )}
 
       {searchState.result && (

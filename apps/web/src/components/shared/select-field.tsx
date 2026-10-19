@@ -27,6 +27,8 @@ export interface SelectFieldProps {
   readonly options: readonly SelectFieldOption[];
   readonly placeholder?: string;
   readonly disabled?: boolean;
+  /** Marca el trigger con `aria-invalid` cuando hay un error de validación visible. */
+  readonly invalid?: boolean;
   readonly className?: string;
 }
 
@@ -37,6 +39,7 @@ export function SelectField({
   options,
   placeholder,
   disabled,
+  invalid = false,
   className,
 }: SelectFieldProps) {
   return (
@@ -52,7 +55,7 @@ export function SelectField({
         }}
         disabled={disabled}
       >
-        <SelectTrigger aria-label={label} className="w-full">
+        <SelectTrigger aria-label={label} aria-invalid={invalid} className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

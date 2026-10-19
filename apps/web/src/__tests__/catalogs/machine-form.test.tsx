@@ -2,8 +2,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { MachineForm } from '@/components/catalogs/machine-form';
-import type { LocationWire } from '@/lib/api/types';
 
+import { makeLocation } from '../helpers/fixtures';
 import { selectOption } from '../helpers/select';
 
 /**
@@ -12,10 +12,10 @@ import { selectOption } from '../helpers/select';
  * lugar.
  */
 
-const LOCATIONS: LocationWire[] = [
-  { id: 'loc-prod', name: 'Planta baja', kind: 'production' },
-  { id: 'loc-storage', name: 'Depósito', kind: 'storage' },
-  { id: 'loc-prod-2', name: 'Planta alta', kind: 'production' },
+const LOCATIONS = [
+  makeLocation({ id: 'loc-prod', name: 'Planta baja', kind: 'production' }),
+  makeLocation({ id: 'loc-storage', name: 'Depósito', kind: 'storage' }),
+  makeLocation({ id: 'loc-prod-2', name: 'Planta alta', kind: 'production' }),
 ];
 
 describe('MachineForm', () => {
@@ -55,5 +55,7 @@ describe('MachineForm', () => {
     expect(onSubmit).not.toHaveBeenCalled();
     expect(screen.getByText('El tipo es obligatorio.')).toBeInTheDocument();
     expect(screen.getByText('Elegí un lugar de producción.')).toBeInTheDocument();
+    // El estado de campo inválido llega al trigger del select (aria-invalid).
+    expect(screen.getByLabelText('Lugar')).toHaveAttribute('aria-invalid', 'true');
   });
 });

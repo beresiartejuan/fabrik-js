@@ -1,5 +1,5 @@
 import type { WorkerRole } from '@fabrik/domain';
-import { render } from '@testing-library/react';
+import { type RenderResult, render } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 
 import { SESSION_STORAGE_KEY, SessionProvider } from '@/lib/session/session-store';
@@ -21,6 +21,6 @@ export function seedSessionRole(role: WorkerRole, workerId = 'w1'): void {
   );
 }
 
-export function renderWithSession(ui: ReactNode): void {
-  render(createElement(SessionProvider, null, ui));
+export function renderWithSession(ui: ReactNode): RenderResult {
+  return render(createElement(SessionProvider, null, ui));
 }

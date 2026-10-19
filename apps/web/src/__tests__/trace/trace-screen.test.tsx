@@ -3,15 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TraceScreen } from '@/components/trace/trace-screen';
 import { ApiError } from '@/lib/api/errors';
-import type {
-  BatchEventWire,
-  BatchForwardNodeWire,
-  BatchTraceNodeWire,
-  BatchWire,
-  MachineWire,
-  MaterialWire,
-  WorkerWire,
-} from '@/lib/api/types';
+import type { BatchForwardNodeWire, BatchTraceNodeWire } from '@/lib/api/types';
+import {
+  makeBatch,
+  makeBatchEvent,
+  makeBatchQuantity,
+  makeMachine,
+  makeMaterial,
+  makeWorker,
+} from '../helpers/fixtures';
 
 /**
  * Pantalla 14 — `/trazabilidad` (Fase 6): buscador por ID de lote, «lotes
@@ -43,30 +43,43 @@ vi.mock('next/navigation', () => ({
 const BATCH_ID = 'rootaaaa-0000-0000-0000-000000000000';
 const SUPPLY_ID = 'leafbbbb-0000-0000-0000-000000000000';
 
-const ROOT_BATCH: BatchTraceNodeWire['batch'] = {
+const ROOT_BATCH = makeBatch({
   id: BATCH_ID,
   materialId: 'm-pan',
   quantity: { amount: 8, unit: 'unit' },
   status: 'in_progress',
-};
+});
 
-const SUPPLY: BatchWire = {
+const SUPPLY = makeBatch({
   id: SUPPLY_ID,
   materialId: 'm-harina',
   quantity: { amount: 5, unit: 'kg' },
   status: 'stored',
-};
+});
 
-const EVENT: BatchEventWire = {
+/** Un evento reciente cuyo output es el lote raíz (alimenta «lotes recientes»). */
+const EVENT = makeBatchEvent({
   id: 'eventcc0-0000-0000-0000-000000000000',
   machineId: 'maq-1',
   workerId: 'w-1',
   locationId: 'loc-1',
-  inputs: [{ batchId: SUPPLY_ID, materialId: 'm-harina', quantity: { amount: 5, unit: 'kg' } }],
-  outputs: [{ batchId: BATCH_ID, materialId: 'm-pan', quantity: { amount: 8, unit: 'unit' } }],
+  inputs: [
+    makeBatchQuantity({
+      batchId: SUPPLY_ID,
+      materialId: 'm-harina',
+      quantity: { amount: 5, unit: 'kg' },
+    }),
+  ],
+  outputs: [
+    makeBatchQuantity({
+      batchId: BATCH_ID,
+      materialId: 'm-pan',
+      quantity: { amount: 8, unit: 'unit' },
+    }),
+  ],
   observation: 'Se removió dos veces',
   timestamp: '2026-10-01T10:30:00.000Z',
-};
+});
 
 const BACKWARD: BatchTraceNodeWire = {
   batch: ROOT_BATCH,
@@ -79,33 +92,28 @@ const FORWARD: BatchForwardNodeWire = {
   children: [{ event: EVENT, children: [{ batch: SUPPLY, children: [] }] }],
 };
 
-const MATERIALS: MaterialWire[] = [
-  {
+const MATERIALS = [
+  makeMaterial({
     id: 'm-pan',
     name: 'Pan francés',
     kind: 'product',
     physicalState: 'solid',
     unitOfMeasure: 'unit',
-    active: true,
-  },
-  {
+  }),
+  makeMaterial({
     id: 'm-harina',
     name: 'Harina 000',
     kind: 'supply',
     physicalState: 'solid',
     unitOfMeasure: 'kg',
-    active: true,
-  },
+  }),
 ];
 
-const MACHINES: MachineWire[] = [
-  { id: 'maq-1', name: 'Amasadora', type: 'amasadora', locationId: 'loc-1', status: 'idle' },
+const MACHINES = [
+  makeMachine({ id: 'maq-1', name: 'Amasadora', locationId: 'loc-1', status: 'idle' }),
 ];
 
-const WORKERS: WorkerWire[] = [{ id: 'w-1', name: 'Ada', role: 'worker', active: true }];
-
-/** Un evento reciente cuyo output es el lote raíz (alimenta «lotes recientes»). */
-const PAST_EVENT: BatchEventWire = EVENT;
+const WORKERS = [makeWorker({ id: 'w-1', name: 'Ada', role: 'worker' })];
 
 function resetMocks(): void {
   window.sessionStorage.clear();
@@ -117,7 +125,7 @@ function resetMocks(): void {
   }
   mocks.traceApi.backward.mockResolvedValue(BACKWARD);
   mocks.traceApi.forward.mockResolvedValue(FORWARD);
-  mocks.batchEventsApi.list.mockResolvedValue([PAST_EVENT]);
+  mocks.batchEventsApi.list.mockResolvedValue([EVENT]);
   mocks.materialsApi.list.mockResolvedValue(MATERIALS);
   mocks.machinesApi.list.mockResolvedValue(MACHINES);
   mocks.workersApi.list.mockResolvedValue(WORKERS);

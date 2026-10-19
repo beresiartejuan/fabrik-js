@@ -128,8 +128,7 @@ export function MachinesScreen({ canWrite }: { readonly canWrite: boolean }) {
   if (canWrite) {
     columns.push({
       id: 'actions',
-      header: '',
-      headerClassName: 'w-0',
+      header: 'Acciones',
       cellClassName: 'text-right',
       cell: (machine) => (
         <RowActions

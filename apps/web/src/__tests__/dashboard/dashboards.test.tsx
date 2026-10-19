@@ -1,12 +1,14 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AdminDashboard } from '@/components/dashboard/admin-dashboard';
 import { AuditorDashboard } from '@/components/dashboard/auditor-dashboard';
+import { ApiError } from '@/lib/api/errors';
 
 /**
  * CTAs y accesos de dashboard: se filtran con el mismo registro de `lib/nav`, así
- * que las pantallas de fases futuras no aparecen como enlaces muertos.
+ * que las pantallas de fases futuras no aparecen como enlaces muertos. El
+ * recopilatorio también cubre los estados de error de las consultas del panel.
  */
 
 const { mocks } = vi.hoisted(() => ({
@@ -55,5 +57,22 @@ describe('dashboards: secciones habilitadas', () => {
     expect(screen.getByRole('link', { name: 'Trazabilidad' }).getAttribute('href')).toBe(
       '/trazabilidad',
     );
+  });
+
+  it('si el listado de eventos falla, el auditor ve el bloque de error con Reintentar', async () => {
+    mocks.batchEventsApi.list.mockRejectedValue(
+      new ApiError({ statusCode: 503, error: 'HttpError', message: 'boom' }),
+    );
+    render(<AuditorDashboard />);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Ocurrió un error inesperado.');
+    expect(screen.queryByText('Todavía no hay eventos registrados.')).not.toBeInTheDocument();
+
+    mocks.batchEventsApi.list.mockResolvedValue([]);
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+
+    await screen.findByText('Todavía no hay eventos registrados.');
+    expect(mocks.batchEventsApi.list).toHaveBeenCalledTimes(2);
   });
 });

@@ -2,9 +2,9 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AssignmentsScreen } from '@/components/assignments/assignments-screen';
 import { ApiError } from '@/lib/api/errors';
-import type { AssignmentWire } from '@/lib/api/types';
 import { formatTimeSlot } from '@/lib/format/days';
 
+import { makeAssignment, makeMachine, makeWorker } from '../helpers/fixtures';
 import { selectOptionAsync } from '../helpers/select';
 
 /**
@@ -34,31 +34,31 @@ vi.mock('@/lib/api/modules/machinesApi', () => ({ machinesApi: mocks.machinesApi
 vi.mock('@/lib/api/modules/workersApi', () => ({ workersApi: mocks.workersApi }));
 
 const MACHINES = [
-  { id: 'm1', name: 'Mezcladora', type: 'mixer', locationId: 'l1', status: 'idle' as const },
-  { id: 'm2', name: 'Horno', type: 'oven', locationId: 'l1', status: 'idle' as const },
+  makeMachine({ id: 'm1', name: 'Mezcladora', type: 'mixer', locationId: 'l1', status: 'idle' }),
+  makeMachine({ id: 'm2', name: 'Horno', type: 'oven', locationId: 'l1', status: 'idle' }),
 ];
 
 const WORKERS = [
-  { id: 'w1', name: 'Ada Lovelace', role: 'worker' as const, active: true },
-  { id: 'w2', name: 'Alan Turing', role: 'worker' as const, active: false },
+  makeWorker({ id: 'w1', name: 'Ada Lovelace', role: 'worker' }),
+  makeWorker({ id: 'w2', name: 'Alan Turing', role: 'worker', active: false }),
 ];
 
-const ASSIGNMENT_ON_M1: AssignmentWire = {
+const ASSIGNMENT_ON_M1 = makeAssignment({
   id: 'a1',
   workerId: 'w1',
   machineId: 'm1',
   slot: { daysOfWeek: [1, 3], start: '08:00', end: '16:30' },
-};
+});
 
 /** Asignación de un solo día para los flujos de Desasignar (una sola tarjeta). */
-const ASSIGNMENT_MONDAY: AssignmentWire = {
+const ASSIGNMENT_MONDAY = makeAssignment({
   id: 'a2',
   workerId: 'w1',
   machineId: 'm1',
   slot: { daysOfWeek: [1], start: '08:00', end: '16:30' },
-};
+});
 
-function slotLabel(slot: AssignmentWire['slot']): string {
+function slotLabel(slot: typeof ASSIGNMENT_MONDAY.slot): string {
   return formatTimeSlot(slot);
 }
 
@@ -76,12 +76,14 @@ function resetMocks(): void {
   mocks.workersApi.list.mockResolvedValue(WORKERS);
   mocks.assignmentsApi.machineSchedule.mockResolvedValue([]);
   mocks.assignmentsApi.workerSchedule.mockResolvedValue([]);
-  mocks.assignmentsApi.assign.mockResolvedValue({
-    id: 'a9',
-    workerId: 'w1',
-    machineId: 'm1',
-    slot: { daysOfWeek: [1], start: '08:00', end: '16:00' },
-  });
+  mocks.assignmentsApi.assign.mockResolvedValue(
+    makeAssignment({
+      id: 'a9',
+      workerId: 'w1',
+      machineId: 'm1',
+      slot: { daysOfWeek: [1], start: '08:00', end: '16:00' },
+    }),
+  );
   mocks.assignmentsApi.unassign.mockResolvedValue(undefined);
 }
 
@@ -186,12 +188,12 @@ describe('AssignmentsScreen: asignar (admin)', () => {
     mocks.assignmentsApi.workerSchedule.mockImplementation(async (workerId: string) =>
       workerId === 'w1'
         ? [
-            {
+            makeAssignment({
               id: 'a1',
               workerId: 'w1',
               machineId: 'm2',
               slot: { daysOfWeek: [1], start: '10:00', end: '12:00' },
-            },
+            }),
           ]
         : [],
     );
@@ -214,12 +216,12 @@ describe('AssignmentsScreen: asignar (admin)', () => {
     mocks.assignmentsApi.workerSchedule.mockImplementation(async (workerId: string) =>
       workerId === 'w1'
         ? [
-            {
+            makeAssignment({
               id: 'a1',
               workerId: 'w1',
               machineId: 'm2',
               slot: { daysOfWeek: [1], start: '16:00', end: '18:00' },
-            },
+            }),
           ]
         : [],
     );

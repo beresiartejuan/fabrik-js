@@ -2,7 +2,8 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WorkersScreen } from '@/components/catalogs/workers-screen';
-import type { WorkerWire } from '@/lib/api/types';
+
+import { makeWorker } from '../helpers/fixtures';
 
 /**
  * Tabla de trabajadores (docs/10-plan-de-web.md §6): el **auditor** la ve sin
@@ -21,9 +22,9 @@ const { workersApiMock } = vi.hoisted(() => ({
 
 vi.mock('@/lib/api/modules/workersApi', () => ({ workersApi: workersApiMock }));
 
-const WORKERS: WorkerWire[] = [
-  { id: 'w1', name: 'Ada Lovelace', role: 'admin', active: true },
-  { id: 'w2', name: 'Alan Turing', role: 'worker', active: false },
+const WORKERS = [
+  makeWorker({ id: 'w1', name: 'Ada Lovelace', role: 'admin' }),
+  makeWorker({ id: 'w2', name: 'Alan Turing', role: 'worker', active: false }),
 ];
 
 beforeEach(() => {

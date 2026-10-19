@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 
+import { EmptyState } from '@/components/shared/empty-state';
+import { QueryError } from '@/components/shared/query-error';
 import { buttonVariants } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { errorToMessage } from '@/lib/api/errors';
 import { meApi } from '@/lib/api/modules/meApi';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
+import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { isNavHrefEnabled } from '@/lib/nav';
 
 import { PageHeader } from './dashboard-common';
@@ -24,6 +26,7 @@ import { PageHeader } from './dashboard-common';
  */
 export function WorkerDashboard() {
   const schedule = useApiQuery(() => meApi.schedule());
+  useErrorToast(schedule.error);
 
   const currentMachines = (schedule.data ?? []).flatMap((item) =>
     item.activeNow && item.machine ? [item.machine] : [],
@@ -36,20 +39,19 @@ export function WorkerDashboard() {
     <div className="flex flex-col gap-6">
       <PageHeader title="Mi jornada" description="Máquinas que tenés asignadas en este momento." />
 
-      {schedule.error !== null && (
-        <p className="text-sm text-destructive">{errorToMessage(schedule.error)}</p>
-      )}
-
       {schedule.loading ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-24 w-full" />
         </div>
+      ) : schedule.error !== null ? (
+        <QueryError error={schedule.error} onRetry={schedule.refetch} />
       ) : currentMachines.length === 0 ? (
-        <p className="rounded-lg border bg-background p-6 text-sm text-muted-foreground">
-          Todavía no hay máquinas asignadas en este momento.
-        </p>
+        <EmptyState
+          title="Todavía no hay máquinas asignadas en este momento."
+          description="Cuando el admin te asigne a las máquinas que están activas ahora mismo, aparecen acá."
+        />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {currentMachines.map((machine) => (

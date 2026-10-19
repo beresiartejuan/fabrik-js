@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
 import { CatalogsReadGate } from '@/components/shared/catalogs-read-gate';
 import { DataTable, type DataTableColumn } from '@/components/shared/data-table';
@@ -73,6 +73,8 @@ function StockBody({ canReadCatalogs }: StockBodyProps) {
 
   // Un nombre de material que no resuelve no bloquea la tabla (queda el id del wire).
   useErrorToast(materials.error);
+  // El error de lugares, en cambio, bloquea el selector (se muestra además inline).
+  useErrorToast(locations.error);
 
   const stock = useApiQuery(
     () => (hasLocation ? stockApi.byLocation(trimmedLocation) : Promise.resolve(null)),
@@ -246,10 +248,11 @@ function StockAmount({
  */
 function ManualLocationField({ onConfirm }: { readonly onConfirm: (locationId: string) => void }) {
   const [draft, setDraft] = useState('');
+  const locationInputId = useId();
 
   return (
     <Field>
-      <FieldLabel>ID del lugar</FieldLabel>
+      <FieldLabel htmlFor={locationInputId}>ID del lugar</FieldLabel>
       <form
         className="flex flex-wrap items-end gap-2"
         noValidate
@@ -259,10 +262,10 @@ function ManualLocationField({ onConfirm }: { readonly onConfirm: (locationId: s
         }}
       >
         <Input
+          id={locationInputId}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Id del lugar"
-          aria-label="ID del lugar"
           className="min-w-60 flex-1"
         />
         <Button type="submit" variant="outline" size="sm" disabled={draft.trim().length === 0}>

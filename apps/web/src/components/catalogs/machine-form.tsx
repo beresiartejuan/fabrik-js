@@ -47,6 +47,10 @@ export function MachineForm({
   onCancel,
 }: MachineFormProps) {
   const typeListId = useId();
+  const nameId = useId();
+  const nameErrorId = useId();
+  const typeId = useId();
+  const typeErrorId = useId();
   const [name, setName] = useState(defaultValues?.name ?? '');
   const [type, setType] = useState(defaultValues?.type ?? '');
   const [locationId, setLocationId] = useState(defaultValues?.locationId ?? '');
@@ -84,37 +88,39 @@ export function MachineForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
       <Field data-invalid={errors.name !== undefined}>
-        <FieldLabel>Nombre</FieldLabel>
+        <FieldLabel htmlFor={nameId}>Nombre</FieldLabel>
         <Input
+          id={nameId}
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Amasadora 1"
-          aria-label="Nombre"
           aria-invalid={errors.name !== undefined}
+          aria-describedby={errors.name !== undefined ? nameErrorId : undefined}
           autoFocus
         />
-        <FieldError>{errors.name}</FieldError>
+        <FieldError id={nameErrorId}>{errors.name}</FieldError>
       </Field>
 
       <Field data-invalid={errors.type !== undefined}>
-        <FieldLabel>Tipo</FieldLabel>
+        <FieldLabel htmlFor={typeId}>Tipo</FieldLabel>
         <Input
+          id={typeId}
           value={type}
           onChange={(event) => setType(event.target.value)}
           placeholder="amasadora"
-          aria-label="Tipo"
           list={typeListId}
           aria-invalid={errors.type !== undefined}
+          aria-describedby={errors.type !== undefined ? typeErrorId : undefined}
         />
         <datalist id={typeListId}>
           {machineTypes.map((machineType) => (
             <option key={machineType} value={machineType} />
           ))}
         </datalist>
-        <FieldError>{errors.type}</FieldError>
+        <FieldError id={typeErrorId}>{errors.type}</FieldError>
       </Field>
 
-      <div className="flex flex-col gap-1">
+      <Field data-invalid={errors.locationId !== undefined}>
         <SelectField
           label="Lugar"
           value={locationId}
@@ -122,12 +128,13 @@ export function MachineForm({
           options={locationOptions}
           placeholder="Elegí un lugar"
           disabled={editing}
+          invalid={errors.locationId !== undefined}
         />
         {editing ? (
           <p className="text-xs text-muted-foreground">El lugar se cambia con la acción «Mover».</p>
         ) : null}
-        {errors.locationId && <p className="text-sm text-destructive">{errors.locationId}</p>}
-      </div>
+        <FieldError>{errors.locationId}</FieldError>
+      </Field>
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>

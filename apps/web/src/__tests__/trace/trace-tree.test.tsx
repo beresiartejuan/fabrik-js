@@ -3,13 +3,9 @@ import { describe, expect, it } from 'vitest';
 
 import { type TraceResolvers, TraceTree } from '@/components/trace/trace-tree';
 import { normalizeForwardNode, normalizeTraceNode } from '@/components/trace/trace-view';
-import type {
-  BatchEventWire,
-  BatchForwardNodeWire,
-  BatchTraceNodeWire,
-  BatchWire,
-} from '@/lib/api/types';
+import type { BatchEventWire, BatchForwardNodeWire, BatchTraceNodeWire } from '@/lib/api/types';
 import { formatDateTime } from '@/lib/format/date';
+import { makeBatch, makeBatchEvent, makeBatchQuantity } from '../helpers/fixtures';
 
 /**
  * Componente recursivo del árbol de trazabilidad (Fase 6): tarjetas de lote y
@@ -24,33 +20,45 @@ const RESOLVERS: TraceResolvers = {
   workerName: (id) => (id === 'w-1' ? 'Ada' : id),
 };
 
-const ROOT: BatchWire = {
+const ROOT = makeBatch({
   id: 'rootaaaa-0000-0000-0000-000000000000',
   materialId: 'm-pan',
   quantity: { amount: 8, unit: 'unit' },
   status: 'in_progress',
-};
+});
 
-const LEAF: BatchWire = {
+const LEAF = makeBatch({
   id: 'leafbbbb-0000-0000-0000-000000000000',
   materialId: 'm-harina',
   quantity: { amount: 5, unit: 'kg' },
   status: 'stored',
-};
+});
 
 const EVENT = '2026-10-01T10:30:00.000Z';
 
 function event(overrides: Partial<BatchEventWire> = {}): BatchEventWire {
-  return {
+  return makeBatchEvent({
     id: 'eventcc0-0000-0000-0000-000000000000',
     machineId: 'maq-1',
     workerId: 'w-1',
     locationId: 'loc-1',
-    inputs: [{ batchId: LEAF.id, materialId: 'm-harina', quantity: { amount: 5, unit: 'kg' } }],
-    outputs: [{ batchId: ROOT.id, materialId: 'm-pan', quantity: { amount: 8, unit: 'unit' } }],
+    inputs: [
+      makeBatchQuantity({
+        batchId: LEAF.id,
+        materialId: 'm-harina',
+        quantity: { amount: 5, unit: 'kg' },
+      }),
+    ],
+    outputs: [
+      makeBatchQuantity({
+        batchId: ROOT.id,
+        materialId: 'm-pan',
+        quantity: { amount: 8, unit: 'unit' },
+      }),
+    ],
     timestamp: EVENT,
     ...overrides,
-  };
+  });
 }
 
 describe('TraceTree (genealogía hacia atrás)', () => {

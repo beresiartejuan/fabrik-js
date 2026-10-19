@@ -2,7 +2,7 @@
 
 import { Loader2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useId, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,6 +40,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const errorId = useId();
 
   useEffect(() => {
     if (hydrated && session) {
@@ -89,6 +90,7 @@ export default function LoginPage() {
                   required
                   value={name}
                   aria-invalid={error !== null}
+                  aria-describedby={error !== null ? errorId : undefined}
                   onChange={(event) => setName(event.target.value)}
                 />
               </Field>
@@ -102,10 +104,11 @@ export default function LoginPage() {
                   required
                   value={password}
                   aria-invalid={error !== null}
+                  aria-describedby={error !== null ? errorId : undefined}
                   onChange={(event) => setPassword(event.target.value)}
                 />
               </Field>
-              {error !== null && <FieldError>{error}</FieldError>}
+              {error !== null && <FieldError id={errorId}>{error}</FieldError>}
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting && <Loader2Icon className="animate-spin" aria-hidden="true" />}
                 {submitting ? 'Ingresando…' : 'Ingresar'}

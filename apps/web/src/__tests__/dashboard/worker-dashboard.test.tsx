@@ -1,8 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WorkerDashboard } from '@/components/dashboard/worker-dashboard';
-import type { MeScheduleItemWire } from '@/lib/api/types';
+import { ApiError } from '@/lib/api/errors';
+
+import { makeMeScheduleItem } from '../helpers/fixtures';
 
 /**
  * Dashboard del worker: debe consumir `GET /me/schedule` tal cual (máquina
@@ -18,8 +20,8 @@ vi.mock('@/lib/api/modules/meApi', () => ({ meApi: meApiMock }));
 
 const SLOT = { daysOfWeek: [1, 2, 3, 4, 5] as const, start: '08:00', end: '17:00' };
 
-const ITEMS: MeScheduleItemWire[] = [
-  {
+const ITEMS = [
+  makeMeScheduleItem({
     id: 'a1',
     workerId: 'w1',
     machineId: 'm1',
@@ -32,8 +34,8 @@ const ITEMS: MeScheduleItemWire[] = [
       status: 'running',
     },
     activeNow: true,
-  },
-  {
+  }),
+  makeMeScheduleItem({
     id: 'a2',
     workerId: 'w1',
     machineId: 'm2',
@@ -48,15 +50,15 @@ const ITEMS: MeScheduleItemWire[] = [
     // El servidor dice que la franja no está vigente: no se muestra aunque
     // `TimeSlot.contains` en el navegador pudiera opinar otra cosa.
     activeNow: false,
-  },
-  {
+  }),
+  makeMeScheduleItem({
     id: 'a3',
     workerId: 'w1',
     machineId: 'm3',
     slot: { ...SLOT, daysOfWeek: [...SLOT.daysOfWeek] },
     machine: null,
     activeNow: true,
-  },
+  }),
 ];
 
 beforeEach(() => {
@@ -96,5 +98,23 @@ describe('WorkerDashboard', () => {
     await screen.findByText('Horno 1');
     expect(screen.getByRole('link', { name: 'Registrar transformación' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Arribo de suministros' })).toBeInTheDocument();
+  });
+
+  it('si falla la agenda muestra el bloque de error con Reintentar (y reintenta)', async () => {
+    meApiMock.schedule.mockRejectedValue(
+      new ApiError({ statusCode: 503, error: 'HttpError', message: 'boom' }),
+    );
+
+    render(<WorkerDashboard />);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Ocurrió un error inesperado.');
+    expect(screen.queryByText('Horno 1')).not.toBeInTheDocument();
+
+    meApiMock.schedule.mockResolvedValue(ITEMS);
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+
+    await screen.findByText('Horno 1');
+    expect(meApiMock.schedule).toHaveBeenCalledTimes(2);
   });
 });

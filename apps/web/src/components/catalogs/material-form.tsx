@@ -6,7 +6,7 @@ import {
   type UnitOfMeasure,
   unitsForPhysicalState,
 } from '@fabrik/domain';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useId, useState } from 'react';
 
 import { SelectField } from '@/components/shared/select-field';
 import { Button } from '@/components/ui/button';
@@ -64,6 +64,9 @@ export function MaterialForm({
   onCancel,
 }: MaterialFormProps) {
   const initialPhysicalState = defaultValues?.physicalState ?? 'solid';
+  const nameId = useId();
+  const nameErrorId = useId();
+  const descriptionId = useId();
   const [name, setName] = useState(defaultValues?.name ?? '');
   const [description, setDescription] = useState(defaultValues?.description ?? '');
   const [kind, setKind] = useState<MaterialKind>(defaultValues?.kind ?? 'supply');
@@ -111,25 +114,26 @@ export function MaterialForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
       <Field data-invalid={nameError !== null}>
-        <FieldLabel>Nombre</FieldLabel>
+        <FieldLabel htmlFor={nameId}>Nombre</FieldLabel>
         <Input
+          id={nameId}
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Harina 000"
-          aria-label="Nombre"
           aria-invalid={nameError !== null}
+          aria-describedby={nameError !== null ? nameErrorId : undefined}
           autoFocus
         />
-        <FieldError>{nameError}</FieldError>
+        <FieldError id={nameErrorId}>{nameError}</FieldError>
       </Field>
 
       <Field>
-        <FieldLabel>Descripción</FieldLabel>
+        <FieldLabel htmlFor={descriptionId}>Descripción</FieldLabel>
         <Input
+          id={descriptionId}
           value={description}
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Opcional"
-          aria-label="Descripción"
         />
       </Field>
 

@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { NewProductionForm } from '@/components/production/new-production-form';
 import { ApiError } from '@/lib/api/errors';
-import type { MaterialWire, RecipeWire } from '@/lib/api/types';
 
+import { makeBatch, makeMaterial, makeRecipe, makeRecipeStep } from '../helpers/fixtures';
 import { selectOptionAsync } from '../helpers/select';
 
 /**
@@ -29,56 +29,54 @@ vi.mock('@/lib/api/modules/recipesApi', () => ({ recipesApi: mocks.recipesApi })
 vi.mock('@/lib/api/modules/materialsApi', () => ({ materialsApi: mocks.materialsApi }));
 vi.mock('@/lib/api/modules/productionApi', () => ({ productionApi: mocks.productionApi }));
 
-const FLOUR: MaterialWire = {
+const FLOUR = makeMaterial({
   id: 'm-harina',
   name: 'Harina 000',
   kind: 'supply',
   physicalState: 'solid',
   unitOfMeasure: 'kg',
-  active: true,
-};
+});
 
-const BREAD: MaterialWire = {
+const BREAD = makeMaterial({
   id: 'm-pan',
   name: 'Pan francés',
   kind: 'product',
   physicalState: 'solid',
   unitOfMeasure: 'unit',
-  active: true,
-};
+});
 
-const RECIPE: RecipeWire = {
+const RECIPE = makeRecipe({
   id: 'r1',
   name: 'Panes franceses',
   outputProductId: 'm-pan',
   outputQuantity: { amount: 8, unit: 'unit' },
   steps: [
-    {
+    makeRecipeStep({
       id: 's1',
       position: 1,
       machineType: 'mixer',
       inputs: [{ materialId: 'm-harina', quantity: { amount: 2, unit: 'kg' } }],
       outputProductId: 'm-pan',
       outputQuantity: { amount: 4, unit: 'unit' },
-    },
-    {
+    }),
+    makeRecipeStep({
       id: 's2',
       position: 2,
       machineType: 'oven',
       inputs: [],
       outputProductId: 'm-pan',
       outputQuantity: { amount: 4, unit: 'unit' },
-    },
+    }),
   ],
-};
+});
 
-const ROOT_BATCH = {
+const ROOT_BATCH = makeBatch({
   id: 'b-root',
   materialId: 'm-pan',
   quantity: { amount: 8, unit: 'unit' },
   recipeId: 'r1',
   status: 'in_progress',
-};
+});
 
 beforeEach(() => {
   window.sessionStorage.clear();

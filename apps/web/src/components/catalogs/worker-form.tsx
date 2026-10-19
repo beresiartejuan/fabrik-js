@@ -1,7 +1,7 @@
 'use client';
 
 import type { WorkerRole } from '@fabrik/domain';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useId, useState } from 'react';
 
 import { SelectField } from '@/components/shared/select-field';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,8 @@ export function WorkerForm({
   onSubmit,
   onCancel,
 }: WorkerFormProps) {
+  const nameId = useId();
+  const nameErrorId = useId();
   const [name, setName] = useState(defaultValues?.name ?? '');
   const [role, setRole] = useState<WorkerRole>(defaultValues?.role ?? 'worker');
   const [error, setError] = useState<string | null>(null);
@@ -59,16 +61,17 @@ export function WorkerForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
       <Field data-invalid={error !== null}>
-        <FieldLabel>Nombre</FieldLabel>
+        <FieldLabel htmlFor={nameId}>Nombre</FieldLabel>
         <Input
+          id={nameId}
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Ada Lovelace"
-          aria-label="Nombre"
           aria-invalid={error !== null}
+          aria-describedby={error !== null ? nameErrorId : undefined}
           autoFocus
         />
-        <FieldError>{error}</FieldError>
+        <FieldError id={nameErrorId}>{error}</FieldError>
       </Field>
 
       <SelectField

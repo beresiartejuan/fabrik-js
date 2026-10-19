@@ -144,8 +144,7 @@ export function MaterialsScreen({ canWrite }: { readonly canWrite: boolean }) {
   if (canWrite) {
     columns.push({
       id: 'actions',
-      header: '',
-      headerClassName: 'w-0',
+      header: 'Acciones',
       cellClassName: 'text-right',
       cell: (material) => (
         <RowActions

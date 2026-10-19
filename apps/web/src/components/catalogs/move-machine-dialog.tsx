@@ -5,6 +5,7 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { FormDialog } from '@/components/shared/form-dialog';
 import { SelectField } from '@/components/shared/select-field';
 import { Button } from '@/components/ui/button';
+import { Field, FieldError } from '@/components/ui/field';
 import type { LocationWire, MachineWire } from '@/lib/api/types';
 import { LOCATION_KIND_LABELS } from '@/lib/format/labels';
 
@@ -70,14 +71,17 @@ export function MoveMachineDialog({
       }
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-        <SelectField
-          label="Lugar de destino"
-          value={locationId}
-          onValueChange={setLocationId}
-          options={targetOptions}
-          placeholder="Elegí un lugar"
-        />
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        <Field data-invalid={error !== null}>
+          <SelectField
+            label="Lugar de destino"
+            value={locationId}
+            onValueChange={setLocationId}
+            options={targetOptions}
+            placeholder="Elegí un lugar"
+            invalid={error !== null}
+          />
+          <FieldError>{error}</FieldError>
+        </Field>
         <div className="flex justify-end gap-2 pt-2">
           <Button
             type="button"

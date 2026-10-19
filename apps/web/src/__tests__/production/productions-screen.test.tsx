@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProductionsScreen } from '@/components/production/productions-screen';
 import { ApiError } from '@/lib/api/errors';
-import type { BatchWire, MaterialWire, RecipeWire } from '@/lib/api/types';
 
+import { makeBatch, makeMaterial, makeRecipe } from '../helpers/fixtures';
 import { renderWithSession, seedSessionRole } from '../helpers/session';
 
 /**
@@ -26,33 +26,32 @@ vi.mock('@/lib/api/modules/batchesApi', () => ({ batchesApi: mocks.batchesApi })
 vi.mock('@/lib/api/modules/materialsApi', () => ({ materialsApi: mocks.materialsApi }));
 vi.mock('@/lib/api/modules/recipesApi', () => ({ recipesApi: mocks.recipesApi }));
 
-const ROOT: BatchWire = {
+const ROOT = makeBatch({
   id: 'aaaaaaaa-1111-2222-3333-444444444444',
   materialId: 'm-pan',
   quantity: { amount: 8, unit: 'unit' },
   recipeId: 'r1',
   status: 'in_progress',
-};
+});
 
-const MATERIALS: MaterialWire[] = [
-  {
+const MATERIALS = [
+  makeMaterial({
     id: 'm-pan',
     name: 'Pan francés',
     kind: 'product',
     physicalState: 'solid',
     unitOfMeasure: 'unit',
-    active: true,
-  },
+  }),
 ];
 
-const RECIPES: RecipeWire[] = [
-  {
+const RECIPES = [
+  makeRecipe({
     id: 'r1',
     name: 'Pan francés 8u',
     outputProductId: 'm-pan',
     outputQuantity: { amount: 8, unit: 'unit' },
     steps: [],
-  },
+  }),
 ];
 
 function resetMocks(role: 'admin' | 'worker' = 'admin'): void {

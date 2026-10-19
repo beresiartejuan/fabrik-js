@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useId, useMemo, useState } from 'react';
 import { EmptyState } from '@/components/shared/empty-state';
 import { PageHeader } from '@/components/shared/page-header';
 import { QueryError } from '@/components/shared/query-error';
@@ -19,6 +19,7 @@ import { workersApi } from '@/lib/api/modules/workersApi';
 import type { BatchEventWire, BatchForwardNodeWire, BatchTraceNodeWire } from '@/lib/api/types';
 import { batchLabel } from '@/lib/format/ids';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
+import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 import { type TraceResolvers, TraceTree } from './trace-tree';
 import { deriveRecentBatchIds, normalizeForwardNode, normalizeTraceNode } from './trace-view';
@@ -61,6 +62,7 @@ function batchParamFrom(searchParams: { get(key: string): string | null }): stri
 
 function TraceBody() {
   const searchParams = useSearchParams();
+  const queryId = useId();
 
   // Estado inicial desde el deep-link `?batch=`; el input lo refleja.
   const [batchId, setBatchId] = useState<string>(() => batchParamFrom(searchParams));
@@ -72,6 +74,12 @@ function TraceBody() {
   const workers = useApiQuery(() => workersApi.list());
   // «Lotes recientes»: los eventos (ascendentes) alimentan el helper puro.
   const pastEvents = useApiQuery(() => batchEventsApi.list());
+
+  // Los ids sin resolver quedan como fallback visible; el toast explica el porqué.
+  useErrorToast(materials.error);
+  useErrorToast(machines.error);
+  useErrorToast(workers.error);
+  useErrorToast(pastEvents.error);
 
   const resolvers: TraceResolvers = useMemo(() => {
     const materialById = new Map((materials.data ?? []).map((m) => [m.id, m]));
@@ -116,12 +124,12 @@ function TraceBody() {
       <section className="flex flex-col gap-3 rounded-xl border bg-background p-4">
         <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2" noValidate>
           <Field className="min-w-60 flex-1">
-            <FieldLabel>Buscar lote por ID</FieldLabel>
+            <FieldLabel htmlFor={queryId}>Buscar lote por ID</FieldLabel>
             <Input
+              id={queryId}
               value={draft}
               onChange={(change) => setDraft(change.target.value)}
               placeholder="Id del lote (UUID)"
-              aria-label="Buscar lote por ID"
             />
           </Field>
           <Button type="submit" variant="outline" size="sm" disabled={draft.trim().length === 0}>

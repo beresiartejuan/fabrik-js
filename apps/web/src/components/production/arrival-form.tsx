@@ -1,7 +1,7 @@
 'use client';
 
 import type { UnitOfMeasure } from '@fabrik/domain';
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useId, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/page-header';
 import { QueryError } from '@/components/shared/query-error';
@@ -74,6 +74,10 @@ function ArrivalFormBody({ canReadCatalogs }: ArrivalFormBodyProps) {
   const [busy, setBusy] = useState(false);
   const [formIssues, setFormIssues] = useState<string[]>([]);
   const [lastArrival, setLastArrival] = useState<BatchWire | null>(null);
+  const unitPreviewId = useId();
+  const manualMaterialId = useId();
+  const manualLocationId = useId();
+  const amountId = useId();
 
   const materialById = useMemo(
     () => new Map((materials.data ?? []).map((material) => [material.id, material])),
@@ -199,8 +203,8 @@ function ArrivalFormBody({ canReadCatalogs }: ArrivalFormBodyProps) {
                 disabled={materials.loading || busy}
               />
               <Field>
-                <FieldLabel>Unidad (del material)</FieldLabel>
-                <Input value={unit} readOnly aria-label="Unidad (del material)" />
+                <FieldLabel htmlFor={unitPreviewId}>Unidad (del material)</FieldLabel>
+                <Input id={unitPreviewId} value={unit} readOnly />
                 <p className="text-xs text-muted-foreground">
                   La unidad la determina el material elegido (I6).
                 </p>
@@ -220,13 +224,13 @@ function ArrivalFormBody({ canReadCatalogs }: ArrivalFormBodyProps) {
           ) : (
             <>
               <Field>
-                <FieldLabel>ID del material (suministro)</FieldLabel>
+                <FieldLabel htmlFor={manualMaterialId}>ID del material (suministro)</FieldLabel>
                 <Input
+                  id={manualMaterialId}
                   value={materialId}
                   onChange={(event) => setMaterialId(event.target.value)}
                   disabled={busy}
                   placeholder="Id del material"
-                  aria-label="ID del material (suministro)"
                 />
               </Field>
               <SelectField
@@ -240,21 +244,22 @@ function ArrivalFormBody({ canReadCatalogs }: ArrivalFormBodyProps) {
                 disabled={busy}
               />
               <Field>
-                <FieldLabel>ID del lugar de almacenamiento</FieldLabel>
+                <FieldLabel htmlFor={manualLocationId}>ID del lugar de almacenamiento</FieldLabel>
                 <Input
+                  id={manualLocationId}
                   value={locationId}
                   onChange={(event) => setLocationId(event.target.value)}
                   disabled={busy}
                   placeholder="Id del lugar"
-                  aria-label="ID del lugar de almacenamiento"
                 />
               </Field>
             </>
           )}
 
           <Field>
-            <FieldLabel>Cantidad</FieldLabel>
+            <FieldLabel htmlFor={amountId}>Cantidad</FieldLabel>
             <Input
+              id={amountId}
               type="number"
               min="0"
               step="any"
@@ -262,7 +267,6 @@ function ArrivalFormBody({ canReadCatalogs }: ArrivalFormBodyProps) {
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
               disabled={busy}
-              aria-label="Cantidad"
             />
             <FieldError>
               {formIssues.find((issue) => issue.startsWith('Ingresá una cantidad'))}

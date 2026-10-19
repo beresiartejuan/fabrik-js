@@ -4,7 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventsScreen } from '@/components/events/events-screen';
 import { EVENTS_DISPLAY_LIMIT } from '@/components/events/events-state';
 import { ApiError } from '@/lib/api/errors';
-import type { BatchEventWire, MachineWire, MaterialWire, WorkerWire } from '@/lib/api/types';
+import type { BatchEventWire } from '@/lib/api/types';
+import { makeBatchEvent, makeMachine, makeMaterial, makeWorker } from '../helpers/fixtures';
 
 /**
  * Pantalla 15 — `/eventos` (Fase 6): filtros (máquina, operario, material,
@@ -27,37 +28,26 @@ vi.mock('@/lib/api/modules/workersApi', () => ({ workersApi: mocks.workersApi })
 vi.mock('@/lib/api/modules/materialsApi', () => ({ materialsApi: mocks.materialsApi }));
 vi.mock('@/lib/api/modules/batchEventsApi', () => ({ batchEventsApi: mocks.batchEventsApi }));
 
-const MACHINES: MachineWire[] = [
-  { id: 'maq-1', name: 'Amasadora', type: 'amasadora', locationId: 'loc-1', status: 'idle' },
-  { id: 'maq-2', name: 'Horno', type: 'horno', locationId: 'loc-1', status: 'idle' },
+const MACHINES = [
+  makeMachine({ id: 'maq-1', name: 'Amasadora', type: 'amasadora', locationId: 'loc-1' }),
+  makeMachine({ id: 'maq-2', name: 'Horno', type: 'horno', locationId: 'loc-1' }),
 ];
 
-const WORKERS: WorkerWire[] = [
-  { id: 'w-1', name: 'Ada', role: 'worker', active: true },
-  { id: 'w-2', name: 'Bruno', role: 'worker', active: true },
-];
+const WORKERS = [makeWorker({ id: 'w-1', name: 'Ada' }), makeWorker({ id: 'w-2', name: 'Bruno' })];
 
-const MATERIALS: MaterialWire[] = [
-  {
-    id: 'm-harina',
-    name: 'Harina 000',
-    kind: 'supply',
-    physicalState: 'solid',
-    unitOfMeasure: 'kg',
-    active: true,
-  },
-  {
+const MATERIALS = [
+  makeMaterial({ id: 'm-harina', name: 'Harina 000', kind: 'supply', unitOfMeasure: 'kg' }),
+  makeMaterial({
     id: 'm-pan',
     name: 'Pan francés',
     kind: 'product',
-    physicalState: 'solid',
     unitOfMeasure: 'unit',
-    active: true,
-  },
+  }),
 ];
 
+/** Evento con el resumen del listado: 1 · Harina 000 → 1 · Pan francés. */
 function event(id: string, overrides: Partial<BatchEventWire> = {}): BatchEventWire {
-  return {
+  return makeBatchEvent({
     id,
     machineId: 'maq-1',
     workerId: 'w-1',
@@ -67,7 +57,7 @@ function event(id: string, overrides: Partial<BatchEventWire> = {}): BatchEventW
     observation: 'Sin inconvenientes',
     timestamp: '2026-10-01T10:30:00.000Z',
     ...overrides,
-  };
+  });
 }
 
 function resetMocks(): void {

@@ -8,6 +8,7 @@ import { machinesApi } from '@/lib/api/modules/machinesApi';
 import { materialsApi } from '@/lib/api/modules/materialsApi';
 import { workersApi } from '@/lib/api/modules/workersApi';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
+import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { isNavHrefEnabled } from '@/lib/nav';
 
 import { PageHeader, StatCard } from './dashboard-common';
@@ -34,6 +35,11 @@ export function AdminDashboard() {
   const materials = useApiQuery(() => materialsApi.list());
   const machines = useApiQuery(() => machinesApi.list());
   const workers = useApiQuery(() => workersApi.list());
+
+  // Los contadores degradan a «—» en las tarjetas; el toast avisa el porqué.
+  useErrorToast(materials.error);
+  useErrorToast(machines.error);
+  useErrorToast(workers.error);
 
   const activeMaterials = materials.data?.filter((material) => material.active).length;
   const activeWorkers = workers.data?.filter((worker) => worker.active).length;

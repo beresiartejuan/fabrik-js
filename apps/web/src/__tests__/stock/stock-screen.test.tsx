@@ -3,12 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StockScreen } from '@/components/stock/stock-screen';
 import { ApiError } from '@/lib/api/errors';
-import type {
-  LocationWire,
-  MaterialWire,
-  StockByLocationEntryWire,
-  StockMovementWire,
-} from '@/lib/api/types';
+import { makeLocation, makeMaterial, makeStockEntry, makeStockMovement } from '../helpers/fixtures';
 import { selectOptionAsync } from '../helpers/select';
 import { renderWithSession, seedSessionRole } from '../helpers/session';
 
@@ -31,45 +26,43 @@ vi.mock('@/lib/api/modules/stockApi', () => ({ stockApi: mocks.stockApi }));
 vi.mock('@/lib/api/modules/locationsApi', () => ({ locationsApi: mocks.locationsApi }));
 vi.mock('@/lib/api/modules/materialsApi', () => ({ materialsApi: mocks.materialsApi }));
 
-const LOCATIONS: LocationWire[] = [
-  { id: 'loc-alma', name: 'Depósito central', kind: 'storage' },
-  { id: 'loc-planta', name: 'Planta norte', kind: 'production' },
+const LOCATIONS = [
+  makeLocation({ id: 'loc-alma', name: 'Depósito central', kind: 'storage' }),
+  makeLocation({ id: 'loc-planta', name: 'Planta norte', kind: 'production' }),
 ];
 
-const MATERIALS: MaterialWire[] = [
-  {
+const MATERIALS = [
+  makeMaterial({
     id: 'm-harina',
     name: 'Harina 000',
     kind: 'supply',
     physicalState: 'solid',
     unitOfMeasure: 'kg',
-    active: true,
-  },
-  {
+  }),
+  makeMaterial({
     id: 'm-pan',
     name: 'Pan francés',
     kind: 'product',
     physicalState: 'solid',
     unitOfMeasure: 'unit',
-    active: true,
-  },
+  }),
 ];
 
-const STOCK: StockByLocationEntryWire[] = [
-  { materialId: 'm-harina', amount: 25, unit: 'kg' },
-  { materialId: 'm-pan', amount: -3.5, unit: 'unit' },
+const STOCK = [
+  makeStockEntry({ materialId: 'm-harina', amount: 25, unit: 'kg' }),
+  makeStockEntry({ materialId: 'm-pan', amount: -3.5, unit: 'unit' }),
 ];
 
-const MOVEMENTS: StockMovementWire[] = [
-  {
+const MOVEMENTS = [
+  makeStockMovement({
     id: 'mv-1',
     locationId: 'loc-alma',
     materialId: 'm-harina',
     delta: { amount: 50, unit: 'kg' },
     reason: 'supply_in',
     timestamp: '2026-03-01T10:00:00.000Z',
-  },
-  {
+  }),
+  makeStockMovement({
     id: 'mv-2',
     locationId: 'loc-alma',
     materialId: 'm-harina',
@@ -77,7 +70,7 @@ const MOVEMENTS: StockMovementWire[] = [
     reason: 'consumed',
     batchEventId: 'evento-1234',
     timestamp: '2026-03-02T10:00:00.000Z',
-  },
+  }),
 ];
 
 function resetMocks(role: 'admin' | 'worker' | 'auditor' = 'admin'): void {

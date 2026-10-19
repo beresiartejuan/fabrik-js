@@ -3,14 +3,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RegistrarForm } from '@/components/production/registrar-form';
 import { ApiError } from '@/lib/api/errors';
-import type {
-  BatchWire,
-  LocationWire,
-  MaterialWire,
-  MeScheduleItemWire,
-  RecipeWire,
-} from '@/lib/api/types';
-
+import type { BatchWire, RecipeWire } from '@/lib/api/types';
+import {
+  makeBatch,
+  makeLocation,
+  makeMaterial,
+  makeMeScheduleItem,
+  makeRecipe,
+  makeRecipeStep,
+  makeTransformation,
+} from '../helpers/fixtures';
 import { selectOptionAsync } from '../helpers/select';
 import { renderWithSession, seedSessionRole } from '../helpers/session';
 
@@ -51,42 +53,40 @@ function machineItem(
   type: string,
   status: 'idle' | 'running' | 'maintenance',
   activeNow: boolean,
-): MeScheduleItemWire {
-  const machine = { id, name, type, locationId: 'l-planta', status };
-  return {
-    id: `asg-${id}`,
+) {
+  return makeMeScheduleItem({
     workerId: 'w1',
     machineId: id,
     slot: { ...SLOT, daysOfWeek: [...SLOT.daysOfWeek] },
-    machine,
+    machine: { id, name, type, locationId: 'l-planta', status },
     activeNow,
-  };
+  });
 }
 
-const HARINA: BatchWire = {
+const HARINA = makeBatch({
   id: '11111111-1111-1111-1111-111111111111',
   materialId: 'm-harina',
   quantity: { amount: 100, unit: 'kg' },
   status: 'stored',
-};
+});
 
-const ROOT: BatchWire = {
+const ROOT = makeBatch({
   id: '22222222-2222-2222-2222-222222222222',
   materialId: 'm-harina',
   quantity: { amount: 10, unit: 'unit' },
   recipeId: 'r1',
   status: 'in_progress',
-};
+});
 
-const OUTPUT_BATCH: BatchWire = {
+const OUTPUT_BATCH = makeBatch({
   id: '99999999-9999-9999-9999-999999999999',
   materialId: 'm-masa',
   quantity: { amount: 5, unit: 'unit' },
   originBatchEventId: 'ev-1',
   status: 'in_progress',
-};
+});
 
-const RESPONSE_TRANSFORM = {
+const RESPONSE_TRANSFORM = makeTransformation({
   event: {
     id: 'ev-1',
     machineId: 'm-mixer',
@@ -97,18 +97,17 @@ const RESPONSE_TRANSFORM = {
     timestamp: '2026-10-17T10:00:00.000Z',
   },
   outputBatches: [OUTPUT_BATCH],
-};
+});
 
-const MASA: MaterialWire = {
+const MASA = makeMaterial({
   id: 'm-masa',
   name: 'Masa',
   kind: 'product',
   physicalState: 'solid',
   unitOfMeasure: 'unit',
-  active: true,
-};
+});
 
-const ALMACEN: LocationWire = { id: 'l-almacen', name: 'Almacén Norte', kind: 'storage' };
+const ALMACEN = makeLocation({ id: 'l-almacen', name: 'Almacén Norte', kind: 'storage' });
 
 function resetMocks(): void {
   window.sessionStorage.clear();
@@ -290,30 +289,30 @@ describe('RegistrarForm: envío de la transformación', () => {
 describe('RegistrarForm: pasos de receta', () => {
   it('deriva los pasos de la receta del primer input, filtrados por tipo de máquina', async () => {
     mocks.batchesApi.list.mockResolvedValue([HARINA, ROOT]);
-    mocks.recipesApi.get.mockResolvedValue({
-      id: 'r1',
-      name: 'Panes',
-      outputProductId: 'p1',
-      outputQuantity: { amount: 8, unit: 'unit' },
-      steps: [
-        {
-          id: 'step-mixer',
-          position: 1,
-          machineType: 'mixer',
-          inputs: [],
-          outputProductId: 'p1',
-          outputQuantity: { amount: 8, unit: 'unit' },
-        },
-        {
-          id: 'step-oven',
-          position: 2,
-          machineType: 'oven',
-          inputs: [],
-          outputProductId: 'p1',
-          outputQuantity: { amount: 8, unit: 'unit' },
-        },
-      ],
-    } as RecipeWire);
+    mocks.recipesApi.get.mockResolvedValue(
+      makeRecipe({
+        id: 'r1',
+        name: 'Panes',
+        outputProductId: 'p1',
+        outputQuantity: { amount: 8, unit: 'unit' },
+        steps: [
+          makeRecipeStep({
+            id: 'step-mixer',
+            position: 1,
+            machineType: 'mixer',
+            outputProductId: 'p1',
+            outputQuantity: { amount: 8, unit: 'unit' },
+          }),
+          makeRecipeStep({
+            id: 'step-oven',
+            position: 2,
+            machineType: 'oven',
+            outputProductId: 'p1',
+            outputQuantity: { amount: 8, unit: 'unit' },
+          }),
+        ],
+      }),
+    );
     renderWithSession(<RegistrarForm />);
 
     await fillFormWithInputs(ROOT); // input con recipeId → contexto de receta

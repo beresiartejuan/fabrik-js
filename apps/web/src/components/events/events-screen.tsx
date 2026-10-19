@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useId, useMemo, useState } from 'react';
 
 import { DataTable, type DataTableColumn } from '@/components/shared/data-table';
 import { PageHeader } from '@/components/shared/page-header';
@@ -16,6 +16,7 @@ import { workersApi } from '@/lib/api/modules/workersApi';
 import type { BatchEventWire } from '@/lib/api/types';
 import { formatDateTime } from '@/lib/format/date';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
+import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 import {
   batchQuantitiesSummary,
@@ -47,6 +48,9 @@ export function EventsScreen() {
 }
 
 function EventsBody() {
+  const fromId = useId();
+  const toId = useId();
+
   // Catálogos para los selects y para resolver nombres (admin/auditor).
   const machines = useApiQuery(() => machinesApi.list());
   const workers = useApiQuery(() => workersApi.list());
@@ -56,6 +60,13 @@ function EventsBody() {
   const [draft, setDraft] = useState<EventFilterState>(EMPTY_EVENT_FILTERS);
 
   const events = useApiQuery(() => batchEventsApi.list(toEventQuery(applied)), [applied]);
+
+  // Si un catálogo falla, la tabla sigue (los nombres quedan como ids); el
+  // toast avisa el porqué, y el error del listado va al bloque + toast.
+  useErrorToast(machines.error);
+  useErrorToast(workers.error);
+  useErrorToast(materials.error);
+  useErrorToast(events.error);
 
   const materialById = useMemo(
     () => new Map((materials.data ?? []).map((material) => [material.id, material])),
@@ -208,25 +219,25 @@ function EventsBody() {
             disabled={materials.loading}
           />
           <Field>
-            <FieldLabel>Desde</FieldLabel>
+            <FieldLabel htmlFor={fromId}>Desde</FieldLabel>
             <Input
+              id={fromId}
               type="datetime-local"
               value={draft.from}
               onChange={(change) => {
                 setDraftFilter('from', change.target.value);
               }}
-              aria-label="Desde"
             />
           </Field>
           <Field>
-            <FieldLabel>Hasta</FieldLabel>
+            <FieldLabel htmlFor={toId}>Hasta</FieldLabel>
             <Input
+              id={toId}
               type="datetime-local"
               value={draft.to}
               onChange={(change) => {
                 setDraftFilter('to', change.target.value);
               }}
-              aria-label="Hasta"
             />
           </Field>
           <div className="flex items-end gap-2">

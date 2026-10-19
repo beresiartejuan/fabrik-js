@@ -1,6 +1,7 @@
 'use client';
 
 import type { DayOfWeek } from '@fabrik/domain';
+import { useId } from 'react';
 
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,10 @@ function normalizeDays(values: readonly string[]): DayOfWeek[] {
 }
 
 export function TimeSlotEditor({ value, onChange, issues, disabled }: TimeSlotEditorProps) {
+  const startId = useId();
+  const startErrorId = useId();
+  const endId = useId();
+  const endErrorId = useId();
   const shownIssues = issues ?? [];
   const daysError = issueForField(shownIssues, 'days');
   const startError = issueForField(shownIssues, 'start');
@@ -74,31 +79,33 @@ export function TimeSlotEditor({ value, onChange, issues, disabled }: TimeSlotEd
 
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Field data-invalid={startError !== undefined}>
-          <FieldLabel>Hora de inicio (HH:mm)</FieldLabel>
+          <FieldLabel htmlFor={startId}>Hora de inicio (HH:mm)</FieldLabel>
           <Input
+            id={startId}
             value={value.start}
             onChange={(event) => onChange(changeStart(value, event.target.value))}
             placeholder="08:00"
             inputMode="numeric"
             disabled={disabled}
-            aria-label="Hora de inicio (HH:mm)"
             aria-invalid={startError !== undefined}
+            aria-describedby={startError !== undefined ? startErrorId : undefined}
           />
-          <FieldError>{startError}</FieldError>
+          <FieldError id={startErrorId}>{startError}</FieldError>
         </Field>
 
         <Field data-invalid={endError !== undefined}>
-          <FieldLabel>Hora de fin (HH:mm o 24:00)</FieldLabel>
+          <FieldLabel htmlFor={endId}>Hora de fin (HH:mm o 24:00)</FieldLabel>
           <Input
+            id={endId}
             value={value.end}
             onChange={(event) => onChange(changeEnd(value, event.target.value))}
             placeholder="16:00"
             inputMode="numeric"
             disabled={disabled}
-            aria-label="Hora de fin (HH:mm o 24:00)"
             aria-invalid={endError !== undefined}
+            aria-describedby={endError !== undefined ? endErrorId : undefined}
           />
-          <FieldError>{endError}</FieldError>
+          <FieldError id={endErrorId}>{endError}</FieldError>
         </Field>
       </div>
 

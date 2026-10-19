@@ -3,10 +3,11 @@
 import type { UnitOfMeasure } from '@fabrik/domain';
 import { MAX_OBSERVATION_LENGTH } from '@fabrik/domain';
 import { PlusIcon, Trash2Icon } from 'lucide-react';
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useId, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { CatalogsReadGate } from '@/components/shared/catalogs-read-gate';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { EmptyState } from '@/components/shared/empty-state';
 import { FormDialog } from '@/components/shared/form-dialog';
 import { PageHeader } from '@/components/shared/page-header';
 import { QueryError } from '@/components/shared/query-error';
@@ -15,6 +16,7 @@ import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { errorToMessage } from '@/lib/api/errors';
 import { batchesApi } from '@/lib/api/modules/batchesApi';
@@ -124,6 +126,8 @@ function RegistrarFormBody({ canReadCatalogs }: RegistrarFormBodyProps) {
   const [storeLocationId, setStoreLocationId] = useState('');
   const [storeIssues, setStoreIssues] = useState<string[]>([]);
   const [storeBusy, setStoreBusy] = useState(false);
+  const observationId = useId();
+  const manualStoreLocationId = useId();
 
   // Confirmación de completar la orden de producción (lote raíz).
   const [orderToComplete, setOrderToComplete] = useState<BatchWire | null>(null);
@@ -280,15 +284,21 @@ function RegistrarFormBody({ canReadCatalogs }: RegistrarFormBodyProps) {
     return <QueryError error={materials.error} onRetry={materials.refetch} />;
   }
   if (schedule.loading || batches.loading) {
-    return <p className="text-sm text-muted-foreground">Cargando tu agenda y los lotes…</p>;
+    return (
+      <div className="flex flex-col gap-2" aria-hidden="true">
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+      </div>
+    );
   }
 
   if (machines.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed bg-background px-6 py-10 text-center text-sm text-muted-foreground">
-        No tenés máquinas activas para operar en este momento: tus franjas no están vigentes o las
-        máquinas están en mantenimiento.
-      </p>
+      <EmptyState
+        title="No tenés máquinas activas para operar en este momento"
+        description="Tus franjas no están vigentes o las máquinas están en mantenimiento. Volvé a consultar más tarde."
+      />
     );
   }
 
@@ -532,8 +542,9 @@ function RegistrarFormBody({ canReadCatalogs }: RegistrarFormBodyProps) {
         </section>
 
         <Field>
-          <FieldLabel>Observación (opcional)</FieldLabel>
+          <FieldLabel htmlFor={observationId}>Observación (opcional)</FieldLabel>
           <Textarea
+            id={observationId}
             value={form.observation}
             onChange={(event) =>
               mutate((current) =>
@@ -542,7 +553,6 @@ function RegistrarFormBody({ canReadCatalogs }: RegistrarFormBodyProps) {
             }
             maxLength={MAX_OBSERVATION_LENGTH}
             disabled={busy}
-            aria-label="Observación (opcional)"
           />
           <p aria-live="polite" className="text-xs text-muted-foreground">
             {observationCount(form.observation)}
@@ -578,15 +588,17 @@ function RegistrarFormBody({ canReadCatalogs }: RegistrarFormBodyProps) {
             />
           ) : (
             <Field>
-              <FieldLabel>ID del lugar de almacenamiento</FieldLabel>
+              <FieldLabel htmlFor={manualStoreLocationId}>
+                ID del lugar de almacenamiento
+              </FieldLabel>
               <Input
+                id={manualStoreLocationId}
                 value={storeLocationId}
                 onChange={(event) => {
                   setStoreLocationId(event.target.value);
                   setStoreIssues([]);
                 }}
                 disabled={storeBusy}
-                aria-label="ID del lugar de almacenamiento"
               />
               <p className="text-xs text-muted-foreground">
                 Tu rol no puede listar los lugares: ingresá el ID y el servidor valida que sea
@@ -595,9 +607,7 @@ function RegistrarFormBody({ canReadCatalogs }: RegistrarFormBodyProps) {
             </Field>
           )}
           {storeIssues.map((issue) => (
-            <p key={issue} role="alert" className="text-sm text-destructive">
-              {issue}
-            </p>
+            <FieldError key={issue}>{issue}</FieldError>
           ))}
         </div>
         <Button type="button" disabled={storeBusy} onClick={() => void confirmStore()}>
