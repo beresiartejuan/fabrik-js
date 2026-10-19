@@ -707,11 +707,12 @@ ni `next.config.ts` con env, ni scripts `dev:demo`/`build:demo`, ni `.env.exampl
   R3 — y el export/la suite lo resuelven vía `exports: ./dist`, por lo que hay que
   compilarlo antes de test/build del fork; turbo solo ordena esto en el build root**) →
   sanity `pnpm --filter @fabrik/web-demo test` (la suite 472/53 en verde gatilla el
-  deploy) → build export con las dos envs → `actions/configure-pages` con
-  `enablement: false` (solo lee la config del sitio — ver caveat abajo) →
+  deploy) → build export con las dos envs →
   `actions/upload-pages-artifact` con `path: apps/web-demo/out` → job `deploy` que
   publica el artefacto con `actions/deploy-pages` (environment `github-pages`; la URL
-  final sale de `steps.deployment.outputs.page_url`).
+  final sale de `steps.deployment.outputs.page_url`). El workflow **no usa
+  `configure-pages`**: es fatal mientras el sitio no exista y no aporta base_url
+  (el basePath se fija por env al compilar).
 
 ### Disparadores
 
@@ -725,13 +726,14 @@ ni `next.config.ts` con env, ni scripts `dev:demo`/`build:demo`, ni `.env.exampl
 
 ### Primera ejecución — activación manual de Pages (una única vez)
 
-**`enablement: true` no es viable con `GITHUB_TOKEN`:** según la metadata de la
+**`enablement` por API no es viable con `GITHUB_TOKEN`:** según la metadata de la
 propia `actions/configure-pages`, activar Pages por API exige un token que no sea
-`GITHUB_TOKEN` (PAT con `administration:write` o GitHub App). Por eso el workflow
-usa `enablement: false` y la activación es **manual y una sola vez**:
-**Settings → Pages → Build and deployment → Source: GitHub Actions**. Hecho eso,
-el deploy queda 100% automático en cada push relevante (el paso `Configure Pages`
-solo consulta la configuración del sitio).
+`GITHUB_TOKEN` (PAT con `administration:write` o GitHub App), y con el sitio
+inexistente el action falla aunque `enablement` sea `false` (por eso el workflow
+ni lo incluye). La activación es **manual y una sola vez**: **Settings → Pages →
+Build and deployment → Source: GitHub Actions**. Mientras no esté hecho, el job
+`build` queda verde (tests + export + upload del artefacto) y solo falla el deploy;
+hecho eso, todo deploy posterior es automático.
 
 ### Notas de la demo servida en Pages
 
