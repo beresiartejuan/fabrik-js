@@ -676,3 +676,73 @@ ni `next.config.ts` con env, ni scripts `dev:demo`/`build:demo`, ni `.env.exampl
 - [x] "Resetear demo" restaura el estado semilla en la pestaña (*pie del sidebar → `ConfirmDialog` → `resetDb()` + reload; testeado*).
 - [x] `transform` devuelve `{ event, outputBatches }` con la misma forma que la API (lectura de apoyo fuera del use case).
 - [x] Documentación demo en `apps/web-demo/README.md` (conteo de tests actualizado: **472**).
+
+---
+
+## Despliegue (GitHub Pages)
+
+> **Orquestación:** esta sección documenta el workflow
+> `.github/workflows/deploy-demo.yml` (**Deploy Demo (GitHub Pages)**), que publica la
+> demo como **sitio estático en GitHub Pages**. Es un agregado de infraestructura: no
+> toca código ni configs de `apps/web-demo` ni del resto del monorepo — únicamente
+> **consume** el modo export estático (config en curso de construcción en el fork,
+> incluida la ruta `/recetas/detalle?id=`; ver "Notas" al final).
+
+### Cómo funciona
+
+- **Export estático + basePath.** El build del fork corre con dos variables de entorno
+  que la config de export de `apps/web-demo` interpreta (contrato acordado con esa
+  config — nombres exactos):
+  - `NEXT_EXPORT: '1'` — activa el modo export estático; el resultado aterriza en
+    `apps/web-demo/out/`, que es lo que el workflow sube como artefacto de Pages.
+  - `NEXT_PUBLIC_BASE_PATH: '/<repo>'` — el workflow la fija con
+    `/${{ github.event.repository.name }}` (nombre del repo, `fabrik-js`), de modo que
+    el sitio se sirve desde la subruta del dominio de Pages:
+    **https://beresiartejuan.github.io/fabrik-js/**. Derivar el basePath del nombre del
+    repo (en vez de hardcodearlo) mantiene el contrato en un solo lugar (el workflow).
+- **Pipeline** (mismo estilo/convenciones que `.github/workflows/ci.yml`): checkout →
+  pnpm (versión leída de `packageManager: pnpm@10.30.3` del root, sin `version` input) →
+  Node 22 (igual que CI) → `pnpm install --frozen-lockfile` →
+  `pnpm --filter @fabrik/domain build` (**la demo consume `dist` del dominio — ver §8
+  R3 — y el export/la suite lo resuelven vía `exports: ./dist`, por lo que hay que
+  compilarlo antes de test/build del fork; turbo solo ordena esto en el build root**) →
+  sanity `pnpm --filter @fabrik/web-demo test` (la suite 472/53 en verde gatilla el
+  deploy) → build export con las dos envs → `actions/configure-pages` con
+  `enablement: true` (activa Pages en el primer run) →
+  `actions/upload-pages-artifact` con `path: apps/web-demo/out` → job `deploy` que
+  publica el artefacto con `actions/deploy-pages` (environment `github-pages`; la URL
+  final sale de `steps.deployment.outputs.page_url`).
+
+### Disparadores
+
+- **`push` a `main` con filtro de rutas:** solo dispara si cambian `apps/web-demo/**`
+  o el propio workflow (`.github/workflows/deploy-demo.yml`). Cambios en el resto del
+  monorepo (`apps/web`, `apps/api`, `packages/…`) no re-disparan el deploy.
+- **`workflow_dispatch`:** republicado manual desde *Actions → Deploy Demo (GitHub
+  Pages) → Run workflow* (útil para republicar sin cambios de código).
+- **`concurrency: { group: pages-demo, cancel-in-progress: true }`:** pushes seguidos
+  cancelan el deploy en curso; solo el último queda publicando.
+
+### Primera ejecución — caveat de enablement
+
+El paso `Configure Pages` usa `enablement: true` para **activar GitHub Pages
+automáticamente** con el `GITHUB_TOKEN` del workflow (permisos `pages: write`). Si en
+el **primer run** ese paso falla por permisos del token sobre la API de Pages, hay que
+habilitarlo **una única vez** a mano: **Settings → Pages → Build and deployment →
+Source: GitHub Actions**, y relanzar el deploy (push nuevo o `workflow_dispatch`). Las
+ejecuciones siguientes ya no dependen del enablement (queda como no-op).
+
+### Notas de la demo servida en Pages
+
+- **`sessionStorage` por pestaña (R6) sigue aplicando igual:** en Pages la demo sigue
+  viva por pestaña — cada pestaña nueva arranca desde el seed limpio, no comparte
+  estado con otras pestañas ni entre sesiones, y se limpia al cerrarla ("Resetear
+  demo" afecta solo a la pestaña actual).
+- **Contexto seguro (R2) garantizado:** `https://<owner>.github.io` es contexto seguro
+  por definición, así que el requisito de `crypto.randomUUID` (ids de lotes/eventos)
+  se cumple sin ajustes.
+- **Ruta de recetas retargeteada por la config de export:** el detalle de receta pasa
+  a **query param** — `/recetas/detalle?id=<recipeId>` — para que la navegación sea
+  compatible con el export estático (sin segmentos dinámicos que prerolver). Es parte
+  del trabajo de export en `apps/web-demo`; este workflow no toca esa ruta, solo la
+  referencia aquí para el walkthrough manual.
