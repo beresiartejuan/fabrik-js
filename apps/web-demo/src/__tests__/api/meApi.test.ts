@@ -10,7 +10,7 @@ import type { TimeSlotWire } from '@/lib/api/types';
 import { writeTokens } from '@/lib/session/session-store';
 
 /**
- * `GET /me/schedule` sobre el **runtime demo** (docs/11-plan-demo.md §4):
+ * `GET /me/schedule` sobre el **runtime demo** (docs/demo.md §4):
  * **lectura de apoyo** sin caso de uso propio — el módulo replica el armado del
  * `MeController` real con las piezas de `ctx`:
  *

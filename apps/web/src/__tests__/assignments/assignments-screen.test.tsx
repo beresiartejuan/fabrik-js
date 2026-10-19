@@ -8,7 +8,7 @@ import { makeAssignment, makeMachine, makeWorker } from '../helpers/fixtures';
 import { selectOptionAsync } from '../helpers/select';
 
 /**
- * Flujos de `/asignaciones` (docs/10-plan-de-web.md §Fase 3): grilla semanal
+ * Flujos de `/asignaciones` (docs/pantallas.md §Fase 3): grilla semanal
  * con contraparte resuelta, Asignar (admin) con pre-validación de solapes I1
  * (adyacentes NO cuentan), server 409 mapeado al mensaje amigable,
  * Desasignar con confirmación y auditor en solo lectura.

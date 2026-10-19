@@ -10,7 +10,7 @@ import {
 import { TimeSlotEditor } from '@/components/assignments/time-slot-editor';
 
 /**
- * Editor de `TimeSlot` (docs/10-plan-de-web.md §Pantalla 8): los toggles de día
+ * Editor de `TimeSlot` (docs/pantallas.md §Pantalla 8): los toggles de día
  * arman la lista de días y las horas se validan inline (`HH:mm`, `end` admite
  * `24:00`, `start < end`, >= 1 día) sin dejar pasar nada al padre.
  */

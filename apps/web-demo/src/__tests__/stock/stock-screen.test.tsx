@@ -8,7 +8,7 @@ import { selectOptionAsync } from '../helpers/select';
 import { renderWithSession, seedSessionRole } from '../helpers/session';
 
 /**
- * Pantalla 13 — `/stock` (docs/10-plan-de-web.md §13, Fase 5): stock por lugar
+ * Pantalla 13 — `/stock` (docs/pantallas.md §13, Fase 5): stock por lugar
  * con cantidades con signo/color, drawer de movimientos (A/Au) con motivos en
  * español y degradación del worker (ID manual de lugar, ids de material y sin
  * movimientos: la API le da 403 en ese endpoint).

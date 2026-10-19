@@ -9,7 +9,7 @@ import type { TimeSlotWire } from '@/lib/api/types';
 import { writeTokens } from '@/lib/session/session-store';
 
 /**
- * Asignaciones y agendas sobre el **runtime demo** (docs/11-plan-demo.md §4):
+ * Asignaciones y agendas sobre el **runtime demo** (docs/demo.md §4):
  * los mismos casos de uso que inyectan `AssignmentsController`/
  * `ScheduleController`, con `TimeSlot.create` revalidando la franja (422) e **I1**
  * en el caso de uso (`OverlappingScheduleError` → 409, `InactiveWorkerError`

@@ -18,7 +18,7 @@ import {
 } from './time-slot-draft';
 
 /**
- * Editor de `TimeSlot` reutilizable (docs/10-plan-de-web.md §Pantalla 8):
+ * Editor de `TimeSlot` reutilizable (docs/pantallas.md §Pantalla 8):
  * días como toggles múltiples (lunes primero) + horas `HH:mm` en texto libre
  * con validación inline (el `end` admite `24:00`). Recibe el borrador y los
  * `issues` de `validateSlotDraft`; el componente no decide nada de dominio.

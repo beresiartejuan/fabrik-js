@@ -15,7 +15,7 @@ import {
 
 /**
  * Diálogo de confirmación para acciones destructivas o irreversibles
- * (docs/10-plan-de-web.md §Pantallas 3–6). Gestiona el estado `busy`: mientras
+ * (docs/pantallas.md §Pantallas 3–6). Gestiona el estado `busy`: mientras
  * `onConfirm` está en vuelo el botón queda deshabilitado y el diálogo se cierra
  * **solo** si la promesa resuelve; si rechaza, permanece abierto para que la
  * pantalla muestre el error (toast).

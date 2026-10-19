@@ -3,7 +3,7 @@ import type { DemoData, DemoUserRow } from './db';
 
 /**
  * Seed del runtime DEMO: espejo de `apps/api/src/persistence/seed.ts`
- * (docs/09-plan-de-api.md, Fase 7) con ids **legibles y cortos** (`mat-harina`,
+ * (docs/api.md, Fase 7) con ids **legibles y cortos** (`mat-harina`,
  * `loc-almacen-1`, …) porque el dominio no impone formato (`*Id.from` solo
  * castea) y para la demo son UX pura.
  *

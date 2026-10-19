@@ -5,7 +5,7 @@ más `UnitOfWork`, sobre Drizzle ORM y el motor embebido de Turso.
 
 ## Elección de cliente (y por qué)
 
-El plan (`docs/09-plan-de-api.md`) mencionaba `@libsql/client`, pero ese SDK es la
+El plan (`docs/plans/09-plan-de-api.md`) mencionaba `@libsql/client`, pero ese SDK es la
 etapa anterior (libSQL) y fue renombrado. Verificamos la documentación actual de
 Drizzle antes de decidir:
 
@@ -51,7 +51,7 @@ Las migraciones versionadas viven en `apps/api/drizzle/`.
 ## Seed de demo (Fase 7) — `db:seed`
 
 `src/persistence/seed.ts` prepara un contexto mínimo pero completo para arrancar
-la API y recorrer el flujo de `docs/03-flujo-de-produccion.md`. Corre contra el
+la API y recorrer el flujo de `docs/flujo-de-produccion.md`. Corre contra el
 archivo indicado por `FABRIK_DB_FILE` (default `./data/fabrik.db`) y **aplica las
 migraciones antes de sembrar**, así que sirve sobre una base recién creada:
 

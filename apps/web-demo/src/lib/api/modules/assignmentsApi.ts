@@ -14,7 +14,7 @@ import type { AssignmentWire, TimeSlotWire } from '../types';
 /**
  * Endpoints de asignaciones y agendas
  * (`apps/api/src/assignments/{assignments,schedule}.controller.ts`) sobre el
- * **runtime demo** (docs/11-plan-demo.md §4): los cuatro casos de uso que
+ * **runtime demo** (docs/demo.md §4): los cuatro casos de uso que
  * inyectan los controladores reales, ejecutados con el actor de la sesión.
  *
  * - `assign` (admin): body `{ workerId, machineId, slot }` — `TimeSlot.create`

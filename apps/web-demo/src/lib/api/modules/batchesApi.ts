@@ -20,7 +20,7 @@ import type { BatchWire } from '../types';
 
 /**
  * Consulta de lotes (`apps/api/src/batches/batches.controller.ts`) sobre el
- * runtime DEMO (docs/11-plan-demo.md §T4b): la fábrica ejecuta los casos de uso
+ * runtime DEMO (docs/demo.md §T4b): la fábrica ejecuta los casos de uso
  * reales `ListBatches`/`GetBatch` del registro (`demo/registry.ts`) en lugar de
  * `GET /batches`; la interfaz, el actor por llamada y el wire de respuesta
  * quedan idénticos al módulo axios (los componentes no cambian).

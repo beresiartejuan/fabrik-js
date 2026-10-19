@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { errorToMessage } from '@/lib/api/errors';
 
 /**
- * Bloque de error para una consulta fallida (docs/10-plan-de-web.md §Pantallas
+ * Bloque de error para una consulta fallida (docs/pantallas.md §Pantallas
  * 3–6). Evita mostrar un estado vacío engañoso cuando en realidad falló la carga;
  * el aviso transitorio lo da además el toast (`useErrorToast`).
  */

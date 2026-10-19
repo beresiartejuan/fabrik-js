@@ -13,7 +13,7 @@ import type { BatchForwardNodeWire, BatchTraceNodeWire } from '../types';
 
 /**
  * Trazabilidad (`apps/api/src/trace/trace.controller.ts`, Fase 6, docs/09)
- * sobre el runtime DEMO (docs/11-plan-demo.md §T4b): la fábrica ejecuta los
+ * sobre el runtime DEMO (docs/demo.md §T4b): la fábrica ejecuta los
  * casos de uso reales `TraceBatch`/`TraceForward` del registro
  * (`demo/registry.ts`) en lugar de las rutas HTTP; la interfaz, el actor por
  * llamada y el wire de respuesta quedan idénticos al módulo axios.

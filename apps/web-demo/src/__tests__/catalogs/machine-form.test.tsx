@@ -7,7 +7,7 @@ import { makeLocation } from '../helpers/fixtures';
 import { selectOption } from '../helpers/select';
 
 /**
- * Formulario de máquina (docs/10-plan-de-web.md §5): el selector de lugar solo
+ * Formulario de máquina (docs/pantallas.md §5): el selector de lugar solo
  * ofrece lugares de **producción** y el payload de alta incluye nombre, tipo y
  * lugar.
  */

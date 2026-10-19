@@ -50,8 +50,8 @@ Inicio de sesión (nombre + contraseña):
 | `operario` | `operario` | Registrar transformaciones, arribos, almacenar/completar, ver stock. |
 | `auditor` | `auditor` | Todo en **lectura** + stock, trazabilidad y eventos. |
 
-Más detalle: [`apps/web-demo/README.md`](apps/web-demo/README.md) y el plan
-completo en [`docs/11-plan-demo.md`](docs/11-plan-demo.md).
+Más detalle: [`apps/web-demo/README.md`](apps/web-demo/README.md) y
+[`docs/demo.md`](docs/demo.md).
 
 ## Arquitectura
 
@@ -217,13 +217,11 @@ fabrik-js/
 │  ├─ api/                # API HTTP: NestJS 12, Drizzle + Turso, 45 rutas, OpenAPI en /docs
 │  ├─ web/                # Panel de administración: Next.js 16, consume la API por HTTP
 │  └─ web-demo/           # Fork de web sin backend: dominio en el navegador + sessionStorage
-├─ docs/                  # 11 planes numerados: la fuente de verdad del proyecto
-│  ├─ 01-vision-y-glosario.md … 07-arquitectura.md   # conceptuales: visión,
-│  │                      #   modelo, flujo de producción, inventario, arquitectura
-│  ├─ 08-plan-capa-de-dominio.md
-│  ├─ 09-plan-de-api.md
-│  ├─ 10-plan-de-web.md
-│  └─ 11-plan-demo.md
+├─ docs/                  # Documentación de producto: la fuente de verdad del proyecto
+│  ├─ *.md                # 11 docs: producto, glosario, modelo de dominio, flujo de
+│  │                      #   producción, inventario, eventos, arquitectura, api,
+│  │                      #   pantallas, demo, limitaciones-conocidas (+ README índice)
+│  └─ plans/              # archivo histórico: planes numerados, cronología por fase
 ├─ packages/
 │  └─ domain/             # @fabrik/domain: entidades, VOs, casos de uso, eventos y puertos
 └─ turbo.json · pnpm-workspace.yaml · biome.json
@@ -256,7 +254,7 @@ mismo criterio. Matriz de navegación de la UI (idéntica en `apps/web` y
 Notas del dominio: un `admin` **no** registra transformaciones (worker-only), y
 donde el `worker` no puede leer catálogos, sus pantallas degradan a entrada
 manual de ids/unidad con indicación visible. Detalle: [`apps/web/README.md`](apps/web/README.md)
-y [`docs/09-plan-de-api.md`](docs/09-plan-de-api.md).
+y [`docs/api.md`](docs/api.md).
 
 ## Licencia
 

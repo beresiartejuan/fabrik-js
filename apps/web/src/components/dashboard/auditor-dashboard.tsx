@@ -17,7 +17,7 @@ import { isNavHrefEnabled } from '@/lib/nav';
 import { PageHeader } from './dashboard-common';
 
 /**
- * Dashboard del **auditor** (docs/10-plan-de-web.md §2): últimos eventos
+ * Dashboard del **auditor** (docs/pantallas.md §2): últimos eventos
  * (`GET /batch-events`, recorte en cliente — no hay paginación, gap documentado)
  * + accesos a `/stock` (Fase 5) y a `/trazabilidad` cuando la pantalla exista.
  */

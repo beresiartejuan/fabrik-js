@@ -14,7 +14,7 @@ import type { BatchEventWire } from '../types';
 /**
  * Endpoints de eventos de transformación
  * (`apps/api/src/batch-events/batch-events.controller.ts`) sobre el runtime
- * DEMO (docs/11-plan-demo.md §T4b): la fábrica ejecuta el caso de uso real
+ * DEMO (docs/demo.md §T4b): la fábrica ejecuta el caso de uso real
  * `ListBatchEvents` del registro (`demo/registry.ts`) en lugar de
  * `GET /batch-events`; la interfaz, el actor por llamada y el wire de respuesta
  * quedan idénticos al módulo axios (los componentes no cambian).

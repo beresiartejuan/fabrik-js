@@ -9,7 +9,7 @@ import { selectOptionAsync } from '../helpers/select';
 import { renderWithSession, seedSessionRole } from '../helpers/session';
 
 /**
- * Pantalla 12 — `/suministros/arribo` (docs/10-plan-de-web.md §Fase 4):
+ * Pantalla 12 — `/suministros/arribo` (docs/pantallas.md §Fase 4):
  * unidad **derivada del material**, payload exacto de `POST /supplies/arrivals`,
  * éxito con lote + «Registrar otro», 422 mapeado y modo manual del worker (los
  * catálogos son A/Au y un operario recibe 403).

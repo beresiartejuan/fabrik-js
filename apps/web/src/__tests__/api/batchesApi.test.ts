@@ -6,7 +6,7 @@ import { createBatchesApi } from '@/lib/api/modules/batchesApi';
 
 /**
  * Contrato de `batchesApi` contra `apps/api/src/batches/{batches.controller.ts,batches.dto.ts}`
- * (gap del plan ya resuelto; `docs/10-plan-de-web.md` §Fase 4). Listar y leer
+ * (gap del plan ya resuelto; `docs/pantallas.md` §Fase 4). Listar y leer
  * lotes es A/Au/W; los filtros son opcionales.
  */
 

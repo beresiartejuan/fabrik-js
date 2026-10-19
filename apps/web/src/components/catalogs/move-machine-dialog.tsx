@@ -10,7 +10,7 @@ import type { LocationWire, MachineWire } from '@/lib/api/types';
 import { LOCATION_KIND_LABELS } from '@/lib/format/labels';
 
 /**
- * Diálogo "Mover" de máquinas (docs/10-plan-de-web.md §5). El destino solo
+ * Diálogo "Mover" de máquinas (docs/pantallas.md §5). El destino solo
  * ofrece lugares de **producción** (I2) y el movimiento va por su endpoint
  * `POST /machines/:id/move`, que además emite `machine.moved`.
  */

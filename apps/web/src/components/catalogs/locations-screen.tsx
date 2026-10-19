@@ -20,7 +20,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 /**
- * Pantalla 4 — `/ubicaciones` (docs/10-plan-de-web.md §4). Alta con nombre y tipo;
+ * Pantalla 4 — `/ubicaciones` (docs/pantallas.md §4). Alta con nombre y tipo;
  * la edición **solo renombra** (el tipo no se puede cambiar). No hay baja lógica
  * en la API. El auditor ve la tabla sin acciones de escritura.
  */

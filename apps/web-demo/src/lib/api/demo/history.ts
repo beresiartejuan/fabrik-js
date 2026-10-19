@@ -10,7 +10,7 @@ import { DEMO_SEED_IDS } from './seed';
  *
  * El seed maestro (`seed.ts`) deja `batches`/`batchEvents`/`stockMovements`
  * vacíos: este módulo llena el histórico ejecutando el flujo de
- * `docs/03-flujo-de-produccion.md` **con los use cases reales** del registro
+ * `docs/flujo-de-produccion.md` **con los use cases reales** del registro
  * (`registry.ts`) — cero atajos de fixtures: los invariantes los imponen los
  * propios casos de uso y los actores del seed (admin para arribos/orden, el
  * operario para transformar y almacenar).

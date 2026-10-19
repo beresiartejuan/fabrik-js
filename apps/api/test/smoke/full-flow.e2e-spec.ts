@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ADMIN, createE2EApp, type E2EContext } from '../support/e2e-app.js';
 
 /**
- * E2E smoke del flujo completo de `docs/03-flujo-de-produccion.md` (Fase 7, docs/09).
+ * E2E smoke del flujo completo de `docs/flujo-de-produccion.md` (Fase 7, docs/09).
  *
  * A diferencia de los e2e de Fase 5/6 (que preparan el estado por repositorio),
  * este smoke recorre el ciclo **solo por HTTP** (salvo el bootstrap de usuarios del

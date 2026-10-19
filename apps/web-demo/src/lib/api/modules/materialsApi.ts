@@ -13,7 +13,7 @@ import type { MaterialWire } from '../types';
 
 /**
  * Endpoints de materiales (`apps/api/src/materials/materials.controller.ts`)
- * sobre el **runtime demo** (docs/11-plan-demo.md §4): los mismos cinco casos
+ * sobre el **runtime demo** (docs/demo.md §4): los mismos cinco casos
  * de uso que inyecta el controlador real (`CreateMaterial`, `UpdateMaterial`,
  * `DeactivateMaterial`, `GetMaterial`, `ListMaterials`), ejecutados contra la
  * base de `sessionStorage` y convertidos a wire con los mappers de `demo/`.

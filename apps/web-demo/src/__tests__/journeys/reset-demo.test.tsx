@@ -7,7 +7,7 @@ import { renderWithSession, seedSessionRole } from '../helpers/session';
 
 /**
  * Acción "Resetear demo" del pie del sidebar (afinamiento de componente del
- * modo demo, docs/11-plan-demo.md §T5 — única excepción declarada junto al
+ * modo demo, docs/demo.md §T5 — única excepción declarada junto al
  * badge y al hint del login). El botón abre el `ConfirmDialog` destructivo y,
  * al confirmar, borra la base de la pestaña (`resetDb()`) y recarga
  * (`window.location.reload()`) para que el mundo se resiembre desde cero.

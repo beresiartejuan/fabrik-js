@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { WORKER_ROLE_LABELS } from '@/lib/format/labels';
 
 /**
- * Formulario de trabajador (docs/10-plan-de-web.md §6). El rol se puede cambiar
+ * Formulario de trabajador (docs/pantallas.md §6). El rol se puede cambiar
  * en alta y edición (`PATCH /workers/:id` acepta `name` y `role`).
  */
 

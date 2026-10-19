@@ -6,7 +6,7 @@ import { MaterialForm } from '@/components/catalogs/material-form';
 import { selectOption } from '../helpers/select';
 
 /**
- * Formulario de material (docs/10-plan-de-web.md §3): el filtro de unidades por
+ * Formulario de material (docs/pantallas.md §3): el filtro de unidades por
  * estado físico (`unitsForPhysicalState`) y el envío del payload.
  */
 

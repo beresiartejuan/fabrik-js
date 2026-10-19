@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SESSION_STORAGE_KEY, SessionProvider } from '@/lib/session/session-store';
 
 /**
- * Guardas de las rutas de la Fase 6 (`docs/10-plan-de-web.md` §14–15): la
+ * Guardas de las rutas de la Fase 6 (`docs/pantallas.md` §14–15): la
  * trazabilidad y los eventos son lecturas A/Au — un `worker` es redirigido al
  * dashboard por `RequireRole` y el contenido no llega a montarse (el RBAC real
  * vuelve a 403 en el dominio).

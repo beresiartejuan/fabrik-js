@@ -14,7 +14,7 @@ import type {
 /**
  * DTOs de wire de la API (`apps/api`), espejo explícito de los serializadores.
  *
- * Reglas (docs/10-plan-de-web.md):
+ * Reglas (docs/pantallas.md):
  * - Los **ids viajan como `string`** (los *branded ids* del dominio no aportan en
  *   runtime y añaden fricción al deserializar JSON).
  * - Se reutilizan las **unions literales** del dominio con `import type`

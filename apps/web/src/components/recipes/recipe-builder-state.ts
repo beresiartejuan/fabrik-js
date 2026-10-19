@@ -5,7 +5,7 @@ import type { MaterialWire, RecipeWire } from '@/lib/api/types';
 import { unitLabel } from '@/lib/format/units';
 
 /**
- * Estado puro del **builder de recetas** (docs/10-plan-de-web.md §Pantalla 7).
+ * Estado puro del **builder de recetas** (docs/pantallas.md §Pantalla 7).
  *
  * El formulario trabaja con borradores (`amount` como string, ids sin resolver)
  * y este módulo concentra las operaciones de lista: alta/baja de pasos e insumos,
@@ -211,7 +211,7 @@ export function updateRecipe(
 
 /**
  * Selecciona el producto de salida de la receta y **deriva la unidad** de su
- * `unitOfMeasure` (docs/10-plan-web §Pantalla 7). Si el producto no existe,
+ * `unitOfMeasure` (docs/pantallas.md §Pantalla 7). Si el producto no existe,
  * solo cambia el id.
  */
 export function selectOutputProduct(

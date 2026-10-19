@@ -16,7 +16,7 @@ import { useSession } from '@/lib/session/session-store';
 import { cn } from '@/lib/utils';
 
 /**
- * Layout del grupo `(app)` (docs/10-plan-de-web.md §App shell). Todo el shell es
+ * Layout del grupo `(app)` (docs/arquitectura.md §App shell). Todo el shell es
  * cliente porque los tokens viven en `sessionStorage`:
  *
  * - `RequireAuth` redirige a `/login` sin sesión (y resuelve el `Actor` si falta).
@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
  *   primitivas de shadcn (`sheet` en mobile).
  * - Topbar con nombre + rol y "Cerrar sesión" (`authApi.logout` + limpieza
  *   local + redirect a `/login`).
- * - Afinamientos del **modo demo** (docs/11-plan-demo.md §T5, excepciones de
+ * - Afinamientos del **modo demo** (docs/demo.md §T5, excepciones de
  *   componente declaradas): badge "DEMO" junto a la marca y acción "Resetear
  *   demo" en el pie del aside (`resetDb()` + reload, con `ConfirmDialog`).
  */

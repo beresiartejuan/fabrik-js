@@ -8,7 +8,7 @@ de red: el transporte es código en la pestaña (módulos → use cases → repo
 `sessionStorage`). Misma UI, mismos wire DTOs (`src/lib/api/types.ts`) y mismos
 mensajes de error en español que la app original.
 
-- Arquitectura, decisiones y plan de la demo: [`docs/11-plan-demo.md`](../../docs/11-plan-demo.md).
+- Arquitectura y decisiones del modo demo: [`docs/demo.md`](../../docs/demo.md).
 - App original (referencia congelada, consume la API real): [`apps/web`](../web).
 - Dominio compartido (`@fabrik/domain`): [`packages/domain`](../../packages/domain).
 - Front en Next.js 16 (App Router) + React 19 + Tailwind v4 + shadcn/ui; vitest
@@ -73,7 +73,7 @@ workers activos:
 El seed maestro (`demo/seed.ts`) deja catálogos, receta y asignación, con lotes/
 eventos/movimientos **vacíos**. En el **primer acceso de la pestaña**,
 `demo/history.ts` corre el flujo completo de
-[`docs/03-flujo-de-produccion.md`](../../docs/03-flujo-de-produccion.md)
+[`docs/flujo-de-produccion.md`](../../docs/flujo-de-produccion.md)
 **ejecutando los use cases reales del dominio** (nada de fixtures):
 
 - 2 arribos de suministro al almacén (admin) → lote `stored` + `supply_in`,
@@ -95,14 +95,14 @@ activas y el flujo de producción funciona a cualquier hora.
 
 Los componentes y pantallas son intactos respecto de la app original; lo que
 cambia es la capa de datos (`src/lib/api/*`) y tres afinamientos de UI
-declarados en docs/11:
+declarados en [`docs/demo.md`](../../docs/demo.md):
 
 | `apps/web` (original) | `apps/web-demo` (esta app) |
 |---|---|
 | Transporte HTTP real: `client.ts` (axios + interceptores, URL de la API por variable pública de entorno). | **Sin axios ni `client.ts` (eliminados)**: `src/lib/api/modules/*` llama fábricas sobre el dominio; cero requests de red. |
 | Errores: el API valida con zod (`400`) y el `DomainExceptionFilter` emite 404/403/409/422/500. | **Sin `400` de zod** (gap aceptado): la pre-validación del cliente filtra la entrada y los invariantes del dominio emergen como `409`/`422` — mismo body `{ statusCode, error, message, context }`. |
 | Tokens JWT de la API + scrypt en `apps/api`. | **Tokens opacos sin firma** (`demo-access.<userId>` / `demo-refresh.<userId>`, `expiresIn` decorativo); el refresh rota el par y no hay revocación. |
-| La auth vive en `apps/api` (`AuthService`, `ActorGuard`). | **La auth vive fuera del dominio** (hallazgo de docs/11): `demo/auth.ts` compara la contraseña en claro contra el snapshot y resuelve el rol **fresco** de la fila (parity `ActorGuard`). |
+| La auth vive en `apps/api` (`AuthService`, `ActorGuard`). | **La auth vive fuera del dominio** (hallazgo recogido en [`docs/limitaciones-conocidas.md`](../../docs/limitaciones-conocidas.md)): `demo/auth.ts` compara la contraseña en claro contra el snapshot y resuelve el rol **fresco** de la fila (parity `ActorGuard`). |
 | UI neutral. | Badge **"DEMO"** junto a la marca, hint del login con credenciales demo y botón **"Resetear demo"** — las únicas ediciones de componente, renderizadas sin flag. |
 
 La matriz de roles/`403` (catálogos solo A/Au, `start` admin-only, `transform`
@@ -177,12 +177,13 @@ NEXT_PUBLIC_BASE_PATH=/fabrik-js \
   correspondiente en `node_modules/next/dist/docs/` — lo recuerda el bloque
   `BEGIN:nextjs-agent-rules` de [`AGENTS.md`](AGENTS.md).
 - El shell es **client-rendered** porque los tokens viven en `sessionStorage`
-  (no existe en el server): misma decisión de docs/10 que la app original.
+  (no existe en el server): misma decisión que la app original
+  ([`docs/arquitectura.md`](../../docs/arquitectura.md)).
 - `next.config.ts` usa `cacheComponents: true` + `partialPrefetching: true` en
   el build normal; `params`/`searchParams` son promesas. Con `NEXT_EXPORT=1`
   (GitHub Pages, ver «Despliegue» arriba) esas flags se desactivan y el id de
   receta viaja por query param (`/recetas/detalle?id=`).
 
-Más contexto: [`docs/11-plan-demo.md`](../../docs/11-plan-demo.md)
-(objetivo, blueprint, mapa de errores, riesgos) y
-[`docs/10-plan-de-web.md`](../../docs/10-plan-de-web.md) (reglas del front).
+Más contexto: [`docs/demo.md`](../../docs/demo.md) (objetivo, semilla, paridad de
+errores y limitaciones del modo demo) y [`docs/pantallas.md`](../../docs/pantallas.md)
+(pantallas y su contrato con la API).

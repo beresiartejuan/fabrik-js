@@ -4,7 +4,7 @@ Objetos de valor e identidades de `@fabrik/domain`. Todos viven en `src/value-ob
 y se re-exportan desde el barrel público (`src/index.ts`).
 
 > Reglas de negocio y justificación: ver [explicacion/invariantes.md](../explicacion/invariantes.md)
-> y [docs/02-modelo-de-dominio.md](../../../../docs/02-modelo-de-dominio.md).
+> y [docs/modelo-de-dominio.md](../../../../docs/modelo-de-dominio.md).
 
 ## Identidades (`ids.ts`)
 
@@ -88,7 +88,7 @@ function isUnitCompatibleWith(unit: UnitOfMeasure, physicalState: PhysicalState)
 function unitsForPhysicalState(physicalState: PhysicalState): readonly UnitOfMeasure[];
 ```
 
-Tabla de coherencia (I6, `docs/02`):
+Tabla de coherencia (I6, `docs/modelo-de-dominio.md`):
 
 | Estado físico | Unidades válidas |
 |---|---|

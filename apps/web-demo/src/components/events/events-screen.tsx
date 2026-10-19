@@ -27,7 +27,7 @@ import {
 } from './events-state';
 
 /**
- * Pantalla 15 — `/eventos` (A/Au, docs/10-plan-de-web.md §15, Fase 6).
+ * Pantalla 15 — `/eventos` (A/Au, docs/pantallas.md §15, Fase 6).
  *
  * Filtros (máquina, operario, material y rango `from`/`to`) → `GET /batch-events`
  * → tabla cronológica ascendente de transformaciones. **Gap de API:** no hay

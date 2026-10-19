@@ -3,7 +3,7 @@
 `@fabrik/domain` es la capa de dominio compartida de Fabrik. Este documento explica
 **por qué** está estructurada así; para el detalle de cada API ver
 [referencia/](../referencia/value-objects.md) y para las decisiones de producto el
-[`docs/02`](../../../../docs/02-modelo-de-dominio.md) y [`docs/07`](../../../../docs/07-arquitectura.md) raíz.
+[`docs/modelo-de-dominio.md`](../../../../docs/modelo-de-dominio.md) y [`docs/arquitectura.md`](../../../../docs/arquitectura.md) raíz.
 
 ## Regla de oro
 
@@ -38,7 +38,7 @@ value-objects → errors → events → entities → ports → use-cases
 
 El flujo es unidireccional: los casos de uso conocen las entidades y los puertos, nunca al
 revés. Las entidades no conocen repositorios ni eventos. Las flechas del diagrama de
-[`docs/07`](../../../../docs/07-arquitectura.md) describen esta misma regla.
+[`docs/arquitectura.md`](../../../../docs/arquitectura.md) describen esta misma regla.
 
 ## Patrones uniformes
 
@@ -92,7 +92,7 @@ Además, producción y trazabilidad definen arrays locales **no exportados** con
 legenda de roles (p. ej. producción A/W, `RecordTransformation` solo `worker`, trazabilidad
 A/Au). Ver [referencia/casos-de-uso.md](../referencia/casos-de-uso.md).
 
-Detalle adicional del modelo de roles: [`docs/01`](../../../../docs/01-vision-y-glosario.md).
+Detalle adicional del modelo de roles: [`docs/producto.md`](../../../../docs/producto.md).
 
 ## Modelo transaccional: `UnitOfWork`
 

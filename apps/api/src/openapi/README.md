@@ -5,7 +5,7 @@ Documento OpenAPI 3.0 de la API, servido por `@nestjs/swagger` en:
 - `GET /docs` — UI de Swagger.
 - `GET /docs-json` — documento JSON (y `/docs-yaml`).
 
-Decisión y criterio de salida en [`docs/09-plan-de-api.md`](../../../../docs/09-plan-de-api.md)
+Decisión y criterio de salida en [`docs/api.md`](../../../../docs/api.md)
 (sección *Fase 7*).
 
 ## Decisión: zod → OpenAPI (no decoradores `@ApiProperty`)

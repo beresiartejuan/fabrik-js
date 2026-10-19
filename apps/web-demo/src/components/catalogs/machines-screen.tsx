@@ -22,7 +22,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 /**
- * Pantalla 5 — `/maquinas` (docs/10-plan-de-web.md §5). Alta/edición (nombre,
+ * Pantalla 5 — `/maquinas` (docs/pantallas.md §5). Alta/edición (nombre,
  * tipo y lugar de producción) y acción **Mover** (`POST /machines/:id/move`). El
  * `status` es de solo lectura (la API no expone transiciones — gap documentado).
  * El auditor ve la tabla sin acciones de escritura.

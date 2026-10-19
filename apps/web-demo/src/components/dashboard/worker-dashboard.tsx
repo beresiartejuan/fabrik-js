@@ -15,7 +15,7 @@ import { isNavHrefEnabled } from '@/lib/nav';
 import { PageHeader } from './dashboard-common';
 
 /**
- * Dashboard del **worker** (docs/10-plan-de-web.md §2): "Mis máquinas de ahora".
+ * Dashboard del **worker** (docs/pantallas.md §2): "Mis máquinas de ahora".
  *
  * Consume `GET /me/schedule`, que resuelve la agenda del propio actor y calcula
  * `activeNow` en el servidor. Es la fuente de verdad de I3 (el reloj/zona del

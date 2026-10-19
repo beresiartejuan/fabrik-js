@@ -4,7 +4,7 @@ import { TimeSlot } from '@fabrik/domain';
 import type { AssignmentWire, TimeSlotWire } from '@/lib/api/types';
 
 /**
- * Estado puro del editor de `TimeSlot` (docs/10-plan-de-web.md §Pantalla 8 y
+ * Estado puro del editor de `TimeSlot` (docs/pantallas.md §Pantalla 8 y
  * §Fase 3). Vive como módulo sin React (mismo patrón que
  * `recipe-builder-state.ts`) para testear validación, normalización y
  * **pre-validación de solapamientos** con el dominio (`TimeSlot.overlaps`)

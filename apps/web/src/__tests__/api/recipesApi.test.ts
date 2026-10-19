@@ -6,7 +6,7 @@ import { createRecipesApi } from '@/lib/api/modules/recipesApi';
 
 /**
  * Contrato de `recipesApi` contra `apps/api/src/recipes/recipes.dto.ts`
- * (docs/10-plan-de-web.md §Fase 2): rutas, filtro y forma exacta del body.
+ * (docs/pantallas.md §Fase 2): rutas, filtro y forma exacta del body.
  * `PATCH` con `steps` envía la lista completa (no un merge por posición).
  */
 

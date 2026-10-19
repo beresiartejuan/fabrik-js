@@ -8,7 +8,7 @@ import { makeBatch, makeMaterial, makeRecipe } from '../helpers/fixtures';
 import { renderWithSession, seedSessionRole } from '../helpers/session';
 
 /**
- * Pantalla 9 — `/produccion` (docs/10-plan-de-web.md §9, Fase 4): lista de
+ * Pantalla 9 — `/produccion` (docs/pantallas.md §9, Fase 4): lista de
  * lotes activos con `GET /batches?status=in_progress`, resolución de nombres de
  * material/receta según el rol (worker → 403 → ids del wire), buscador por ID
  * con 404 amigable y acciones por rol.

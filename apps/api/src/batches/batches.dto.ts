@@ -4,7 +4,7 @@ import { BATCH_STATUSES, idSchema } from '../common/catalog-schemas.js';
 
 /**
  * DTO del recurso `batches` (post-plan, hueco detectado por el plan de web,
- * `docs/10-plan-de-web.md`).
+ * `docs/plans/10-plan-de-web.md`).
  *
  * `GET /batches` acepta los filtros **opcionales** de `BatchFilter` —
  * `?status=`, `?materialId=`, `?recipeId=` y `?originBatchEventId=`—; sin ninguno

@@ -8,7 +8,7 @@ import { createMaterialsApi } from '@/lib/api/modules/materialsApi';
 import { createWorkersApi } from '@/lib/api/modules/workersApi';
 
 /**
- * Contratos de los catálogos contra `apps/api` (docs/10-plan-de-web.md §Fase 1):
+ * Contratos de los catálogos contra `apps/api` (docs/pantallas.md §Fase 1):
  * método, ruta, query y body de cada endpoint de escritura/baja/movimiento.
  */
 

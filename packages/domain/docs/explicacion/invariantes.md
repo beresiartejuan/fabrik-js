@@ -1,6 +1,6 @@
 # Invariantes y dónde se aplican
 
-Los invariantes I1–I7 están definidos en [`docs/02`](../../../../docs/02-modelo-de-dominio.md)
+Los invariantes I1–I7 están definidos en [`docs/modelo-de-dominio.md`](../../../../docs/modelo-de-dominio.md)
 (fuente de verdad de las reglas). Aquí se documenta **dónde los hace cumplir el código**,
 con el archivo y el punto exacto.
 
@@ -92,4 +92,4 @@ que los crea. `RecordTransformation` **no** valida la coherencia de unidad de lo
 
 Cualquier incumplimiento lanza `RecipeIntegrityError(recipeId, reason)`.
 
-Para más contexto de flujo, ver [`docs/03`](../../../../docs/03-flujo-de-produccion.md).
+Para más contexto de flujo, ver [`docs/flujo-de-produccion.md`](../../../../docs/flujo-de-produccion.md).

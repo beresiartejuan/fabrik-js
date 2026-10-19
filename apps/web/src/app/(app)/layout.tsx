@@ -14,7 +14,7 @@ import { useSession } from '@/lib/session/session-store';
 import { cn } from '@/lib/utils';
 
 /**
- * Layout del grupo `(app)` (docs/10-plan-de-web.md §App shell). Todo el shell es
+ * Layout del grupo `(app)` (docs/arquitectura.md §App shell). Todo el shell es
  * cliente porque los tokens viven en `sessionStorage`:
  *
  * - `RequireAuth` redirige a `/login` sin sesión (y resuelve el `Actor` si falta).

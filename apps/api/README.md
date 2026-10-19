@@ -4,7 +4,8 @@ API HTTP del monorepo `fabrik-js` (NestJS 12, ESM, Drizzle + Turso/SQLite, zod).
 Expone los casos de uso de `@fabrik/domain` sobre **45 rutas**; la autorización por
 rol (`admin`/`worker`/`auditor`) la decide el dominio (`403`).
 
-- Plan y decisiones globales: [`docs/09-plan-de-api.md`](../../docs/09-plan-de-api.md).
+- Decisiones globales de la API: [`docs/arquitectura.md`](../../docs/arquitectura.md).
+  Contrato completo (auth, convenciones, errores): [`docs/api.md`](../../docs/api.md).
 - READMEs por módulo: [`src/persistence`](./src/persistence/README.md),
   [`src/domain`](./src/domain/README.md), [`src/auth`](./src/auth/README.md),
   [`src/openapi`](./src/openapi/README.md).
@@ -106,8 +107,8 @@ token inválido/vencido → `401`. La autorización por rol vive en el dominio
 | batches | `GET /batches/:id` | `GetBatch` |
 
 Semántica y decisiones de cada recurso (filtros, formatos, RBAC concreto, errores)
-están en `docs/09-plan-de-api.md`; el mapeo error de dominio → HTTP está en la Fase 2
-del mismo documento (resumen: `404`/`403`/`409`/`422`, fallback `500`).
+están en [`docs/api.md`](../../docs/api.md); el mapeo error de dominio → HTTP:
+`404`/`403`/`409`/`422`, fallback `500`.
 
 ## Estructura
 

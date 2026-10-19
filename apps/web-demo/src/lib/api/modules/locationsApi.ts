@@ -13,7 +13,7 @@ import type { LocationWire } from '../types';
 
 /**
  * Endpoints de lugares (`apps/api/src/locations/locations.controller.ts`) sobre
- * el **runtime demo** (docs/11-plan-demo.md §4): los cuatro casos de uso que
+ * el **runtime demo** (docs/demo.md §4): los cuatro casos de uso que
  * inyecta el controlador real (`CreateLocation`, `UpdateLocation`,
  * `GetLocation`, `ListLocations`), ejecutados con el actor de la sesión.
  *

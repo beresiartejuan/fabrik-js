@@ -12,7 +12,7 @@ import type { MeScheduleItemWire } from '../types';
 
 /**
  * Endpoint del **propio** actor (`apps/api/src/me/me.controller.ts` —
- * `GET /me/schedule`) sobre el **runtime demo** (docs/11-plan-demo.md §4).
+ * `GET /me/schedule`) sobre el **runtime demo** (docs/demo.md §4).
  *
  * **No es un caso de uso**: el `MeController` real lo arma con lecturas de
  * apoyo (`ListWorkerSchedule` para la agenda propia + `MachineRepository` para

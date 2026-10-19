@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 /**
- * Menú de acciones por fila de una tabla de catálogo (docs/10-plan-de-web.md
+ * Menú de acciones por fila de una tabla de catálogo (docs/pantallas.md
  * §Pantallas 3–6). El botón de puntos suspensivos despliega las acciones que la
  * pantalla declare; las deshabilitadas llevan su nota en `title`.
  */

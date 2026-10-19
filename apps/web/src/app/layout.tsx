@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Layout raíz mínimo (docs/10-plan-de-web.md §App shell client-rendered):
+ * Layout raíz mínimo (docs/arquitectura.md §App shell client-rendered):
  * fuentes, `lang="es"`, metadata y los providers de cliente (`SessionProvider`
  * lee `sessionStorage`; `Toaster` para los avisos). El shell con sidebar vive en
  * `(app)/layout.tsx`.

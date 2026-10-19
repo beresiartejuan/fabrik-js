@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import type { TraceViewNode } from './trace-view';
 
 /**
- * Ángbol de trazabilidad recursivo (Fase 6, pantalla 14, docs/10-plan-de-web.md).
+ * Ángbol de trazabilidad recursivo (Fase 6, pantalla 14, docs/pantallas.md).
  *
  * Cada nodo (`TraceViewNode` normalizado) muestra:
  * - **Tarjeta de lote**: material resuelto, id abreviado (`#xxxxxxxx`), cantidad

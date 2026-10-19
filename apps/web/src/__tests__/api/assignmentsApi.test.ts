@@ -7,7 +7,7 @@ import { createAssignmentsApi } from '@/lib/api/modules/assignmentsApi';
 
 /**
  * Contrato de `assignmentsApi` contra `apps/api/src/assignments/{assignments,
- * schedule}.controller.ts` (docs/10-plan-de-web.md §Fase 3): rutas, forma
+ * schedule}.controller.ts` (docs/pantallas.md §Fase 3): rutas, forma
  * exacta del body de `POST /assignments` (slot con `daysOfWeek`/`start`/`end`)
  * y `DELETE /assignments/:id` sin body (204).
  */

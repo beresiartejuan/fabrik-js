@@ -6,7 +6,7 @@ import { WorkersScreen } from '@/components/catalogs/workers-screen';
 import { makeWorker } from '../helpers/fixtures';
 
 /**
- * Tabla de trabajadores (docs/10-plan-de-web.md §6): el **auditor** la ve sin
+ * Tabla de trabajadores (docs/pantallas.md §6): el **auditor** la ve sin
  * acciones de escritura; el admin ve el alta y el menú de acciones por fila.
  */
 

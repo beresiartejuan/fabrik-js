@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createE2EApp, type E2EContext } from '../support/e2e-app.js';
 
 /**
- * E2E de CORS (post-plan, resuelve el riesgo de `docs/10-plan-de-web.md`).
+ * E2E de CORS (post-plan, resuelve el riesgo de `docs/arquitectura.md`).
  *
  * El helper e2e monta **la misma** `enableCors` que `main.ts`, así que este spec
  * cubre la configuración real (no una copia). Se fija `CORS_ORIGINS` con dos

@@ -18,7 +18,7 @@ const COLUMNS: DataTableColumn<Row>[] = [
 ];
 
 /**
- * `DataTable` (docs/10-plan-de-web.md §Fase 1): estado vacío, búsqueda local y
+ * `DataTable` (docs/pantallas.md §Fase 1): estado vacío, búsqueda local y
  * orden por columna.
  */
 

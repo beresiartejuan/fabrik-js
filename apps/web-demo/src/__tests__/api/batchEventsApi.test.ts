@@ -9,7 +9,7 @@ import { writeTokens } from '@/lib/session/session-store';
 
 /**
  * Contrato de `batchEventsApi.list` sobre el runtime DEMO
- * (docs/11-plan-demo.md §T4b), espejo del `BatchEventsController`
+ * (docs/demo.md §T4b), espejo del `BatchEventsController`
  * (`apps/api/src/batch-events/batch-events.controller.ts`): la búsqueda ejecuta
  * `ListBatchEvents` (A/Au; un worker recibe 403 como en la API) con los filtros
  * opcionales máquina/operario/material —material presente en inputs **o**

@@ -22,7 +22,7 @@ import type { BatchWire, QuantityWire, TransformationWire } from '../types';
 
 /**
  * Casos de uso de producción (`apps/api/src/production/production.controller.ts`)
- * sobre el runtime DEMO (docs/11-plan-demo.md §T4b): cada fábrica ejecuta los
+ * sobre el runtime DEMO (docs/demo.md §T4b): cada fábrica ejecuta los
  * casos de uso reales del registro (`demo/registry.ts`) en lugar de las rutas
  * HTTP; la interfaz, el actor por llamada y el wire de respuesta quedan
  * idénticos al módulo axios (los componentes no cambian).

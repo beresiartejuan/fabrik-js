@@ -9,7 +9,7 @@ import { createWorkersApi } from '@/lib/api/modules/workersApi';
 import { readTokens, writeTokens } from '@/lib/session/session-store';
 
 /**
- * Flujo de auth sobre el **core demo** (`demo/auth.ts`, docs/11-plan-demo.md
+ * Flujo de auth sobre el **core demo** (`demo/auth.ts`, docs/demo.md
  * §5): misma forma de sesión que la API real (`AuthTokensWire` + `ActorWire`),
  * tokens opacos deterministas y **rol fresco en cada llamada** (parity del
  * `ActorGuard`: el rol sale de la fila del worker, no del token).

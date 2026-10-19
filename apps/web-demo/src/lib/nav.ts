@@ -1,7 +1,7 @@
 import type { WorkerRole } from '@fabrik/domain';
 
 /**
- * Navegación del sidebar y etiquetas de rol (docs/10-plan-de-web.md §Pantallas).
+ * Navegación del sidebar y etiquetas de rol (docs/pantallas.md §Pantallas).
  *
  * La navegación se **filtra en cliente** por rol: es solo *UX*, el RBAC real lo
  * decide el dominio (403). Mantener la matriz sincronizada con la tabla de

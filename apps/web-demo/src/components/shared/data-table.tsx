@@ -17,7 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 
 /**
- * Tabla de catálogo con búsqueda y orden **locales** (docs/10-plan-de-web.md
+ * Tabla de catálogo con búsqueda y orden **locales** (docs/pantallas.md
  * §Pantallas 3–6). No hay paginación en la API (gap documentado), así que el
  * filtrado/orden se hace en cliente sobre el listado completo.
  *

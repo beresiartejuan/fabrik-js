@@ -25,7 +25,7 @@ nativa y hace que la inmutabilidad sea una propiedad estructural, no una convenc
 No existe un campo editable de stock. El stock de un material en un lugar es la suma de
 sus `StockMovement`. Se materializa en `StockMovementRepository.sumByLocationAndMaterial`
 y, en memoria, en `GetStockByLocation`. Detalle en
-[`docs/06`](../../../../docs/06-inventario.md).
+[`docs/inventario.md`](../../../../docs/inventario.md).
 
 ### `UnitOfWork` por inyección de repositorios
 
@@ -36,7 +36,7 @@ vida de la transacción al caso de uso. Razonamiento completo en
 ### `Material.active` (baja lógica)
 
 `Material` incorpora `active` (default `true`) para habilitar `DeactivateMaterial`. El
-`docs/02` raíz no lo menciona; fue una adición de la fase de catálogos para no romper
+`docs/modelo-de-dominio.md` raíz no lo menciona; fue una adición de la fase de catálogos para no romper
 lecturas/creaciones existentes.
 
 ### `UpdateLocation` solo renombra
@@ -48,7 +48,7 @@ del alcance de la fase. La restricción está documentada en el propio caso de u
 ### Receta: compatibilidad entre pasos laxa
 
 `Recipe` valida orden de posiciones e I7, pero **no** valida que el output del paso N sea
-input del paso N+1. `docs/02` anticipa explícitamente que esa validación "puede ser laxa"
+input del paso N+1. `docs/modelo-de-dominio.md` anticipa explícitamente que esa validación "puede ser laxa"
 (los materiales intermedios se crean como `kind: 'product'`).
 
 ## Diferimientos y limitaciones
@@ -64,16 +64,16 @@ de almacenamiento. Además, los `Batch` son inmutables y no hay contador de cons
 por lo que tampoco se valida la suficiencia de cantidad por lote. I5 llegará junto al flujo
 de almacenamiento completo.
 
-Esto contradice el estado actual de [`docs/04`](../../../../docs/04-casos-de-uso.md), que
+Esto contradice el estado actual de [`docs/api.md`](../../../../docs/api.md), que
 lista "hay stock suficiente de los inputs (I5)" como precondición de
-`RecordTransformation`, y de [`docs/06`](../../../../docs/06-inventario.md), que afirma que
+`RecordTransformation`, y de [`docs/inventario.md`](../../../../docs/inventario.md), que afirma que
 "el use case valida antes de persistir el movimiento". Hoy es una intención de diseño, no
 un comportamiento implementado.
 
 ### Sin emisión de `stock.moved`
 
 La interfaz `StockMoved`, su payload y la fábrica `stockMoved` existen y se exportan, pero
-**ningún caso de uso los emite** en esta fase. `docs/05` describe `stock.moved` como
+**ningún caso de uso los emite** en esta fase. `docs/eventos.md` describe `stock.moved` como
 emitido por "cualquier `StockMovement`", lo cual no ocurre todavía: los eventos publicados
 son los enumerados por caso de uso.
 
@@ -94,7 +94,7 @@ Consecuencias:
 - El servidor debe configurarse con la zona de la fábrica (p. ej. `TZ=America/...`) y
   operar de forma consistente; si se persisten instantes en UTC, la conversión a la
   zona local ocurre antes de llamar a `contains`.
-- `docs/02`/`docs/04` no fijan una zona explícita: esta política cubre ese hueco sin
+- `docs/modelo-de-dominio.md`/`docs/api.md` no fijan una zona explícita: esta política cubre ese hueco sin
   introducir una dependencia de `Intl` en el dominio.
 
 `TimeSlot` sí acota la representación: `start` va de `00:00` a `23:59` y `end` admite
@@ -178,4 +178,4 @@ raíz y pueden cambiar sin aviso. `InMemoryUnitOfWork` no ofrece atomicidad real
 - Los puertos `MaterialRepository.existsByName` y `BatchRepository.findByMaterial` son
   **opcionales**: los adaptadores que no los soporten pueden omitirlos.
 - No hay *aggregates* formales ni *specifications*: DDD a nivel sencillo (ver
-  [`docs/01`](../../../../docs/01-vision-y-glosario.md)).
+  [`docs/producto.md`](../../../../docs/producto.md)).

@@ -73,7 +73,7 @@ const UNPROCESSABLE_ERRORS = [
 ] as const;
 
 /**
- * Traduce un error de dominio a HTTP según la tabla de `docs/09-plan-de-api.md`
+ * Traduce un error de dominio a HTTP según la tabla de `docs/api.md`
  * (el contrato):
  *
  * | Error | HTTP |

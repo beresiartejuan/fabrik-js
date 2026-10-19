@@ -13,7 +13,7 @@ import type { WorkerWire } from '../types';
 
 /**
  * Endpoints de trabajadores (`apps/api/src/workers/workers.controller.ts`)
- * sobre el **runtime demo** (docs/11-plan-demo.md §4): los cinco casos de uso
+ * sobre el **runtime demo** (docs/demo.md §4): los cinco casos de uso
  * que inyecta el controlador real (`CreateWorker`, `UpdateWorker`,
  * `DeactivateWorker`, `GetWorker`, `ListWorkers`), ejecutados con el actor de
  * la sesión.
@@ -25,7 +25,7 @@ import type { WorkerWire } from '../types';
  *   cambiarse el rol ni desactivarse a sí mismo
  *   (`SelfModificationNotAllowedError` → 409).
  * - Sin `reactivate`: el dominio tiene `Worker.activate()` pero no un caso de
- *   uso expuesto (deuda de API, docs/10-plan-de-web.md §Gaps) — el contrato se
+ *   uso expuesto (deuda de API, docs/limitaciones-conocidas.md §Gaps) — el contrato se
  *   mantiene idéntico al módulo axios.
  */
 

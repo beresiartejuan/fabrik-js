@@ -13,7 +13,7 @@ import type { StockByLocationEntryWire, StockMovementWire } from '../types';
 
 /**
  * Inventario (`apps/api/src/stock/stock.controller.ts`, Fase 5) sobre el runtime
- * DEMO (docs/11-plan-demo.md §T4b): la fábrica ejecuta los mismos casos de uso
+ * DEMO (docs/demo.md §T4b): la fábrica ejecuta los mismos casos de uso
  * que el controlador (`GetStockByLocation` y `GetStockMovements`, lecturas puras
  * del registro `demo/registry.ts`) en lugar de las rutas HTTP; la interfaz, el
  * actor por llamada y el wire de respuesta quedan idénticos al módulo axios.

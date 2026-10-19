@@ -2,7 +2,7 @@
 
 Wiring del dominio en la API: puertos→adaptadores, casos de uso como providers,
 `EventBus` in-process, filtro de excepciones y validación con zod. Criterio de
-salida y tabla error→HTTP en [`docs/09-plan-de-api.md`](../../../../docs/09-plan-de-api.md).
+salida y tabla error→HTTP en [`docs/api.md`](../../../../docs/api.md).
 
 ## Layout
 

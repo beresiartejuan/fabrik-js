@@ -721,7 +721,7 @@ export function buildOpenApiDocument(): ReturnType<OpenApiGeneratorV3['generateD
       version: '0.0.1',
       description:
         'API HTTP del monorepo fabrik-js. Cuerpos/schemas generados desde los DTOs zod; ' +
-        'el RBAC lo decide el dominio (403). Ver docs/09-plan-de-api.md.',
+        'el RBAC lo decide el dominio (403). Ver docs/api.md.',
     },
     security: [{ bearerAuth: [] }],
     tags: TAGS.map((name) => ({ name })),

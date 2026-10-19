@@ -13,7 +13,7 @@ import {
 } from '../helpers/fixtures';
 
 /**
- * Builder de recetas (docs/10-plan-de-web.md §Fase 2): reordenar actualiza las
+ * Builder de recetas (docs/pantallas.md §Fase 2): reordenar actualiza las
  * posiciones mostradas, un submit válido envía el payload del wire y una
  * violación de I7 se muestra inline sin llamar a la API.
  */

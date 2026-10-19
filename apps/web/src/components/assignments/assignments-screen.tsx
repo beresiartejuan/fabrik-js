@@ -25,7 +25,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 /**
- * Pantalla 8 — `/asignaciones` (docs/10-plan-de-web.md §Fase 3).
+ * Pantalla 8 — `/asignaciones` (docs/pantallas.md §Fase 3).
  *
  * Vista de agenda con tabs **Por máquina | Por trabajador**: cada selección
  * carga `GET /machines/:id/schedule` o `GET /workers/:id/schedule` y la grilla

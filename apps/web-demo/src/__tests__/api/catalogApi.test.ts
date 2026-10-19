@@ -10,7 +10,7 @@ import { createWorkersApi } from '@/lib/api/modules/workersApi';
 import { writeTokens } from '@/lib/session/session-store';
 
 /**
- * Catálogos sobre el **runtime demo** (docs/11-plan-demo.md §4): los mismos
+ * Catálogos sobre el **runtime demo** (docs/demo.md §4): los mismos
  * casos de uso que inyecta el controlador real de `apps/api`, corriendo contra
  * la base de `sessionStorage` con roles frescos de la sesión.
  *

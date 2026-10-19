@@ -9,7 +9,7 @@ import { createTraceApi } from '@/lib/api/modules/traceApi';
 import { writeTokens } from '@/lib/session/session-store';
 
 /**
- * Contrato de `traceApi` sobre el runtime DEMO (docs/11-plan-demo.md §T4b),
+ * Contrato de `traceApi` sobre el runtime DEMO (docs/demo.md §T4b),
  * espejo del `TraceController` (`apps/api/src/trace/trace.controller.ts`):
  * `TraceBatch`/`TraceForward` son A/Au (un worker recibe 403) y un id
  * desconocido lanza `NotFoundError` → 404. Los árboles se serializan como en

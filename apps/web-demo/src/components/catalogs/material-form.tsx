@@ -16,7 +16,7 @@ import { MATERIAL_KIND_LABELS, PHYSICAL_STATE_LABELS } from '@/lib/format/labels
 import { unitLabel } from '@/lib/format/units';
 
 /**
- * Formulario de material (docs/10-plan-de-web.md §3). Las unidades se **filtran
+ * Formulario de material (docs/pantallas.md §3). Las unidades se **filtran
  * por estado físico** con `unitsForPhysicalState` del dominio para no ofrecer
  * combinaciones inválidas (I3); al cambiar el estado se corrige la unidad si
  * quedó incompatible.

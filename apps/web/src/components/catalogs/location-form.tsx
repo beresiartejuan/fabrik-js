@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { LOCATION_KIND_LABELS } from '@/lib/format/labels';
 
 /**
- * Formulario de ubicación (docs/10-plan-de-web.md §4). En modo `edit` el tipo es
+ * Formulario de ubicación (docs/pantallas.md §4). En modo `edit` el tipo es
  * de solo lectura: `PATCH /locations/:id` **solo renombra** (cambiar `kind`
  * violaría I2).
  */

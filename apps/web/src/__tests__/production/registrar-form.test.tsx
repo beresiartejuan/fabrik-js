@@ -17,7 +17,7 @@ import { selectOptionAsync } from '../helpers/select';
 import { renderWithSession, seedSessionRole } from '../helpers/session';
 
 /**
- * Pantalla 11 — `/produccion/registrar` (docs/10-plan-de-web.md §11, Fase 4):
+ * Pantalla 11 — `/produccion/registrar` (docs/pantallas.md §11, Fase 4):
  * máquinas filtradas por `activeNow` + fuera de mantenimiento, payload exacto de
  * `POST /production/transform` (sin `workerId`/`timestamp`), contador de
  * observación, panel de output batches tras el 201 y seguimientos

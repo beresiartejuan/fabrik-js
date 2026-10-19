@@ -76,7 +76,7 @@ export function toApiError(error: unknown): ApiError {
 
 /**
  * Mensajes en español por **nombre** de error de dominio
- * (`DomainExceptionFilter`, docs/10-plan-de-web.md §Errores).
+ * (`DomainExceptionFilter`, docs/pantallas.md §Errores).
  */
 const ERROR_NAME_MESSAGES: Record<string, string> = {
   OverlappingScheduleError: 'El trabajador ya tiene una asignación en ese horario.',

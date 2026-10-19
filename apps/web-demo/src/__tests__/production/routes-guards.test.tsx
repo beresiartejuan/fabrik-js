@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SESSION_STORAGE_KEY, SessionProvider } from '@/lib/session/session-store';
 
 /**
- * Guardas de las rutas de la Fase 4 a nivel de página (`docs/10-plan-de-web.md`
+ * Guardas de las rutas de la Fase 4 a nivel de página (`docs/pantallas.md`
  * §Guardas): un admin **no** entra a `/produccion/registrar` (worker-only: el
  * dominio exige rol `worker` en `RecordTransformation`) y un worker no entra a
  * `/produccion/nueva` (solo admin arranca órdenes). El redirect vuelve al

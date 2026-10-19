@@ -21,7 +21,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 /**
- * Pantalla 6 — `/trabajadores` (docs/10-plan-de-web.md §6). Alta/edición y baja
+ * Pantalla 6 — `/trabajadores` (docs/pantallas.md §6). Alta/edición y baja
  * lógica. **Reactivar** queda deshabilitado con nota: la API no expone ese caso
  * de uso (deuda anotada en docs/09). El auditor ve la tabla sin acciones.
  */

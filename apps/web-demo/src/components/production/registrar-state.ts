@@ -11,7 +11,7 @@ import type {
 
 /**
  * Estado puro del **formulario de transformación** (`/produccion/registrar`,
- * docs/10-plan-de-web.md §Pantalla 11). Mismo patrón que `recipe-builder-state`:
+ * docs/pantallas.md §Pantalla 11). Mismo patrón que `recipe-builder-state`:
  * borradores con `amount` como string y operaciones/validación sin React.
  *
  * Decisiones fijadas (verificadas contra `apps/api`):

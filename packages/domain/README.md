@@ -70,6 +70,13 @@ pnpm --filter @fabrik/domain build      # tsc → dist/
 - **API del paquete**: [docs/index.md](docs/index.md) — explicación (por qué está
   diseñado así, invariantes, decisiones y limitaciones) y referencia (value objects,
   entidades, errores y eventos, puertos y casos de uso). Solo cubre los exports públicos.
-- **Diseño completo (fuente de verdad de las reglas)** en el `docs/` raíz: modelo y
-  glosario (`01`, `02`), flujo de producción (`03`), casos de uso (`04`), eventos
-  (`05`), inventario (`06`), arquitectura (`07`) y el plan de implementación (`08`).
+- **Diseño completo (fuente de verdad de las reglas)** en el `docs/` raíz
+  ([índice](../../docs/README.md)): visión y glosario
+  ([`producto.md`](../../docs/producto.md), [`glosario.md`](../../docs/glosario.md)),
+  modelo de dominio ([`modelo-de-dominio.md`](../../docs/modelo-de-dominio.md)), flujo
+  de producción ([`flujo-de-produccion.md`](../../docs/flujo-de-produccion.md)),
+  inventario ([`inventario.md`](../../docs/inventario.md)), eventos
+  ([`eventos.md`](../../docs/eventos.md)) y arquitectura
+  ([`arquitectura.md`](../../docs/arquitectura.md)); los casos de uso expuestos por
+  HTTP en [`api.md`](../../docs/api.md). El plan de implementación de este paquete hoy
+  es este README más la documentación [Diátaxis](docs/index.md).

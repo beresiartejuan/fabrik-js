@@ -17,7 +17,7 @@ import type { ActorWire } from '@/lib/api/types';
  * Sesión del front: `sessionStorage` (no `localStorage`) con **ambos tokens** y
  * el `worker` autenticado (`ActorWire`).
  *
- * Decisiones (docs/10-plan-de-web.md):
+ * Decisiones (docs/arquitectura.md):
  * - Los tokens viven en `sessionStorage`, que no existe en el servidor: **todas**
  *   las funciones de acceso son SSR-safe (no-op / `null` sin `window`).
  * - El `worker` se resuelve con `GET /auth/me` después del login; hasta entonces

@@ -6,7 +6,7 @@ import { createProductionApi } from '@/lib/api/modules/productionApi';
 
 /**
  * Contrato de `productionApi` contra `apps/api/src/production/{production.controller.ts,production.dto.ts}`
- * (docs/10-plan-de-web.md §Fase 4). Dos decisiones de seguridad del body:
+ * (docs/pantallas.md §Fase 4). Dos decisiones de seguridad del body:
  * el `workerId` va **del actor** (nunca en el body) y el `timestamp` del
  * cliente no se envía (en producción la API lo descarta).
  */

@@ -35,7 +35,7 @@ import { CatalogsReadGate } from '../shared/catalogs-read-gate';
  * **Degradación por rol:** `GET /materials|/locations` es A/Au (un operario
  * recibe 403 por `CATALOG_READ_ROLES`), así que el worker carga el arribo en
  * **modo manual** (ids + unidad a mano); la API valida la correspondencia exacta
- * igual (`422`). Es el hueco de API documentado en `docs/09-plan-de-api.md`.
+ * igual (`422`). Es el hueco de API documentado en `docs/plans/09-plan-de-api.md`.
  */
 export function ArrivalForm() {
   return (

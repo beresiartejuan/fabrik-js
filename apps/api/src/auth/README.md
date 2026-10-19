@@ -2,7 +2,7 @@
 
 Autenticación de la API: hash de contraseñas, JWT manual, refresh tokens rotativos
 y el guard que resuelve el `Actor` del dominio. Criterio de salida y tabla de
-errores en [`docs/09-plan-de-api.md`](../../../../docs/09-plan-de-api.md).
+errores en [`docs/api.md`](../../../../docs/api.md).
 
 La auth vive **solo** en `apps/api` y se guarda por `workerId`: el `Worker` del
 dominio no tiene password ni campos de sesión.

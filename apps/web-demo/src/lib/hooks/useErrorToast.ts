@@ -7,7 +7,7 @@ import { errorToMessage } from '@/lib/api/errors';
 
 /**
  * Dispara un toast en español cuando cambia el error de un `useApiQuery`
- * (docs/10-plan-de-web.md §Pantallas 3–6). Centraliza el mapeo `errorToMessage`
+ * (docs/pantallas.md §Pantallas 3–6). Centraliza el mapeo `errorToMessage`
  * + `sonner` para no repetirlo en cada pantalla.
  */
 export function useErrorToast(error: unknown): void {

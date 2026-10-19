@@ -10,7 +10,7 @@ import { formatTimeSlot } from '@/lib/format/days';
 import { DISPLAY_DAYS } from './time-slot-draft';
 
 /**
- * Grilla semanal de asignaciones (docs/10-plan-de-web.md §Pantalla 8): columnas
+ * Grilla semanal de asignaciones (docs/pantallas.md §Pantalla 8): columnas
  * lun-dom (orden de semana laboral) y tarjetas de franja con
  * `HH:mm-HH:mm` + nombre de la contraparte (worker cuando se mira una máquina,
  * máquina cuando se mira un worker). El nombre lo resuelve la pantalla porque

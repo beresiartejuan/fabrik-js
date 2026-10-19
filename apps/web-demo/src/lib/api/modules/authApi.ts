@@ -6,7 +6,7 @@ import type { ActorWire, AuthTokensWire } from '../types';
 
 /**
  * Endpoints de auth (`apps/api/src/auth/auth.controller.ts`) sobre el **core
- * de auth del demo** (`demo/auth.ts`, docs/11-plan-demo.md §5: la auth no vive
+ * de auth del demo** (`demo/auth.ts`, docs/demo.md §5: la auth no vive
  * en el dominio — acá se reproduce el *comportamiento observable* del
  * `AuthService`).
  *
@@ -57,7 +57,7 @@ export function createAuthApi(): AuthApi {
 
     async logout() {
       // 204 demo: los tokens opacos del demo no tienen storage de revocación
-      // (docs/11-plan-demo.md §5: no-op); el caller limpia la sesión local.
+      // (docs/demo.md §5: no-op); el caller limpia la sesión local.
     },
 
     async me() {

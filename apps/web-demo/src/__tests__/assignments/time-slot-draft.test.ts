@@ -15,7 +15,7 @@ import {
 } from '@/components/assignments/time-slot-draft';
 
 /**
- * Estado puro del editor de franjas (docs/10-plan-de-web.md §Fase 3): forma
+ * Estado puro del editor de franjas (docs/pantallas.md §Fase 3): forma
  * HH:mm (`end` admite 24:00), `start < end`, >= 1 día y **pre-validación de
  * solapes** con `TimeSlot.overlaps` (adyacentes y otros días no cuentan).
  */

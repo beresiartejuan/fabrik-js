@@ -40,7 +40,7 @@ import {
 } from './registry';
 
 /**
- * Kit compartido de los **módulos del runtime DEMO** (docs/11-plan-demo.md §4/§6).
+ * Kit compartido de los **módulos del runtime DEMO** (docs/demo.md §4/§6).
  *
  * Consume T4a (`modules/{materials,locations,machines,workers,recipes,assignments,
  * me}Demo.ts`) y T4b (`{supplies,production,batches,stock,batchEvents,trace}Demo.ts`

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 
 /**
- * Wrapper genérico de diálogo con título/descripción (docs/10-plan-de-web.md
+ * Wrapper genérico de diálogo con título/descripción (docs/pantallas.md
  * §Pantallas 3–6). No impone formulario ni botones: el contenido y el pie los
  * provee cada pantalla, así se reutiliza tanto para alta/edición como para
  * acciones (p. ej. "Mover").

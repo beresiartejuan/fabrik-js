@@ -20,7 +20,7 @@ import { formatTimeSlot } from '@/lib/format/days';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
 
 /**
- * Diálogo “Asignar” (docs/10-plan-de-web.md §Pantalla 8, Fase 3). Presenta
+ * Diálogo “Asignar” (docs/pantallas.md §Pantalla 8, Fase 3). Presenta
  * worker activo + máquina + editor de franja (`TimeSlotEditor`) y hace la
  * **pre-validación I1 en cliente**: contra la agenda del worker (se pide
  * fresca al abrir el diálogo y al cambiar de worker) marca inline “Se solapa

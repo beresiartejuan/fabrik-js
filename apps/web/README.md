@@ -6,10 +6,10 @@ v4** que consume `apps/api` por HTTP con **axios** (instancia compartida con
 interceptores y refresh de sesión en `sessionStorage`). Toda la app se
 renderiza en cliente y es 100 % en español.
 
-- Plan y decisiones del front: [`docs/10-plan-de-web.md`](../../docs/10-plan-de-web.md).
+- Pantallas y decisiones del front: [`docs/pantallas.md`](../../docs/pantallas.md).
 - API (contrato, seed, env, endpoints): [`../api/README.md`](../api/README.md).
 - Dominio compartido (`@fabrik/domain`): [`../../packages/domain/README.md`](../../packages/domain/README.md).
-- Plan de la API: [`docs/09-plan-de-api.md`](../../docs/09-plan-de-api.md).
+- Referencia de la API: [`docs/api.md`](../../docs/api.md).
 
 ## Arranque paso a paso
 
@@ -77,7 +77,8 @@ Desde la raíz del monorepo (o `pnpm -C apps/web <comando>`):
 | `pnpm --filter web lint` | `biome check .` — Next 16 eliminó `next lint`; el lint corre con Biome aparte. |
 | `pnpm --filter web start` | Sirve el build de producción. |
 
-La suite cierra **verde** con 304 tests (estado Fase 6 de docs/10).
+La suite cierra **verde** con 304 tests (protege la experiencia descrita en
+[`docs/pantallas.md`](../../docs/pantallas.md)).
 
 ## Roles y qué ve cada uno
 
@@ -101,8 +102,8 @@ navegación y acciones por rol con el mismo criterio. Matriz del sidebar
 
 Notas: un `admin` **no** registra transformaciones (worker-only por dominio).
 Donde la API no permite al `worker` leer catálogos (`A/Au`), sus pantallas
-degradan a entrada manual de ids/unidad con nota visible — ver los *gaps* del
-final de docs/10.
+degradan a entrada manual de ids/unidad con nota visible — ver
+[`docs/limitaciones-conocidas.md`](../../docs/limitaciones-conocidas.md).
 
 ## Estructura de carpetas
 
@@ -136,7 +137,7 @@ apps/web/src/
 └─ __tests__/                 # vitest + Testing Library (espeja src/)
 ```
 
-Reglas duras (en docs/10 §Reglas de trabajo): los componentes **nunca** llaman
+Reglas duras del front: los componentes **nunca** llaman
 a axios directo (todo pasa por `lib/api/modules/*`), hooks propios
 (`useApiQuery`) en vez de TanStack Query en v1, y español en toda la UI.
 
@@ -147,7 +148,7 @@ a axios directo (todo pasa por `lib/api/modules/*`), hooks propios
   `BEGIN:nextjs-agent-rules` de [`AGENTS.md`](AGENTS.md) lo recuerda y lo
   regenera `next dev`; se commitea junto con el trabajo.
 - El shell es **client-rendered** porque los tokens viven en `sessionStorage`
-  (no existe en el servidor): decisión en docs/10 §*App shell client-rendered*.
+  (no existe en el servidor): decisión en [`docs/arquitectura.md`](../../docs/arquitectura.md).
 - `next.config.ts` usa `cacheComponents: true` + `partialPrefetching: true`;
   `params` y `searchParams` son promesas (se resuelven con `use()` /
   `useSearchParams` **dentro de `Suspense`**).

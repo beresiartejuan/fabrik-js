@@ -8,7 +8,7 @@ import { createBatchesApi } from '@/lib/api/modules/batchesApi';
 import { writeTokens } from '@/lib/session/session-store';
 
 /**
- * Contrato de `batchesApi` sobre el runtime DEMO (docs/11-plan-demo.md §T4b),
+ * Contrato de `batchesApi` sobre el runtime DEMO (docs/demo.md §T4b),
  * espejo del `BatchesController` (`apps/api/src/batches/batches.controller.ts`):
  * listar y leer lotes es **A/Au/W** (el operario la consume en `/produccion`),
  * lecturas puras vía `ListBatches`/`GetBatch` del registro demo (`demo/registry.ts`).

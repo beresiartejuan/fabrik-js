@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import type { BadgeTone } from '@/lib/format/labels';
 
 /**
- * Badge de estado genérico (docs/10-plan-de-web.md §Pantallas 3–6). El tono es
+ * Badge de estado genérico (docs/pantallas.md §Pantallas 3–6). El tono es
  * una abstracción sobre las variantes de shadcn (`Badge`) para no repetir clases
  * de color en cada pantalla; los textos salen de `lib/format/labels.ts`.
  */

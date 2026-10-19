@@ -50,7 +50,7 @@ function fakeHost(): FakeHttp {
   return { host, status, json };
 }
 
-// Tabla de docs/09-plan-de-api.md (el contrato error → HTTP). Un caso por clase
+// Tabla de docs/api.md (el contrato error → HTTP). Un caso por clase
 // de error del catálogo.
 const cases: ReadonlyArray<readonly [label: string, error: Error, expected: number]> = [
   ['NotFoundError', new NotFoundError('Material', MaterialId.from('m1')), 404],

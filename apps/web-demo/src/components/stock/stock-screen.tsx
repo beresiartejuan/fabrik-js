@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
 import { MovementsSheet } from './movements-sheet';
 
 /**
- * Pantalla 13 — `/stock` (A/Au/W, docs/10-plan-de-web.md §13, Fase 5).
+ * Pantalla 13 — `/stock` (A/Au/W, docs/pantallas.md §13, Fase 5).
  *
  * Selector de lugar → `GET /stock/:locationId` en tabla: material resuelto por
  * nombre (con los catálogos), **cantidad con signo** (en lugares de producción

@@ -19,7 +19,7 @@ import type {
 } from '@/lib/api/types';
 
 /**
- * Fábricas de los DTOs de wire de la API (Fase 7, docs/10-plan-de-web.md
+ * Fábricas de los DTOs de wire de la API (Fase 7, docs/pantallas.md
  * §Testing): objetos válidos listos para las respuestas de los mocks de
  * `lib/api/modules/*`, con overrides a un nivel.
  *
@@ -36,7 +36,7 @@ import type {
  *
  * El mockeo de la capa HTTP sigue siendo el de siempre: `vi.fn()` sobre los
  * módulos de `lib/api/modules/*` (`client.ts` / su adaptador axios se eliminaron
- * con la migración demo — docs/11-plan-demo.md §T5). **No se usa msw** — ver
+ * con la migración demo — docs/demo.md §T5). **No se usa msw** — ver
  * `src/__tests__/helpers/README.md`.
  */
 

@@ -10,7 +10,7 @@ import type { LocationWire } from '@/lib/api/types';
 import { LOCATION_KIND_LABELS } from '@/lib/format/labels';
 
 /**
- * Formulario de máquina (docs/10-plan-de-web.md §5). El `locationId` solo ofrece
+ * Formulario de máquina (docs/pantallas.md §5). El `locationId` solo ofrece
  * **lugares de producción**: la API valida I2 (`InvalidLocationKindError`) al
  * crear/mover, así que no se ofrecen destinos inválidos.
  *

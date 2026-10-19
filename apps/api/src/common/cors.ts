@@ -1,7 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 
 /**
- * CORS de la API (post-plan; resuelve el riesgo anotado en `docs/10-plan-de-web.md`).
+ * CORS de la API (post-plan; resuelve el riesgo anotado en `docs/arquitectura.md`).
  *
  * `apps/web` (Next) corre en otro origen que la API, así que sin CORS el front no
  * puede llamar a `http://localhost:3001` desde el navegador. La configuración vive

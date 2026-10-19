@@ -13,7 +13,7 @@ import type { MachineWire } from '../types';
 
 /**
  * Endpoints de máquinas (`apps/api/src/machines/machines.controller.ts`) sobre
- * el **runtime demo** (docs/11-plan-demo.md §4): los cinco casos de uso que
+ * el **runtime demo** (docs/demo.md §4): los cinco casos de uso que
  * inyecta el controlador real (`CreateMachine`, `UpdateMachine`, `MoveMachine`,
  * `GetMachine`, `ListMachines`), ejecutados con el actor de la sesión.
  *

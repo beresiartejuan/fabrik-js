@@ -15,7 +15,7 @@ import { ApiError, toApiError } from './errors';
 import type { AuthTokensWire } from './types';
 
 /**
- * Cliente HTTP compartido (docs/10-plan-de-web.md §Capa HTTP).
+ * Cliente HTTP compartido (docs/pantallas.md §Capa HTTP).
  *
  * - Instancia axios con `baseURL` desde `NEXT_PUBLIC_API_URL` (fallback seguro).
  *   **Next inlinea las variables `NEXT_PUBLIC_*` en tiempo de build**: cambiar

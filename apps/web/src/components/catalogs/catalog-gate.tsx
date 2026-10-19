@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { useSession } from '@/lib/session/session-store';
 
 /**
- * Puerta de las pantallas de catálogo (docs/10-plan-de-web.md §Pantallas 3–6):
+ * Puerta de las pantallas de catálogo (docs/pantallas.md §Pantallas 3–6):
  * resuelve `canWrite` (admin escribe; auditor es solo lectura) desde la sesión y
  * lo pasa a la pantalla. La redirección por rol la hace `RequireRole` antes.
  */

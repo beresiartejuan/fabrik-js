@@ -6,7 +6,7 @@ import { createSuppliesApi } from '@/lib/api/modules/suppliesApi';
 
 /**
  * Contrato de `suppliesApi` contra `apps/api/src/supplies/supplies.controller.ts`
- * (docs/10-plan-de-web.md §Fase 4): `POST /supplies/arrivals` con
+ * (docs/pantallas.md §Fase 4): `POST /supplies/arrivals` con
  * `{ materialId, quantity: { amount, unit }, locationId }` y respuesta 201 con el
  * lote `stored` creado.
  */

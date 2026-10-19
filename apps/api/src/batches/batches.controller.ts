@@ -16,7 +16,7 @@ import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { type ListBatchesQuery, ListBatchesQuerySchema } from './batches.dto.js';
 
 /**
- * Consulta de lotes (post-plan; hueco del plan de web, `docs/10-plan-de-web.md`).
+ * Consulta de lotes (post-plan; hueco del plan de web, `docs/plans/10-plan-de-web.md`).
  * RBAC en el dominio: `GetBatch` y `ListBatches` son A/Au/W (abiertos al worker
  * porque la pantalla `/produccion` la consume el operario). Un rol indebido
  * recibiría 403; un `id` desconocido lanza `NotFoundError` → 404.

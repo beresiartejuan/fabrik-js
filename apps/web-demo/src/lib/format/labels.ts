@@ -9,7 +9,7 @@ import type {
 } from '@fabrik/domain';
 
 /**
- * Etiquetas y tonos en español de las *unions* del dominio (docs/10-plan-de-web.md
+ * Etiquetas y tonos en español de las *unions* del dominio (docs/pantallas.md
  * §Pantallas 3–6). Es el único punto donde se traduce un valor del wire a texto de
  * UI; así las tablas y los badges no reparten literales por todo el código.
  *

@@ -7,7 +7,7 @@ import { createRecipesApi } from '@/lib/api/modules/recipesApi';
 import { writeTokens } from '@/lib/session/session-store';
 
 /**
- * Recetas sobre el **runtime demo** (docs/11-plan-demo.md §4): los mismos
+ * Recetas sobre el **runtime demo** (docs/demo.md §4): los mismos
  * casos de uso que inyecta `RecipesController`, con la traducción wire →
  * dominio de `toStepProps` (ids de material + `Quantity.create`) y las
  * invariants del agregado `Recipe` intactas (posiciones 1..N, I7, `steps`

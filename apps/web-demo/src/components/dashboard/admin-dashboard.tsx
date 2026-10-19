@@ -14,7 +14,7 @@ import { isNavHrefEnabled } from '@/lib/nav';
 import { PageHeader, StatCard } from './dashboard-common';
 
 /**
- * Dashboard del **admin** (docs/10-plan-de-web.md §2): contadores de catálogo
+ * Dashboard del **admin** (docs/pantallas.md §2): contadores de catálogo
  * (`materials`/`machines`/`workers` activos), acciones rápidas y accesos a los
  * catálogos. Un admin **no** registra transformaciones (worker-only).
  *

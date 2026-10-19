@@ -2,7 +2,7 @@ import { cn } from 'cn';
 import type { ReactNode } from 'react';
 
 /**
- * Estado vacío reutilizable (docs/10-plan-de-web.md §Pantallas 3–6). Se compone
+ * Estado vacío reutilizable (docs/pantallas.md §Pantallas 3–6). Se compone
  * sobre primitivas (no se añadió el componente `empty` de shadcn); el texto y el
  * icono los decide cada pantalla, siempre en español.
  */

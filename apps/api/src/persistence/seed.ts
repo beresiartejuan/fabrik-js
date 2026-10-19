@@ -36,7 +36,7 @@ import { factories } from './schema.js';
  * Seed de demo (Fase 7, docs/09) — `pnpm --filter api db:seed`.
  *
  * Crea un contexto mínimo pero completo para arrancar la API y recorrer el flujo
- * de `docs/03-flujo-de-produccion.md`: fábrica, lugares, materiales, una máquina,
+ * de `docs/flujo-de-produccion.md`: fábrica, lugares, materiales, una máquina,
  * una receta de dos pasos, un operario con asignación horaria y tres usuarios de
  * demo (admin / worker / auditor) con credenciales.
  *

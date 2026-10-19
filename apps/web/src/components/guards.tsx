@@ -10,7 +10,7 @@ import { useSession } from '@/lib/session/session-store';
 import { PageLoading } from './page-loading';
 
 /**
- * Guardas de sesión y rol del shell client-rendered (docs/10-plan-de-web.md
+ * Guardas de sesión y rol del shell client-rendered (docs/pantallas.md
  * §App shell y §Guardas). Los tokens viven en `sessionStorage`, por eso todo el
  * grupo `(app)` es cliente y la hidratación ocurre en un `useEffect`; hasta
  * entonces se muestra `PageLoading` (nunca contenido privado).

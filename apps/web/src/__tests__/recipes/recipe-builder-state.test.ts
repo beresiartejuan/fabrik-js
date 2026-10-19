@@ -21,7 +21,7 @@ import {
 import type { MaterialWire, RecipeWire } from '@/lib/api/types';
 
 /**
- * Lógica crítica del builder (docs/10-plan-de-web.md §Fase 2): reordenar
+ * Lógica crítica del builder (docs/pantallas.md §Fase 2): reordenar
  * recalcula posiciones 1..N, la validación pre-flight detecta I7, filas
  * incompletas y unidades incoherentes, y el payload espeja el wire de la API.
  */

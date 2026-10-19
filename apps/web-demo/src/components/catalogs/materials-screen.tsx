@@ -28,7 +28,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 /**
- * Pantalla 3 — `/materiales` (docs/10-plan-de-web.md §3). Alta/edición en diálogo
+ * Pantalla 3 — `/materiales` (docs/pantallas.md §3). Alta/edición en diálogo
  * (unidades filtradas por estado físico, ver `MaterialForm`), baja lógica con
  * confirmación y búsqueda/orden local en la tabla. El auditor ve la tabla **sin**
  * acciones de escritura.

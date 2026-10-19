@@ -8,7 +8,7 @@ import { makeBatch, makeMaterial, makeRecipe, makeRecipeStep } from '../helpers/
 import { selectOptionAsync } from '../helpers/select';
 
 /**
- * Pantalla 10 — `/produccion/nueva` (docs/10-plan-de-web.md §10, Fase 4): select
+ * Pantalla 10 — `/produccion/nueva` (docs/pantallas.md §10, Fase 4): select
  * de receta con vista previa de pasos → `POST /production/start { recipeId }` →
  * redirect a `/produccion`. Errores mapeados (404 de receta inexistente).
  */

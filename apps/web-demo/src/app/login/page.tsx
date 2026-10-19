@@ -13,7 +13,7 @@ import { authApi } from '@/lib/api/modules/authApi';
 import { useSession } from '@/lib/session/session-store';
 
 /**
- * Pantalla 1 — `/login` (docs/10-plan-de-web.md §1). Pública, sin sidebar.
+ * Pantalla 1 — `/login` (docs/pantallas.md §1). Pública, sin sidebar.
  *
  * Flujo: `authApi.login` → `signIn` guarda tokens + nombre → `authApi.me`
  * resuelve el `Actor` con `setWorker` → `router.replace('/')`. Si ya hay sesión,

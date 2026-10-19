@@ -10,7 +10,7 @@ import { createSuppliesApi } from '@/lib/api/modules/suppliesApi';
 import { writeTokens } from '@/lib/session/session-store';
 
 /**
- * Contrato de `productionApi` sobre el runtime DEMO (docs/11-plan-demo.md §T4b),
+ * Contrato de `productionApi` sobre el runtime DEMO (docs/demo.md §T4b),
  * espejo del `ProductionController` (`apps/api/src/production/production.controller.ts`).
  * Los casos de uso son los reales del registro (`demo/registry.ts`), así que:
  *

@@ -26,7 +26,7 @@ import {
 import type { BatchWire, MeScheduleItemWire, RecipeWire } from '@/lib/api/types';
 
 /**
- * Estado puro del formulario de transformación (docs/10-plan-de-web.md §11):
+ * Estado puro del formulario de transformación (docs/pantallas.md §11):
  * filtrado de máquinas desde `/me/schedule`, picker de lotes desde `/batches`,
  * validación espejando al dominio y payload de `POST /production/transform`
  * (sin `workerId` ni `timestamp`).

@@ -13,7 +13,7 @@ import type { BatchWire, QuantityWire } from '../types';
 
 /**
  * Ingreso de suministros (`apps/api/src/supplies/supplies.controller.ts`) sobre
- * el runtime DEMO (docs/11-plan-demo.md §T4b): la fábrica ejecuta el caso de uso
+ * el runtime DEMO (docs/demo.md §T4b): la fábrica ejecuta el caso de uso
  * real `RegisterSupplyArrival` del registro (`demo/registry.ts`) en lugar de
  * `POST /supplies/arrivals`; la interfaz, el actor por llamada y el wire de
  * respuesta quedan idénticos al módulo axios (los componentes no cambian).

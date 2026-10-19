@@ -21,7 +21,7 @@ async function failureOf(promise: Promise<unknown>): Promise<ApiError> {
 }
 
 /**
- * Contrato de `suppliesApi` sobre el runtime DEMO (docs/11-plan-demo.md §T4b),
+ * Contrato de `suppliesApi` sobre el runtime DEMO (docs/demo.md §T4b),
  * espejo del `SuppliesController` (`apps/api/src/supplies/supplies.controller.ts`):
  * registrar el arribo con `{ materialId, quantity: { amount, unit }, locationId }`
  * crea el lote `stored` + el `StockMovement` `supply_in` y responde el **lote

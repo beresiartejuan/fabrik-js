@@ -25,7 +25,7 @@ import { type TraceResolvers, TraceTree } from './trace-tree';
 import { deriveRecentBatchIds, normalizeForwardNode, normalizeTraceNode } from './trace-view';
 
 /**
- * Pantalla 14 — `/trazabilidad` (A/Au, docs/10-plan-de-web.md §14, Fase 6).
+ * Pantalla 14 — `/trazabilidad` (A/Au, docs/pantallas.md §14, Fase 6).
  *
  * Buscador por **ID de lote** (o «lotes recientes», derivados en cliente desde
  * `GET /batch-events` con `deriveRecentBatchIds`) → `GET /trace/:batchId`

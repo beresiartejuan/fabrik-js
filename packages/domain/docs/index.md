@@ -11,10 +11,10 @@ Esta carpeta documenta la **API de la implementación** del paquete `@fabrik/dom
 
 ## Relación con el `docs/` raíz
 
-Los documentos raíz (en [`docs/`](../../../docs/)) son la **fuente de verdad de las
-reglas y decisiones de producto/diseño**: visión y glosario (`01`), modelo de dominio
-(`02`), flujo de producción (`03`), casos de uso (`04`), eventos (`05`), inventario
-(`06`), arquitectura (`07`) y el plan de implementación (`08`).
+Los documentos raíz (en [`docs/`](../../../docs/README.md)) son la **fuente de verdad
+de las reglas y decisiones de producto/diseño**: producto y glosario, modelo de
+dominio, flujo de producción, casos de uso, eventos, inventario, arquitectura, API
+y limitaciones conocidas.
 
 Estas páginas no repiten esas reglas: explican **cómo se materializan en el código** y
 enlazan al documento raíz correspondiente cuando corresponde. Si hay discrepancia entre

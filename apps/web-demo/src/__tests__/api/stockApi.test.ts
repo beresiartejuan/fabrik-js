@@ -8,7 +8,7 @@ import { createStockApi } from '@/lib/api/modules/stockApi';
 import { writeTokens } from '@/lib/session/session-store';
 
 /**
- * Contrato de `stockApi` sobre el runtime DEMO (docs/11-plan-demo.md §T4b),
+ * Contrato de `stockApi` sobre el runtime DEMO (docs/demo.md §T4b),
  * espejo del `StockController` (`apps/api/src/stock/stock.controller.ts`):
  * ambos endpoints son casos de uso de lectura —`GetStockByLocation` (A/Au/W) y
  * `GetStockMovements` (A/Au)— así que el RBAC y el 404 de lugar desconocido los

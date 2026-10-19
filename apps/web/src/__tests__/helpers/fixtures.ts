@@ -19,7 +19,7 @@ import type {
 } from '@/lib/api/types';
 
 /**
- * Fábricas de los DTOs de wire de la API (Fase 7, docs/10-plan-de-web.md
+ * Fábricas de los DTOs de wire de la API (Fase 7, docs/pantallas.md
  * §Testing): objetos válidos listos para las respuestas de los mocks de
  * `lib/api/modules/*`, con overrides a un nivel.
  *

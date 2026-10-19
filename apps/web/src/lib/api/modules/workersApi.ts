@@ -16,7 +16,7 @@ import type { WorkerWire } from '../types';
  *
  * **Deuda de API:** no hay endpoint de reactivación (el dominio tiene
  * `Worker.activate()` pero no un caso de uso expuesto), por eso no se ofrece
- * `reactivate` (docs/10-plan-de-web.md §Gaps).
+ * `reactivate` (docs/limitaciones-conocidas.md §Gaps).
  */
 
 export interface ListWorkersParams {
