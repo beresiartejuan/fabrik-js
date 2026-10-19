@@ -77,7 +77,7 @@ Desde la raíz del monorepo (o `pnpm -C apps/web <comando>`):
 | `pnpm --filter web lint` | `biome check .` — Next 16 eliminó `next lint`; el lint corre con Biome aparte. |
 | `pnpm --filter web start` | Sirve el build de producción. |
 
-La suite cierra **verde** con 293 tests (estado Fase 6 de docs/10).
+La suite cierra **verde** con 304 tests (estado Fase 6 de docs/10).
 
 ## Roles y qué ve cada uno
 

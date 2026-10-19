@@ -60,7 +60,7 @@ API necesita reutilizar los fakes, se añadirá un subpath explícito más adela
 ## Comandos
 
 ```bash
-pnpm --filter @fabrik/domain test       # vitest (342 tests)
+pnpm --filter @fabrik/domain test       # vitest (366 tests)
 pnpm --filter @fabrik/domain typecheck  # tsc --noEmit
 pnpm --filter @fabrik/domain build      # tsc → dist/
 ```

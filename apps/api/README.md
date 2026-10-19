@@ -139,7 +139,7 @@ Cada recurso del catálogo sigue el mismo patrón: el `*.dto.ts` define schema z
 |---|---|
 | `pnpm --filter api start:dev` | Desarrollo con watch. |
 | `pnpm --filter api build` | Compila (`nest build`, usa `tsconfig.build.json`). |
-| `pnpm --filter api lint` | Oxlint type-aware sobre `src/` y `test/`. |
+| `pnpm --filter api lint` | `biome check .` — Biome como único linter y formateador. |
 | `pnpm --filter api test` | Unitarios (vitest). |
 | `pnpm --filter api test:e2e` | E2E (supertest sobre SQLite temporal). |
 | `pnpm --filter api db:generate` | Genera una migración (`drizzle-kit generate`). |
