@@ -12,9 +12,6 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  # `administration: write` enables configure-pages to CREATE the Pages site
-  # via API on the first run ("Resource not accessible by integration" without it).
-  administration: write
 
 concurrency:
   group: pages-demo
@@ -55,7 +52,11 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v6
         with:
-          enablement: true
+          # `enablement: true` is useless with GITHUB_TOKEN (the action's
+          # metadata requires a PAT/App token to create the Pages site).
+          # Pages is enabled ONCE manually: Settings → Pages → Source:
+          # "GitHub Actions". Here we only fetch the site config.
+          enablement: false
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
