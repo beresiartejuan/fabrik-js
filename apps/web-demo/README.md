@@ -135,9 +135,41 @@ token de la sesión (`readTokens()`), como el `ActorGuard`.
 | Comando | Qué hace |
 |---|---|
 | `pnpm --filter @fabrik/web-demo dev` (o `pnpm dev:web-demo`) | Desarrollo en `http://localhost:3000` (Next 16 con Turbopack). |
-| `pnpm --filter @fabrik/web-demo build` | Build de producción (las 20 rutas prerenderizan). |
-| `pnpm --filter @fabrik/web-demo test` | Suite de vitest: **472 tests / 53 archivos** en verde. |
+| `pnpm --filter @fabrik/web-demo build` | Build de producción (las 20 páginas prerenderizan; con `NEXT_EXPORT=1` saca el sitio estático a `out/`, ver «Despliegue»). Con `@fabrik/domain build` previo si hay dist fresco del dominio. |
+| `pnpm --filter @fabrik/web-demo test` | Suite de vitest: **475 tests / 54 archivos** en verde. |
 | `pnpm --filter @fabrik/web-demo lint` | `biome check .` (Next 16 eliminó `next lint`). |
+
+## Despliegue (GitHub Pages)
+
+La demo no tiene backend, así que además del build de server de siempre existe
+un **modo export** que saca un sitio 100% estático a `apps/web-demo/out/` y
+queda listo para GitHub Pages. El build normal **no cambia un pelo** con esto:
+solo si `NEXT_EXPORT=1` el `next.config.ts` activa `output: 'export'`,
+`trailingSlash: true`, imágenes sin optimizar y desactiva
+`cacheComponents`/`partialPrefetching` (el export es incompatible con PPR).
+
+```bash
+pnpm --filter @fabrik/domain build          # el export necesita el dist compilado del dominio
+NEXT_EXPORT=1 \
+NEXT_PUBLIC_BASE_PATH=/fabrik-js \
+  pnpm --filter @fabrik/web-demo build      # sitio estático en apps/web-demo/out/
+```
+
+- **`NEXT_PUBLIC_BASE_PATH`** (en cualquier modo) se aplica como `basePath` de
+  Next: Pages publica en `https://<owner>.github.io/<repo>/`, y el workflow le
+  pasa como prefijo el nombre de este repo (`/fabrik-js`).
+- **`.nojekyll`** vive en `public/` y copia a `out/`: evita que Pages procese el
+  sitio con Jekyll y descarte las carpetas `_next/` (arranquen con `_`).
+- El deploy lo ejecuta
+  [`../../.github/workflows/deploy-demo.yml`](../../.github/workflows/deploy-demo.yml):
+  se dispara por `push` solo cuando toca archivos bajo `apps/web-demo/**` (con
+  `pnpm install` + `@fabrik/domain build` + el build con las dos variables de
+  arriba, toma `apps/web-demo/out/` como artifact) o a mano vía
+  `workflow_dispatch`.
+- ⚠️ Cambio de URL **solo en esta app**: en el export no hay rutas dinámicas
+  runtime, así que editar una receta es `/recetas/detalle?id=<id>` (query param,
+  mismo patrón `useSearchParams` + `Suspense` del deep-link de
+  `/trazabilidad`), mientras que en `apps/web` sigue siendo `/recetas/[id]`.
 
 ## Notas de Next 16
 
@@ -146,8 +178,10 @@ token de la sesión (`readTokens()`), como el `ActorGuard`.
   `BEGIN:nextjs-agent-rules` de [`AGENTS.md`](AGENTS.md).
 - El shell es **client-rendered** porque los tokens viven en `sessionStorage`
   (no existe en el server): misma decisión de docs/10 que la app original.
-- `next.config.ts` usa `cacheComponents: true` + `partialPrefetching: true`;
-  `params`/`searchParams` son promesas.
+- `next.config.ts` usa `cacheComponents: true` + `partialPrefetching: true` en
+  el build normal; `params`/`searchParams` son promesas. Con `NEXT_EXPORT=1`
+  (GitHub Pages, ver «Despliegue» arriba) esas flags se desactivan y el id de
+  receta viaja por query param (`/recetas/detalle?id=`).
 
 Más contexto: [`docs/11-plan-demo.md`](../../docs/11-plan-demo.md)
 (objetivo, blueprint, mapa de errores, riesgos) y

@@ -45,7 +45,7 @@ export function RecipesScreen({ canWrite }: { readonly canWrite: boolean }) {
       header: 'Nombre',
       cell: (recipe) => (
         <Link
-          href={`/recetas/${recipe.id}`}
+          href={`/recetas/detalle?id=${recipe.id}`}
           className="font-medium underline-offset-4 hover:underline"
         >
           {recipe.name}
@@ -80,7 +80,7 @@ export function RecipesScreen({ canWrite }: { readonly canWrite: boolean }) {
           actions={[
             {
               label: canWrite ? 'Editar' : 'Ver receta',
-              onSelect: () => router.push(`/recetas/${recipe.id}`),
+              onSelect: () => router.push(`/recetas/detalle?id=${recipe.id}`),
             },
           ]}
         />

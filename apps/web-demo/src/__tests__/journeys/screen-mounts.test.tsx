@@ -155,10 +155,10 @@ describe('recorrido por rol: cada pantalla habilitada monta sin error', () => {
     });
   }
 
-  it('el admin aterriza también en /recetas/[id] (modo edición, ruta dinámica)', async () => {
-    // La página finita (`guard` + `Suspense` con `use(params)`) ya está cubierta
-    // por los tests de guardas; acá se monta la pantalla de edición resuelto el
-    // id de la ruta.
+  it('el admin aterriza también en la receta en modo edición (pantalla de recetas/detalle)', async () => {
+    // La página (`guard` + `Suspense` con `useSearchParams`) ya está cubierta
+    // por los tests de guardas y por `recipes/recetas-detalle.test`; acá se
+    // monta la pantalla de edición con el id resuelto del query param.
     const view = await smoke('admin', {
       node: <RecipeEditorScreen recipeId="r-1" canWrite />,
       title: 'Editar receta',

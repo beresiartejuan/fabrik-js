@@ -35,7 +35,7 @@ import {
 } from './recipe-builder-state';
 
 /**
- * Builder compartido de recetas (`/recetas/nueva` y `/recetas/[id]`).
+ * Builder compartido de recetas (`/recetas/nueva` y `/recetas/detalle?id=`).
  *
  * Cabecera (nombre + producto/cantidad de salida) y pasos ordenables con
  * insumos repetibles. El estado y las operaciones puras viven en

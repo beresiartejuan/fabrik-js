@@ -22,7 +22,8 @@ import {
 } from './recipe-builder-state';
 
 /**
- * Pantalla de alta/edición de recetas (`/recetas/nueva`, `/recetas/[id]`).
+ * Pantalla de alta/edición de recetas (`/recetas/nueva`, `/recetas/detalle?id=`;
+ * en `apps/web` la edición es `/recetas/[id]`).
  *
  * Carga materiales (para los selects), máquinas (para el `datalist` de tipos) y,
  * en edición, la receta. El builder es el mismo en ambos modos; el auditor lo ve
