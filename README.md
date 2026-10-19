@@ -25,9 +25,7 @@ demo autocontenida que ejecuta el mismo dominio en el navegador, sin backend.
 4. [Scripts](#scripts)
 5. [Estructura del repo](#estructura-del-repo)
 6. [Roles y permisos](#roles-y-permisos)
-7. [Despliegue de la demo](#despliegue-de-la-demo)
-8. [Documentación y recursos](#documentación-y-recursos)
-9. [Licencia](#licencia)
+7. [Licencia](#licencia)
 
 ## Demo en vivo
 
@@ -259,64 +257,6 @@ Notas del dominio: un `admin` **no** registra transformaciones (worker-only), y
 donde el `worker` no puede leer catálogos, sus pantallas degradan a entrada
 manual de ids/unidad con indicación visible. Detalle: [`apps/web/README.md`](apps/web/README.md)
 y [`docs/09-plan-de-api.md`](docs/09-plan-de-api.md).
-
-## Despliegue de la demo
-
-La demo no tiene backend: se publica como **sitio estático a GitHub Pages** vía
-[`.github/workflows/deploy-demo.yml`](.github/workflows/deploy-demo.yml).
-
-- **Disparo:** `push` a `main` solo cuando cambia `apps/web-demo/**` (o el propio
-  workflow), o manual con `workflow_dispatch`.
-- **Pasos del job:** `pnpm install --frozen-lockfile` → build de `@fabrik/domain`
-  (el export consume su `dist/`) → suite de la demo como gate → build estático con
-  `NEXT_EXPORT=1` y `NEXT_PUBLIC_BASE_PATH=/<repo>` (aquí `/fabrik-js`, derivado
-  del nombre del repositorio) → artifact `apps/web-demo/out/` → `deploy-pages`.
-- **Requisito de Pages:** en Settings → Pages debe estar seleccionado
-  *GitHub Actions* como fuente (ya configurado en este repo); `public/.nojekyll`
-  evita que Jekyll descarte las carpetas `_next/`.
-- La base path de Next se lee de `NEXT_PUBLIC_BASE_PATH` en cualquier modo; solo
-  si `NEXT_EXPORT=1` se activa `output: 'export'` (y se desactiva
-  `cacheComponents`, incompatible con el export).
-
-Para replicarlo a mano:
-
-```bash
-pnpm --filter @fabrik/domain build
-NEXT_EXPORT=1 NEXT_PUBLIC_BASE_PATH=/fabrik-js pnpm --filter @fabrik/web-demo build
-```
-
-## Documentación y recursos
-
-Planes maestros (la fuente de verdad de cada capa):
-
-| Doc | Contenido |
-|---|---|
-| [`docs/08-plan-capa-de-dominio.md`](docs/08-plan-capa-de-dominio.md) | Dominio DDD: modelo, invariantes, eventos y casos de uso. |
-| [`docs/09-plan-de-api.md`](docs/09-plan-de-api.md) | Contrato de la API: recursos, RBAC, errores de dominio → HTTP. |
-| [`docs/10-plan-de-web.md`](docs/10-plan-de-web.md) | Front: pantallas, navegación por rol, reglas de trabajo. |
-| [`docs/11-plan-demo.md`](docs/11-plan-demo.md) | Demo y GitHub Pages: blueprint, seed, diferencias con la app real. |
-
-Los docs `01`–`07` cubren los cimientos conceptuales: visión y glosario
-([`01-vision-y-glosario.md`](docs/01-vision-y-glosario.md)), modelo de dominio
-([`02-modelo-de-dominio.md`](docs/02-modelo-de-dominio.md)), flujo de producción
-([`03-flujo-de-produccion.md`](docs/03-flujo-de-produccion.md)), casos de uso
-([`04-casos-de-uso.md`](docs/04-casos-de-uso.md)), eventos
-([`05-eventos.md`](docs/05-eventos.md)), inventario
-([`06-inventario.md`](docs/06-inventario.md)) y arquitectura
-([`07-arquitectura.md`](docs/07-arquitectura.md)).
-
-Otros recursos:
-
-- **READMEs por app:** [`apps/api`](apps/api/README.md) ·
-  [`apps/web`](apps/web/README.md) · [`apps/web-demo`](apps/web-demo/README.md) ·
-  [`packages/domain`](packages/domain/README.md).
-- **Diátaxis del dominio:** [`packages/domain/docs/index.md`](packages/domain/docs/index.md)
-  (explicación y referencia del API público del paquete).
-- **OpenAPI interactivo:** <http://localhost:3001/docs> (JSON en `/docs-json`),
-  disponible mientras corre la API.
-- **CI:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — en cada push o
-  PR a `main`: lint y Biome check en la raíz, typecheck del dominio, build, tests
-  unitarios de todas las apps y e2e de la API.
 
 ## Licencia
 
