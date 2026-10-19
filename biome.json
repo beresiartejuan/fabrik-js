@@ -62,10 +62,7 @@
       }
     },
     {
-      "includes": [
-        "apps/web/src/components/ui/**",
-        "apps/web-demo/src/components/ui/**"
-      ],
+      "includes": ["apps/web/src/components/ui/**", "apps/web-demo/src/components/ui/**"],
       "linter": {
         "enabled": false
       }
