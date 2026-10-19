@@ -12,6 +12,9 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # `administration: write` enables configure-pages to CREATE the Pages site
+  # via API on the first run ("Resource not accessible by integration" without it).
+  administration: write
 
 concurrency:
   group: pages-demo
