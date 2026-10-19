@@ -16,7 +16,8 @@
       "!!**/coverage",
       "!!**/*.tsbuildinfo",
       "!!apps/api/drizzle",
-      "!!apps/web/public"
+      "!!apps/web/public",
+      "!!apps/web-demo/public"
     ]
   },
   "formatter": {
@@ -61,7 +62,10 @@
       }
     },
     {
-      "includes": ["apps/web/src/components/ui/**"],
+      "includes": [
+        "apps/web/src/components/ui/**",
+        "apps/web-demo/src/components/ui/**"
+      ],
       "linter": {
         "enabled": false
       }

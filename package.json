@@ -14,6 +14,7 @@
     "check:fix": "biome check --write .",
     "test": "turbo run test",
     "dev:web": "pnpm --filter web dev",
+    "dev:web-demo": "pnpm --filter @fabrik/web-demo dev",
     "dev:api": "pnpm --filter api start:dev"
   },
   "devDependencies": {
