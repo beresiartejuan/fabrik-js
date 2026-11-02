@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { isActiveHref, isNavHrefEnabled, NAV_ITEMS, navItemsForRole, ROLE_LABELS } from '@/lib/nav';
+import {
+  activeNavHref,
+  isActiveHref,
+  isNavHrefEnabled,
+  NAV_ITEMS,
+  navItemsForRole,
+  ROLE_LABELS,
+} from '@/lib/nav';
 
 describe('navItemsForRole', () => {
   it('el admin ve catálogos, producción, arribo, stock y las lecturas A/Au', () => {
@@ -111,5 +118,19 @@ describe('isActiveHref', () => {
     expect(isActiveHref('/produccion', '/produccion')).toBe(true);
     expect(isActiveHref('/produccion/nueva', '/produccion')).toBe(true);
     expect(isActiveHref('/produccion-cero', '/produccion')).toBe(false);
+  });
+});
+
+describe('activeNavHref', () => {
+  const items = navItemsForRole('admin');
+
+  it('resalta solo el ítem más específico (no "Producción" junto a "Nueva producción")', () => {
+    expect(activeNavHref('/produccion/nueva', items)).toBe('/produccion/nueva');
+    expect(activeNavHref('/produccion', items)).toBe('/produccion');
+  });
+
+  it('un detalle cae en su sección y una ruta desconocida no activa nada', () => {
+    expect(activeNavHref('/recetas/abc', items)).toBe('/recetas');
+    expect(activeNavHref('/nada', items)).toBeNull();
   });
 });
