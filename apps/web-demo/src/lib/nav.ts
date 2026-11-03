@@ -1,4 +1,21 @@
 import type { WorkerRole } from '@fabrik/domain';
+import {
+  BoxesIcon,
+  CalendarClockIcon,
+  ClipboardListIcon,
+  FactoryIcon,
+  GitBranchIcon,
+  HistoryIcon,
+  LayoutDashboardIcon,
+  type LucideIcon,
+  MapPinIcon,
+  PlayIcon,
+  ScrollTextIcon,
+  SettingsIcon,
+  TruckIcon,
+  UsersIcon,
+  WarehouseIcon,
+} from 'lucide-react';
 
 /**
  * Navegación del sidebar y etiquetas de rol (docs/pantallas.md §Pantallas).
@@ -8,10 +25,24 @@ import type { WorkerRole } from '@fabrik/domain';
  * pantallas del plan.
  */
 
+export type NavGroup = 'main' | 'catalogs' | 'operations' | 'control';
+
+/** Títulos de sección del sidebar (`main` no lleva título). */
+export const NAV_GROUP_LABELS: Record<NavGroup, string | null> = {
+  main: null,
+  catalogs: 'Catálogos',
+  operations: 'Operación',
+  control: 'Control',
+};
+
 export interface NavItem {
   readonly href: string;
   readonly label: string;
   readonly roles: readonly WorkerRole[];
+  /** Ícono del sidebar y de los accesos del dashboard. */
+  readonly icon: LucideIcon;
+  /** Sección del sidebar: los ítems de un mismo grupo son contiguos en `NAV_ITEMS`. */
+  readonly group: NavGroup;
   /**
    * La ruta existe y puede mostrarse. Por defecto `false`: las secciones de
    * fases futuras quedan ocultas hasta que su pantalla aterrice (ver
@@ -51,32 +82,101 @@ export const ALL_ROLES: readonly WorkerRole[] = ['admin', 'worker', 'auditor'];
  * aterricen las fases (y se ajustan los tests de navegación).
  */
 export const NAV_ITEMS: readonly NavItem[] = [
-  { href: '/', label: 'Inicio', roles: ALL_ROLES, enabled: true },
-  { href: '/materiales', label: 'Materiales', roles: ['admin', 'auditor'], enabled: true },
-  { href: '/ubicaciones', label: 'Ubicaciones', roles: ['admin', 'auditor'], enabled: true },
-  { href: '/maquinas', label: 'Máquinas', roles: ['admin', 'auditor'], enabled: true },
-  { href: '/trabajadores', label: 'Trabajadores', roles: ['admin', 'auditor'], enabled: true },
-  { href: '/recetas', label: 'Recetas', roles: ['admin', 'auditor'], enabled: true },
-  { href: '/asignaciones', label: 'Asignaciones', roles: ['admin', 'auditor'], enabled: true },
+  {
+    href: '/',
+    label: 'Inicio',
+    roles: ALL_ROLES,
+    icon: LayoutDashboardIcon,
+    group: 'main',
+    enabled: true,
+  },
+  {
+    href: '/materiales',
+    label: 'Materiales',
+    roles: ['admin', 'auditor'],
+    icon: BoxesIcon,
+    group: 'catalogs',
+    enabled: true,
+  },
+  {
+    href: '/ubicaciones',
+    label: 'Ubicaciones',
+    roles: ['admin', 'auditor'],
+    icon: MapPinIcon,
+    group: 'catalogs',
+    enabled: true,
+  },
+  {
+    href: '/maquinas',
+    label: 'Máquinas',
+    roles: ['admin', 'auditor'],
+    icon: FactoryIcon,
+    group: 'catalogs',
+    enabled: true,
+  },
+  {
+    href: '/trabajadores',
+    label: 'Trabajadores',
+    roles: ['admin', 'auditor'],
+    icon: UsersIcon,
+    group: 'catalogs',
+    enabled: true,
+  },
+  {
+    href: '/recetas',
+    label: 'Recetas',
+    roles: ['admin', 'auditor'],
+    icon: ScrollTextIcon,
+    group: 'catalogs',
+    enabled: true,
+  },
+  {
+    href: '/asignaciones',
+    label: 'Asignaciones',
+    roles: ['admin', 'auditor'],
+    icon: CalendarClockIcon,
+    group: 'catalogs',
+    enabled: true,
+  },
   // Producción y suministros (Fase 4).
-  { href: '/produccion', label: 'Producción', roles: ALL_ROLES, enabled: true },
-  { href: '/produccion/nueva', label: 'Nueva producción', roles: ['admin'], enabled: true },
+  {
+    href: '/produccion',
+    label: 'Producción',
+    roles: ALL_ROLES,
+    icon: ClipboardListIcon,
+    group: 'operations',
+    enabled: true,
+  },
+  {
+    href: '/produccion/nueva',
+    label: 'Nueva producción',
+    roles: ['admin'],
+    icon: PlayIcon,
+    group: 'operations',
+    enabled: true,
+  },
   {
     href: '/produccion/registrar',
     label: 'Registrar transformación',
     roles: ['worker'],
+    icon: SettingsIcon,
+    group: 'operations',
     enabled: true,
   },
   {
     href: '/suministros/arribo',
     label: 'Arribo de suministros',
     roles: ['admin', 'worker'],
+    icon: TruckIcon,
+    group: 'operations',
     enabled: true,
   },
   {
     href: '/stock',
     label: 'Stock',
     roles: ALL_ROLES,
+    icon: WarehouseIcon,
+    group: 'operations',
     enabled: true,
   },
   // Trazabilidad y eventos (Fase 6, A/Au).
@@ -84,9 +184,18 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/trazabilidad',
     label: 'Trazabilidad',
     roles: ['admin', 'auditor'],
+    icon: GitBranchIcon,
+    group: 'control',
     enabled: true,
   },
-  { href: '/eventos', label: 'Eventos', roles: ['admin', 'auditor'], enabled: true },
+  {
+    href: '/eventos',
+    label: 'Eventos',
+    roles: ['admin', 'auditor'],
+    icon: HistoryIcon,
+    group: 'control',
+    enabled: true,
+  },
 ];
 
 /** Etiquetas en español de los roles del dominio. */
@@ -124,4 +233,18 @@ export function isActiveHref(pathname: string, href: string): boolean {
     return pathname === '/';
   }
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/**
+ * Href del ítem a resaltar en el sidebar: el de prefijo **más largo** que matchee, para que
+ * `/produccion/nueva` active solo "Nueva producción" y no también "Producción".
+ */
+export function activeNavHref(pathname: string, items: readonly NavItem[]): string | null {
+  let best: string | null = null;
+  for (const { href } of items) {
+    if (isActiveHref(pathname, href) && (best === null || href.length > best.length)) {
+      best = href;
+    }
+  }
+  return best;
 }

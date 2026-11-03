@@ -1,3 +1,5 @@
+import type { LucideIcon } from 'lucide-react';
+
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -9,19 +11,32 @@ export interface StatCardProps {
   readonly value: number | undefined;
   readonly loading: boolean;
   readonly error?: boolean;
+  readonly icon?: LucideIcon;
   readonly className?: string;
 }
 
 /** Tarjeta de contador con skeleton y estado de error ("—"). */
-export function StatCard({ label, value, loading, error = false, className }: StatCardProps) {
+export function StatCard({
+  label,
+  value,
+  loading,
+  error = false,
+  icon: Icon,
+  className,
+}: StatCardProps) {
   return (
     <Card className={className}>
-      <CardHeader className="gap-1">
+      <CardHeader className="relative gap-1">
+        {Icon && (
+          <span className="absolute top-0 right-4 flex size-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+            <Icon className="size-4.5" aria-hidden="true" />
+          </span>
+        )}
         <CardDescription>{label}</CardDescription>
         {loading ? (
           <Skeleton className="h-8 w-16" />
         ) : (
-          <CardTitle className="text-3xl">{error ? '—' : (value ?? 0)}</CardTitle>
+          <CardTitle className="text-3xl tabular-nums">{error ? '—' : (value ?? 0)}</CardTitle>
         )}
       </CardHeader>
     </Card>
